@@ -1,0 +1,229 @@
+<div class="fixed inset-0 z-50 overflow-y-auto" aria-labelledby="modal-title" role="dialog" aria-modal="true">
+  <div class="flex items-center justify-center min-h-screen px-4 pt-4 pb-20 text-center sm:p-0">
+    
+    <!-- Overlay -->
+    <div class="fixed inset-0 bg-gray-500 bg-opacity-75 transition-opacity" (click)="close()"></div>
+
+    <!-- Modal -->
+    <div class="relative inline-block align-bottom bg-white rounded-lg text-left overflow-hidden shadow-xl transform transition-all sm:my-8 sm:align-middle sm:max-w-4xl sm:w-full max-h-[90vh] flex flex-col">
+      
+      <!-- Header -->
+      <div class="bg-gradient-to-r from-orange-600 to-red-600 px-6 py-4">
+        <div class="flex items-center justify-between">
+          <h3 class="text-xl font-bold text-white flex items-center gap-2">
+            <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 17h5l-1.405-1.405A2.032 2.032 0 0118 14.158V11a6.002 6.002 0 00-4-5.659V5a2 2 0 10-4 0v.341C7.67 6.165 6 8.388 6 11v3.159c0 .538-.214 1.055-.595 1.436L4 17h5m6 0v1a3 3 0 11-6 0v-1m6 0H9"/>
+            </svg>
+            Alertas del Inventario
+            <span class="ml-2 bg-white text-orange-600 text-sm font-bold px-2.5 py-1 rounded-full">
+              {{ estadisticas.total }}
+            </span>
+          </h3>
+          <button (click)="close()" class="text-white hover:text-gray-200 transition-colors">
+            <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/>
+            </svg>
+          </button>
+        </div>
+      </div>
+
+      <!-- Estadísticas Rápidas -->
+      <div class="px-6 py-4 bg-gray-50 border-b border-gray-200">
+        <div class="grid grid-cols-2 md:grid-cols-5 gap-3">
+          
+          <!-- Stock Bajo -->
+          <button
+            (click)="cambiarFiltro(filtroActual === TipoAlerta.STOCK_BAJO ? 'todas' : TipoAlerta.STOCK_BAJO)"
+            [class.ring-2]="filtroActual === TipoAlerta.STOCK_BAJO"
+            [class.ring-yellow-500]="filtroActual === TipoAlerta.STOCK_BAJO"
+            class="bg-white rounded-lg p-3 border border-gray-200 hover:shadow-md transition-all cursor-pointer"
+          >
+            <div class="flex items-center gap-2">
+              <span class="text-2xl">⚠️</span>
+              <div class="text-left">
+                <p class="text-xs text-gray-600">Stock Bajo</p>
+                <p class="text-lg font-bold text-yellow-600">{{ estadisticas.stockBajo }}</p>
+              </div>
+            </div>
+          </button>
+
+          <!-- Stock Crítico -->
+          <button
+            (click)="cambiarFiltro(filtroActual === TipoAlerta.STOCK_CRITICO ? 'todas' : TipoAlerta.STOCK_CRITICO)"
+            [class.ring-2]="filtroActual === TipoAlerta.STOCK_CRITICO"
+            [class.ring-orange-500]="filtroActual === TipoAlerta.STOCK_CRITICO"
+            class="bg-white rounded-lg p-3 border border-gray-200 hover:shadow-md transition-all cursor-pointer"
+          >
+            <div class="flex items-center gap-2">
+              <span class="text-2xl">🚨</span>
+              <div class="text-left">
+                <p class="text-xs text-gray-600">Crítico</p>
+                <p class="text-lg font-bold text-orange-600">{{ estadisticas.stockCritico }}</p>
+              </div>
+            </div>
+          </button>
+
+          <!-- Próximo a Vencer -->
+          <button
+            (click)="cambiarFiltro(filtroActual === TipoAlerta.PROXIMO_VENCER ? 'todas' : TipoAlerta.PROXIMO_VENCER)"
+            [class.ring-2]="filtroActual === TipoAlerta.PROXIMO_VENCER"
+            [class.ring-blue-500]="filtroActual === TipoAlerta.PROXIMO_VENCER"
+            class="bg-white rounded-lg p-3 border border-gray-200 hover:shadow-md transition-all cursor-pointer"
+          >
+            <div class="flex items-center gap-2">
+              <span class="text-2xl">⏰</span>
+              <div class="text-left">
+                <p class="text-xs text-gray-600">Por Vencer</p>
+                <p class="text-lg font-bold text-blue-600">{{ estadisticas.proximoVencer }}</p>
+              </div>
+            </div>
+          </button>
+
+          <!-- Vencidos -->
+          <button
+            (click)="cambiarFiltro(filtroActual === TipoAlerta.VENCIDO ? 'todas' : TipoAlerta.VENCIDO)"
+            [class.ring-2]="filtroActual === TipoAlerta.VENCIDO"
+            [class.ring-red-500]="filtroActual === TipoAlerta.VENCIDO"
+            class="bg-white rounded-lg p-3 border border-gray-200 hover:shadow-md transition-all cursor-pointer"
+          >
+            <div class="flex items-center gap-2">
+              <span class="text-2xl">❌</span>
+              <div class="text-left">
+                <p class="text-xs text-gray-600">Vencidos</p>
+                <p class="text-lg font-bold text-red-600">{{ estadisticas.vencido }}</p>
+              </div>
+            </div>
+          </button>
+
+          <!-- Agotados -->
+          <button
+            (click)="cambiarFiltro(filtroActual === TipoAlerta.STOCK_AGOTADO ? 'todas' : TipoAlerta.STOCK_AGOTADO)"
+            [class.ring-2]="filtroActual === TipoAlerta.STOCK_AGOTADO"
+            [class.ring-gray-500]="filtroActual === TipoAlerta.STOCK_AGOTADO"
+            class="bg-white rounded-lg p-3 border border-gray-200 hover:shadow-md transition-all cursor-pointer"
+          >
+            <div class="flex items-center gap-2">
+              <span class="text-2xl">📭</span>
+              <div class="text-left">
+                <p class="text-xs text-gray-600">Agotados</p>
+                <p class="text-lg font-bold text-gray-600">{{ estadisticas.agotado }}</p>
+              </div>
+            </div>
+          </button>
+
+        </div>
+
+        <!-- Botón Marcar Todas Leídas -->
+        <div class="mt-4 flex justify-between items-center">
+          <p class="text-sm text-gray-600">
+            Mostrando <span class="font-semibold">{{ alertasFiltradas.length }}</span> 
+            {{ filtroActual === 'todas' ? 'de todas las alertas' : 'alertas filtradas' }}
+          </p>
+          <button
+            (click)="marcarTodasLeidas()"
+            [disabled]="loading || alertasNoLeidas === 0"
+            class="bg-green-600 hover:bg-green-700 text-white px-4 py-2 rounded-lg text-sm font-medium flex items-center gap-2 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+          >
+            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"/>
+            </svg>
+            Marcar todas como leídas
+          </button>
+        </div>
+      </div>
+
+      <!-- Lista de Alertas -->
+      <div class="flex-1 overflow-y-auto px-6 py-4">
+        
+        <!-- Empty State -->
+        <div *ngIf="alertasFiltradas.length === 0" class="text-center py-12">
+          <svg class="mx-auto h-16 w-16 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"/>
+          </svg>
+          <h3 class="mt-4 text-lg font-medium text-gray-900">¡Sin alertas!</h3>
+          <p class="mt-2 text-sm text-gray-500">No hay alertas activas en este momento.</p>
+        </div>
+
+        <!-- Alertas -->
+        <div class="space-y-3">
+          <div
+            *ngFor="let alerta of alertasFiltradas"
+            [class]="getColorAlerta(alerta.tipoAlerta)"
+            [class.opacity-50]="alerta.leida"
+            class="rounded-lg border p-4 transition-all hover:shadow-md"
+          >
+            <div class="flex items-start gap-4">
+              
+              <!-- Icono -->
+              <div class="flex-shrink-0 text-3xl">
+                {{ getIconoAlerta(alerta.tipoAlerta) }}
+              </div>
+
+              <!-- Contenido -->
+              <div class="flex-1 min-w-0">
+                <div class="flex items-start justify-between gap-4">
+                  <div>
+                    <h4 [class]="getColorTexto(alerta.tipoAlerta)" class="font-semibold text-base">
+                      {{ alerta.itemNombre }}
+                    </h4>
+                    <p class="text-sm text-gray-700 mt-1">{{ alerta.mensaje }}</p>
+                  </div>
+                  
+                  <!-- Prioridad -->
+                  <span [class]="getPrioridadClass(alerta.prioridad)" class="px-2.5 py-1 text-xs font-semibold rounded-full uppercase whitespace-nowrap">
+                    {{ alerta.prioridad }}
+                  </span>
+                </div>
+
+                <!-- Footer -->
+                <div class="flex items-center justify-between mt-3 pt-3 border-t border-gray-200">
+                  <div class="flex items-center gap-4">
+                    <span class="text-xs text-gray-500 flex items-center gap-1">
+                      <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"/>
+                      </svg>
+                      {{ alerta.fecha | date:'dd/MM/yyyy HH:mm' }}
+                    </span>
+                    <span class="text-xs font-medium px-2 py-0.5 rounded-full" 
+                          [class.bg-green-100]="alerta.leida"
+                          [class.text-green-700]="alerta.leida"
+                          [class.bg-gray-100]="!alerta.leida"
+                          [class.text-gray-700]="!alerta.leida">
+                      {{ alerta.leida ? 'Leída' : 'No leída' }}
+                    </span>
+                  </div>
+
+                  <!-- Botón Marcar Leída -->
+                  <button
+                    *ngIf="!alerta.leida"
+                    (click)="marcarComoLeida(alerta)"
+                    [disabled]="loading"
+                    class="text-sm text-green-600 hover:text-green-700 font-medium flex items-center gap-1 transition-colors disabled:opacity-50"
+                  >
+                    <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"/>
+                    </svg>
+                    Marcar como leída
+                  </button>
+                </div>
+              </div>
+
+            </div>
+          </div>
+        </div>
+
+      </div>
+
+      <!-- Footer -->
+      <div class="bg-gray-50 px-6 py-4 border-t border-gray-200">
+        <button
+          (click)="close()"
+          class="w-full bg-gray-800 hover:bg-gray-900 text-white font-semibold py-3 rounded-lg transition-colors"
+        >
+          Cerrar
+        </button>
+      </div>
+
+    </div>
+  </div>
+</div>
