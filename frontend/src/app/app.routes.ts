@@ -30,17 +30,17 @@ export const routes: Routes = [
   },
   
   // ==========================================
-  // RUTAS DE PARCELAS (NUEVO MÓDULO)
+  // RUTAS DE PARCELAS (SINGULAR)
   // ==========================================
   
   // Lista de Parcelas
   {
     path: 'parcelas',
-    loadComponent: () => import('./modules/parcelas/pages/parcelas/parcelas.component').then(m => m.ParcelasComponent),
+    loadComponent: () => import('./modules/parcelas/pages/parcela/parcela.component').then(m => m.ParcelaComponent),
     canActivate: [AuthGuard]
   },
   
-  // Detalle de Parcela (componente auxiliar)
+  // Detalle de Parcela
   {
     path: 'parcelas/:id',
     loadComponent: () => import('./modules/parcelas/components/detalle-parcela/detalle-parcela.component').then(m => m.DetalleParcelaComponent),

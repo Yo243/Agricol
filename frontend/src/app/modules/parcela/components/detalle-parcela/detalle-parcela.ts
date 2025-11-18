@@ -1,7 +1,8 @@
-import { Component, OnInit } from '@angular/core';
+import { Component, OnInit, inject } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { ActivatedRoute, Router, RouterLink } from '@angular/router';
-import { ParcelasService } from '../../services/parcelas.service';
+import { ParcelasService } from '../../services/parcela.service';
+// ✅ RUTAS CORRECTAS - Solo subir 1 nivel porque están al mismo nivel
 import { FormPeriodoComponent } from '../form-periodo/form-periodo.component';
 import { FormAplicacionComponent } from '../form-aplicacion/form-aplicacion.component';
 import { TrazabilidadComponent } from '../trazabilidad/trazabilidad.component';
@@ -13,7 +14,7 @@ import {
   getEstadoPeriodoColor,
   formatearHectareas,
   formatearCosto
-} from '../../../../models/parcelas.model';
+} from '../../../../models/parcela.model';
 
 @Component({
   selector: 'app-detalle-parcela',
@@ -29,6 +30,10 @@ import {
   styleUrl: './detalle-parcela.component.css'
 })
 export class DetalleParcelaComponent implements OnInit {
+  private route = inject(ActivatedRoute);
+  private router = inject(Router);
+  private parcelasService = inject(ParcelasService);
+
   parcela?: Parcela;
   periodos: PeriodoSiembra[] = [];
   aplicaciones: AplicacionParcela[] = [];
@@ -45,12 +50,6 @@ export class DetalleParcelaComponent implements OnInit {
   periodosActivos = 0;
   totalAplicaciones = 0;
   costoTotal = 0;
-
-  constructor(
-    private route: ActivatedRoute,
-    private router: Router,
-    private parcelasService: ParcelasService
-  ) {}
 
   ngOnInit() {
     const id = Number(this.route.snapshot.paramMap.get('id'));
@@ -117,6 +116,7 @@ export class DetalleParcelaComponent implements OnInit {
 
   cerrarFormPeriodo() {
     this.mostrarFormPeriodo = false;
+    this.cargarPeriodos();
   }
 
   abrirFormAplicacion() {
@@ -125,6 +125,7 @@ export class DetalleParcelaComponent implements OnInit {
 
   cerrarFormAplicacion() {
     this.mostrarFormAplicacion = false;
+    this.cargarAplicaciones();
   }
 
   getEstadoColor(estado: any): string {

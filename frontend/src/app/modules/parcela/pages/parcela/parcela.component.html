@@ -1,167 +1,176 @@
-<div class="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center p-4 z-50">
-  <div class="bg-white rounded-lg max-w-2xl w-full max-h-[90vh] overflow-y-auto">
-    <!-- Header -->
-    <div class="sticky top-0 bg-white border-b border-gray-200 px-6 py-4">
-      <div class="flex items-center justify-between">
-        <h2 class="text-xl font-bold text-gray-800">
-          {{ modoEdicion ? '✏️ Editar Parcela' : '➕ Nueva Parcela' }}
-        </h2>
-        <button (click)="cerrar()" type="button" class="text-gray-500 hover:text-gray-700 text-2xl">
-          ✕
-        </button>
+<div class="container mx-auto px-4 py-6">
+  <!-- Header -->
+  <div class="mb-6">
+    <div class="flex items-center justify-between mb-4">
+      <div>
+        <h1 class="text-3xl font-bold text-gray-800">🗺️ Gestión de Parcelas</h1>
+        <p class="text-gray-600 mt-1">Administra tus parcelas agrícolas</p>
+      </div>
+      <button
+        (click)="abrirFormulario()"
+        class="px-6 py-3 bg-green-600 text-white rounded-lg hover:bg-green-700 transition-colors flex items-center gap-2 shadow-lg">
+        <span class="text-xl">➕</span>
+        Nueva Parcela
+      </button>
+    </div>
+
+    <!-- Estadísticas -->
+    <div class="grid grid-cols-1 md:grid-cols-3 gap-4 mb-6">
+      <div class="bg-white rounded-lg shadow p-4 border-l-4 border-blue-500">
+        <div class="flex items-center justify-between">
+          <div>
+            <p class="text-gray-600 text-sm">Total Parcelas</p>
+            <p class="text-2xl font-bold text-gray-800">{{ totalParcelas }}</p>
+          </div>
+          <div class="text-4xl">🗺️</div>
+        </div>
+      </div>
+
+      <div class="bg-white rounded-lg shadow p-4 border-l-4 border-green-500">
+        <div class="flex items-center justify-between">
+          <div>
+            <p class="text-gray-600 text-sm">Superficie Total</p>
+            <p class="text-2xl font-bold text-gray-800">{{ formatearHectareas(superficieTotal) }}</p>
+          </div>
+          <div class="text-4xl">📏</div>
+        </div>
+      </div>
+
+      <div class="bg-white rounded-lg shadow p-4 border-l-4 border-yellow-500">
+        <div class="flex items-center justify-between">
+          <div>
+            <p class="text-gray-600 text-sm">Parcelas Activas</p>
+            <p class="text-2xl font-bold text-gray-800">{{ parcelasActivas }}</p>
+          </div>
+          <div class="text-4xl">✅</div>
+        </div>
       </div>
     </div>
 
-    <!-- Body -->
-    <form (ngSubmit)="guardar()" class="p-6 space-y-6">
-      <!-- Información Básica -->
-      <div class="space-y-4">
-        <h3 class="text-lg font-semibold text-gray-700 border-b pb-2">📋 Información Básica</h3>
-        
-        <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
-          <!-- Nombre -->
-          <div>
-            <label class="block text-sm font-medium text-gray-700 mb-1">
-              Nombre <span class="text-red-500">*</span>
-            </label>
-            <input
-              type="text"
-              [(ngModel)]="formData.nombre"
-              name="nombre"
-              required
-              placeholder="Ej: Parcela Norte"
-              class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-green-500 focus:border-transparent">
-          </div>
+    <!-- Filtros -->
+    <div class="bg-white rounded-lg shadow p-4">
+      <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+        <!-- Búsqueda -->
+        <div>
+          <label class="block text-sm font-medium text-gray-700 mb-2">🔍 Buscar</label>
+          <input
+            type="text"
+            [(ngModel)]="busqueda"
+            (ngModelChange)="aplicarFiltros()"
+            placeholder="Buscar por nombre, código o ubicación..."
+            class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-green-500 focus:border-transparent">
+        </div>
 
-          <!-- Superficie -->
-          <div>
-            <label class="block text-sm font-medium text-gray-700 mb-1">
-              Superficie (ha) <span class="text-red-500">*</span>
-            </label>
-            <input
-              type="number"
-              [(ngModel)]="formData.superficieHa"
-              name="superficieHa"
-              required
-              min="0.01"
-              step="0.01"
-              placeholder="0.00"
-              class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-green-500 focus:border-transparent">
-          </div>
+        <!-- Filtro Estado -->
+        <div>
+          <label class="block text-sm font-medium text-gray-700 mb-2">📊 Estado</label>
+          <select
+            [(ngModel)]="estadoFiltro"
+            (ngModelChange)="aplicarFiltros()"
+            class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-green-500 focus:border-transparent">
+            <option value="todos">Todos los estados</option>
+            <option *ngFor="let estado of ESTADOS_PARCELA" [value]="estado">{{ estado }}</option>
+          </select>
+        </div>
+      </div>
+    </div>
+  </div>
 
-          <!-- Estado -->
-          <div>
-            <label class="block text-sm font-medium text-gray-700 mb-1">Estado</label>
-            <select
-              [(ngModel)]="formData.estado"
-              name="estado"
-              class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-green-500 focus:border-transparent">
-              <option *ngFor="let estado of ESTADOS_PARCELA" [value]="estado">{{ estado }}</option>
-            </select>
-          </div>
+  <!-- Loading -->
+  <div *ngIf="loading" class="text-center py-12">
+    <div class="inline-block animate-spin rounded-full h-12 w-12 border-4 border-green-500 border-t-transparent"></div>
+    <p class="text-gray-600 mt-4">Cargando parcelas...</p>
+  </div>
 
-          <!-- Código (solo mostrar en edición) -->
-          <div *ngIf="modoEdicion">
-            <label class="block text-sm font-medium text-gray-700 mb-1">Código</label>
-            <input
-              type="text"
-              [value]="parcela?.codigo"
-              disabled
-              class="w-full px-3 py-2 border border-gray-300 rounded-lg bg-gray-100 text-gray-600">
+  <!-- Lista de Parcelas -->
+  <div *ngIf="!loading && parcelasFiltradas.length > 0" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+    <div *ngFor="let parcela of parcelasFiltradas" 
+         class="bg-white rounded-lg shadow-md hover:shadow-xl transition-shadow overflow-hidden">
+      <!-- Header de la tarjeta -->
+      <div class="p-4 border-b border-gray-200">
+        <div class="flex items-start justify-between mb-2">
+          <div class="flex-1">
+            <h3 class="text-lg font-bold text-gray-800 mb-1">{{ parcela.nombre }}</h3>
+            <p class="text-sm text-gray-500">{{ parcela.codigo }}</p>
           </div>
+          <span [class]="'px-3 py-1 rounded-full text-xs font-semibold ' + getEstadoColor(parcela.estado)">
+            {{ parcela.estado }}
+          </span>
         </div>
       </div>
 
-      <!-- Ubicación -->
-      <div class="space-y-4">
-        <h3 class="text-lg font-semibold text-gray-700 border-b pb-2">📍 Ubicación</h3>
-        
-        <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
-          <!-- Ubicación -->
-          <div class="md:col-span-2">
-            <label class="block text-sm font-medium text-gray-700 mb-1">Ubicación</label>
-            <input
-              type="text"
-              [(ngModel)]="formData.ubicacion"
-              name="ubicacion"
-              placeholder="Ej: Sector Norte - Lote 1"
-              class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-green-500 focus:border-transparent">
-          </div>
+      <!-- Información -->
+      <div class="p-4 space-y-3">
+        <div class="flex items-center gap-2 text-gray-700">
+          <span class="text-xl">📏</span>
+          <span class="text-sm">
+            <strong>Superficie:</strong> {{ formatearHectareas(parcela.superficieHa) }}
+          </span>
+        </div>
 
-          <!-- Coordenadas -->
-          <div class="md:col-span-2">
-            <label class="block text-sm font-medium text-gray-700 mb-1">Coordenadas GPS</label>
-            <input
-              type="text"
-              [(ngModel)]="formData.coordenadas"
-              name="coordenadas"
-              placeholder="Ej: 24.8049° N, 107.3940° W"
-              class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-green-500 focus:border-transparent">
-          </div>
+        <div class="flex items-center gap-2 text-gray-700" *ngIf="parcela.ubicacion">
+          <span class="text-xl">📍</span>
+          <span class="text-sm">
+            <strong>Ubicación:</strong> {{ parcela.ubicacion }}
+          </span>
+        </div>
+
+        <div class="flex items-center gap-2 text-gray-700" *ngIf="parcela.tipoSuelo">
+          <span class="text-xl">🌱</span>
+          <span class="text-sm">
+            <strong>Suelo:</strong> {{ parcela.tipoSuelo }}
+          </span>
+        </div>
+
+        <div class="flex items-center gap-2 text-gray-700" *ngIf="parcela.sistemaRiego">
+          <span class="text-xl">💧</span>
+          <span class="text-sm">
+            <strong>Riego:</strong> {{ parcela.sistemaRiego }}
+          </span>
         </div>
       </div>
 
-      <!-- Características -->
-      <div class="space-y-4">
-        <h3 class="text-lg font-semibold text-gray-700 border-b pb-2">🌱 Características</h3>
-        
-        <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
-          <!-- Tipo de Suelo -->
-          <div>
-            <label class="block text-sm font-medium text-gray-700 mb-1">Tipo de Suelo</label>
-            <input
-              type="text"
-              [(ngModel)]="formData.tipoSuelo"
-              name="tipoSuelo"
-              placeholder="Ej: Franco arcilloso"
-              class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-green-500 focus:border-transparent">
-          </div>
-
-          <!-- Sistema de Riego -->
-          <div>
-            <label class="block text-sm font-medium text-gray-700 mb-1">Sistema de Riego</label>
-            <select
-              [(ngModel)]="formData.sistemaRiego"
-              name="sistemaRiego"
-              class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-green-500 focus:border-transparent">
-              <option value="">Seleccionar...</option>
-              <option value="Goteo">Goteo</option>
-              <option value="Por aspersión">Por aspersión</option>
-              <option value="Pivot central">Pivot central</option>
-              <option value="Por gravedad">Por gravedad</option>
-              <option value="Cintilla">Cintilla</option>
-              <option value="Micro aspersión">Micro aspersión</option>
-            </select>
-          </div>
-        </div>
-      </div>
-
-      <!-- Observaciones -->
-      <div>
-        <label class="block text-sm font-medium text-gray-700 mb-1">Observaciones</label>
-        <textarea
-          [(ngModel)]="formData.observaciones"
-          name="observaciones"
-          rows="3"
-          placeholder="Notas adicionales sobre la parcela..."
-          class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-green-500 focus:border-transparent resize-none"></textarea>
-      </div>
-
-      <!-- Botones -->
-      <div class="flex gap-3 pt-4 border-t">
+      <!-- Acciones -->
+      <div class="p-4 bg-gray-50 border-t border-gray-200 flex gap-2">
+        <a
+          [routerLink]="['/parcelas', parcela.id]"
+          class="flex-1 px-4 py-2 bg-blue-600 text-white text-center rounded-lg hover:bg-blue-700 transition-colors text-sm font-medium">
+          Ver Detalle
+        </a>
         <button
-          type="button"
-          (click)="cerrar()"
-          class="flex-1 px-4 py-2 border border-gray-300 text-gray-700 rounded-lg hover:bg-gray-50 transition-colors">
-          Cancelar
+          (click)="abrirFormulario(parcela)"
+          class="px-4 py-2 bg-yellow-500 text-white rounded-lg hover:bg-yellow-600 transition-colors">
+          ✏️
         </button>
         <button
-          type="submit"
-          [disabled]="loading"
-          class="flex-1 px-4 py-2 bg-green-600 text-white rounded-lg hover:bg-green-700 transition-colors disabled:opacity-50 disabled:cursor-not-allowed">
-          {{ loading ? 'Guardando...' : (modoEdicion ? 'Actualizar' : 'Crear Parcela') }}
+          (click)="eliminarParcela(parcela.id)"
+          class="px-4 py-2 bg-red-600 text-white rounded-lg hover:bg-red-700 transition-colors">
+          🗑️
         </button>
       </div>
-    </form>
+    </div>
+  </div>
+
+  <!-- Sin resultados -->
+  <div *ngIf="!loading && parcelasFiltradas.length === 0" class="text-center py-12">
+    <div class="text-6xl mb-4">🗺️</div>
+    <h3 class="text-xl font-semibold text-gray-700 mb-2">No hay parcelas</h3>
+    <p class="text-gray-600 mb-6">
+      {{ parcelas.length === 0 ? 'Crea tu primera parcela para comenzar' : 'No se encontraron parcelas con los filtros aplicados' }}
+    </p>
+    <button
+      *ngIf="parcelas.length === 0"
+      (click)="abrirFormulario()"
+      class="px-6 py-3 bg-green-600 text-white rounded-lg hover:bg-green-700 transition-colors">
+      ➕ Crear Primera Parcela
+    </button>
   </div>
 </div>
+
+<!-- Modal Formulario -->
+<app-form-parcela
+  *ngIf="mostrarFormulario"
+  [parcela]="parcelaSeleccionada || undefined"
+  (onClose)="cerrarFormulario()"
+  (onSave)="cerrarFormulario()">
+</app-form-parcela>

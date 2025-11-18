@@ -1,24 +1,147 @@
-import { Component, OnInit } from '@angular/core';
+import { Component, EventEmitter, Input, OnInit, Output, inject } from '@angular/core';
 import { CommonModule } from '@angular/common';
-import { RouterLink } from '@angular/router';
 import { FormsModule } from '@angular/forms';
-import { ParcelasService } from '../services/parcelas.service';
-import { FormParcelaComponent } from '../components/form-parcela/form-parcela.component';  // ← AGREGAR
+import { ParcelasService } from '../../services/parcela.service';  // ✅ CORREGIDO
 import {
   Parcela,
+  CreateParcelaDto,
+  UpdateParcelaDto,
   EstadoParcela,
-  getEstadoParcelaColor,
-  formatearHectareas,
-  ESTADOS_PARCELA
-} from '../../../models/parcelas.model';
+  ESTADOS_PARCELA,
+  TIPOS_SUELO,
+  SISTEMAS_RIEGO
+} from '../../../../models/parcela.model';  // ✅ CORREGIDO
 
 @Component({
-  selector: 'app-parcelas',
+  selector: 'app-form-parcela',
   standalone: true,
-  imports: [CommonModule, RouterLink, FormsModule, FormParcelaComponent],  // ← AGREGAR FormParcelaComponent
-  templateUrl: './parcelas.component.html',
-  styleUrl: './parcelas.component.css'
+  imports: [CommonModule, FormsModule],
+  templateUrl: './form-parcela.component.html',
+  styleUrl: './form-parcela.component.css'
 })
-export class ParcelasComponent implements OnInit {
-  // ... resto del código igual
+export class FormParcelaComponent implements OnInit {
+  private parcelasService = inject(ParcelasService);
+
+  @Input() parcela?: Parcela;
+  @Output() onClose = new EventEmitter<void>();
+  @Output() onSave = new EventEmitter<void>();
+
+  loading = false;
+  modoEdicion = false;
+
+  // Constantes para el template
+  ESTADOS_PARCELA = ESTADOS_PARCELA;
+  TIPOS_SUELO = TIPOS_SUELO;
+  SISTEMAS_RIEGO = SISTEMAS_RIEGO;
+
+  formData = {
+    nombre: '',
+    codigo: '',
+    superficieHa: 0,
+    ubicacion: '',
+    coordenadas: '',
+    coordenadasGPS: '',
+    tipoSuelo: '',
+    sistemaRiego: '',
+    estado: 'Activa' as EstadoParcela,
+    observaciones: ''
+  };
+
+  ngOnInit() {
+    if (this.parcela) {
+      this.modoEdicion = true;
+      this.cargarDatosParcela();
+    } else {
+      this.generarCodigo();
+    }
+  }
+
+  cargarDatosParcela() {
+    if (this.parcela) {
+      this.formData = {
+        nombre: this.parcela.nombre,
+        codigo: this.parcela.codigo,
+        superficieHa: this.parcela.superficieHa,
+        ubicacion: this.parcela.ubicacion || '',
+        coordenadas: this.parcela.coordenadas || '',
+        coordenadasGPS: this.parcela.coordenadas || '',
+        tipoSuelo: this.parcela.tipoSuelo || '',
+        sistemaRiego: this.parcela.sistemaRiego || '',
+        estado: this.parcela.estado as EstadoParcela,
+        observaciones: this.parcela.observaciones || ''
+      };
+    }
+  }
+
+  generarCodigo() {
+    const timestamp = Date.now().toString().slice(-6);
+    this.formData.codigo = `PAR-${timestamp}`;
+  }
+
+  guardar() {
+    if (!this.validarFormulario()) {
+      return;
+    }
+
+    this.loading = true;
+
+    const dataParaEnviar: CreateParcelaDto = {
+      nombre: this.formData.nombre,
+      codigo: this.formData.codigo,
+      superficieHa: this.formData.superficieHa,
+      ubicacion: this.formData.ubicacion,
+      coordenadas: this.formData.coordenadas,
+      tipoSuelo: this.formData.tipoSuelo,
+      sistemaRiego: this.formData.sistemaRiego,
+      estado: this.formData.estado,
+      observaciones: this.formData.observaciones
+    };
+
+    if (this.modoEdicion && this.parcela) {
+      const updateData: UpdateParcelaDto = { ...dataParaEnviar };
+      this.parcelasService.updateParcela(this.parcela.id, updateData).subscribe({
+        next: () => {
+          alert('Parcela actualizada correctamente');
+          this.onSave.emit();
+          this.cerrar();
+        },
+        error: (error) => {
+          console.error('Error al actualizar:', error);
+          alert('Error al actualizar la parcela');
+          this.loading = false;
+        }
+      });
+    } else {
+      this.parcelasService.createParcela(dataParaEnviar).subscribe({
+        next: () => {
+          alert('Parcela creada correctamente');
+          this.onSave.emit();
+          this.cerrar();
+        },
+        error: (error) => {
+          console.error('Error al crear:', error);
+          alert('Error al crear la parcela');
+          this.loading = false;
+        }
+      });
+    }
+  }
+
+  validarFormulario(): boolean {
+    if (!this.formData.nombre.trim()) {
+      alert('El nombre es requerido');
+      return false;
+    }
+
+    if (this.formData.superficieHa <= 0) {
+      alert('La superficie debe ser mayor a 0');
+      return false;
+    }
+
+    return true;
+  }
+
+  cerrar() {
+    this.onClose.emit();
+  }
 }

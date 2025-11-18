@@ -1,9 +1,14 @@
-import { Component, EventEmitter, Input, OnInit, Output } from '@angular/core';
+import { Component, EventEmitter, Input, OnInit, Output, inject } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { HttpClient } from '@angular/common/http';
-import { ParcelasService } from '../../services/parcelas.service';
-import { PeriodoSiembra, CreateAplicacionDto, TIPOS_APLICACION, TipoAplicacion } from '../../../../models/parcelas.model';
+import { ParcelasService } from '../../services/parcela.service';  // ✅ CORREGIDO
+import { 
+  PeriodoSiembra, 
+  CreateAplicacionDto, 
+  TIPOS_APLICACION, 
+  TipoAplicacion 
+} from '../../../../models/parcela.model';  // ✅ CORREGIDO
 
 interface Insumo {
   id: number;
@@ -31,6 +36,9 @@ interface InsumoAplicacion {
   styleUrl: './form-aplicacion.component.css'
 })
 export class FormAplicacionComponent implements OnInit {
+  private parcelasService = inject(ParcelasService);
+  private http = inject(HttpClient);
+
   @Input() periodoId?: number;
   @Input() parcelaId?: number;
   @Output() onClose = new EventEmitter<void>();
@@ -49,18 +57,13 @@ export class FormAplicacionComponent implements OnInit {
     parcelaId: 0,
     fecha: new Date().toISOString().split('T')[0],
     hectareasAplicadas: 0,
-    tipoAplicacion: 'Fertilización',
+    tipoAplicacion: 'Fertilización' as TipoAplicacion,
     insumos: [],
     responsable: '',
     observaciones: ''
   };
 
   insumoSeleccionado: number = 0;
-
-  constructor(
-    private parcelasService: ParcelasService,
-    private http: HttpClient
-  ) {}
 
   ngOnInit() {
     this.cargarDatos();

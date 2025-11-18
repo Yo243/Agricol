@@ -1,95 +1,125 @@
-import { Component, EventEmitter, Input, OnInit, Output } from '@angular/core';
+import { Component, OnInit, inject } from '@angular/core';
 import { CommonModule } from '@angular/common';
+import { RouterLink } from '@angular/router';
 import { FormsModule } from '@angular/forms';
-import { ParcelasService } from '../../services/parcelas.service';
-import { Parcela, CreateParcelaDto, ESTADOS_PARCELA, EstadoParcela } from '../../../../models/parcelas.model';
+import { ParcelasService } from '../../services/parcela.service';
+import { FormParcelaComponent } from '../../components/form-parcela/form-parcela';  // ✅ CORREGIDO
+import {
+  Parcela,
+  EstadoParcela,
+  getEstadoParcelaColor,
+  formatearHectareas,
+  ESTADOS_PARCELA
+} from '../../../../models/parcela.model';
 
 @Component({
-  selector: 'app-form-parcela',
+  selector: 'app-parcela',
   standalone: true,
-  imports: [CommonModule, FormsModule],
-  templateUrl: './form-parcela.component.html',
-  styleUrl: './form-parcela.component.css'
+  imports: [CommonModule, RouterLink, FormsModule, FormParcelaComponent],
+  templateUrl: './parcela.component.html',
+  styleUrl: './parcela.component.css'
 })
-export class FormParcelaComponent implements OnInit {
-  @Input() parcela?: Parcela;
-  @Output() onClose = new EventEmitter<void>();
-  @Output() onSave = new EventEmitter<void>();
+export class ParcelaComponent implements OnInit {
+  private parcelasService = inject(ParcelasService);
 
-  formData: CreateParcelaDto = {
-    nombre: '',
-    superficieHa: 0,
-    ubicacion: '',
-    coordenadas: '',
-    tipoSuelo: '',
-    sistemaRiego: '',
-    estado: 'Activa',
-    observaciones: ''
-  };
-
-  ESTADOS_PARCELA = ESTADOS_PARCELA;
+  parcelas: Parcela[] = [];
+  parcelasFiltradas: Parcela[] = [];
   loading = false;
-  modoEdicion = false;
-
-  constructor(private parcelasService: ParcelasService) {}
+  
+  // Filtros
+  estadoFiltro: EstadoParcela | 'todos' = 'todos';
+  busqueda = '';
+  
+  // Estadísticas
+  totalParcelas = 0;
+  superficieTotal = 0;
+  parcelasActivas = 0;
+  
+  // Constantes para template
+  ESTADOS_PARCELA = ESTADOS_PARCELA;
+  
+  // Modales
+  mostrarFormulario = false;
+  parcelaSeleccionada: Parcela | null = null;
 
   ngOnInit() {
-    if (this.parcela) {
-      this.modoEdicion = true;
-      this.formData = {
-        codigo: this.parcela.codigo,
-        nombre: this.parcela.nombre,
-        superficieHa: this.parcela.superficieHa,
-        ubicacion: this.parcela.ubicacion,
-        coordenadas: this.parcela.coordenadas,
-        tipoSuelo: this.parcela.tipoSuelo,
-        sistemaRiego: this.parcela.sistemaRiego,
-        estado: this.parcela.estado,
-        observaciones: this.parcela.observaciones
-      };
-    }
+    this.cargarParcelas();
   }
 
-  guardar() {
-    if (!this.validarFormulario()) {
-      return;
-    }
-
+  cargarParcelas() {
     this.loading = true;
-
-    const request = this.modoEdicion
-      ? this.parcelasService.updateParcela(this.parcela!.id, this.formData)
-      : this.parcelasService.createParcela(this.formData);
-
-    request.subscribe({
-      next: () => {
-        alert(this.modoEdicion ? 'Parcela actualizada correctamente' : 'Parcela creada correctamente');
-        this.onSave.emit();
-        this.cerrar();
+    this.parcelasService.getParcelas(true).subscribe({
+      next: (parcelas) => {
+        this.parcelas = parcelas;
+        this.aplicarFiltros();
+        this.calcularEstadisticas();
+        this.loading = false;
       },
       error: (error) => {
-        console.error('Error al guardar parcela:', error);
-        alert('Error al guardar la parcela');
+        console.error('Error al cargar parcelas:', error);
         this.loading = false;
       }
     });
   }
 
-  validarFormulario(): boolean {
-    if (!this.formData.nombre.trim()) {
-      alert('El nombre es requerido');
-      return false;
+  aplicarFiltros() {
+    let filtradas = [...this.parcelas];
+
+    // Filtrar por estado
+    if (this.estadoFiltro !== 'todos') {
+      filtradas = filtradas.filter(p => p.estado === this.estadoFiltro);
     }
 
-    if (this.formData.superficieHa <= 0) {
-      alert('La superficie debe ser mayor a 0');
-      return false;
+    // Filtrar por búsqueda
+    if (this.busqueda.trim()) {
+      const busq = this.busqueda.toLowerCase();
+      filtradas = filtradas.filter(p =>
+        p.nombre.toLowerCase().includes(busq) ||
+        p.codigo.toLowerCase().includes(busq) ||
+        p.ubicacion?.toLowerCase().includes(busq)
+      );
     }
 
-    return true;
+    this.parcelasFiltradas = filtradas;
   }
 
-  cerrar() {
-    this.onClose.emit();
+  calcularEstadisticas() {
+    this.totalParcelas = this.parcelas.length;
+    this.superficieTotal = this.parcelas.reduce((sum, p) => sum + p.superficieHa, 0);
+    this.parcelasActivas = this.parcelas.filter(p => p.estado === 'Activa').length;
+  }
+
+  getEstadoColor(estado: EstadoParcela): string {
+    return getEstadoParcelaColor(estado);
+  }
+
+  formatearHectareas(hectareas: number): string {
+    return formatearHectareas(hectareas);
+  }
+
+  abrirFormulario(parcela?: Parcela) {
+    this.parcelaSeleccionada = parcela || null;
+    this.mostrarFormulario = true;
+  }
+
+  cerrarFormulario() {
+    this.mostrarFormulario = false;
+    this.parcelaSeleccionada = null;
+    this.cargarParcelas();
+  }
+
+  eliminarParcela(id: number) {
+    if (confirm('¿Estás seguro de que deseas eliminar esta parcela?')) {
+      this.parcelasService.deleteParcela(id).subscribe({
+        next: () => {
+          alert('Parcela eliminada correctamente');
+          this.cargarParcelas();
+        },
+        error: (error) => {
+          console.error('Error al eliminar:', error);
+          alert('Error al eliminar la parcela');
+        }
+      });
+    }
   }
 }

@@ -1,7 +1,7 @@
-import { Component, Input, OnInit } from '@angular/core';
+import { Component, Input, OnInit, inject } from '@angular/core';
 import { CommonModule } from '@angular/common';
-import { ParcelasService } from '../../../services/parcelas.service';  // ← CAMBIAR ESTA LÍNEA
-import { TrazabilidadParcela, formatearCosto, formatearHectareas } from '../../../../../models/parcelas.model';  // ← Y ESTA
+import { ParcelasService } from '../../services/parcela.service';  // ✅ CORREGIDO
+import { TrazabilidadParcela, formatearCosto, formatearHectareas } from '../../../../models/parcela.model';  // ✅ CORREGIDO
 
 @Component({
   selector: 'app-trazabilidad',
@@ -11,12 +11,12 @@ import { TrazabilidadParcela, formatearCosto, formatearHectareas } from '../../.
   styleUrl: './trazabilidad.component.css'
 })
 export class TrazabilidadComponent implements OnInit {
+  private parcelasService = inject(ParcelasService);
+  
   @Input() parcelaId!: number;
   
   trazabilidad?: TrazabilidadParcela;
   loading = false;
-
-  constructor(private parcelasService: ParcelasService) {}
 
   ngOnInit() {
     if (this.parcelaId) {
@@ -27,11 +27,11 @@ export class TrazabilidadComponent implements OnInit {
   cargarTrazabilidad() {
     this.loading = true;
     this.parcelasService.getTrazabilidad(this.parcelaId).subscribe({
-      next: (data: TrazabilidadParcela) => {  // ← Tipar explícitamente
+      next: (data: TrazabilidadParcela) => {
         this.trazabilidad = data;
         this.loading = false;
       },
-      error: (error: any) => {  // ← Tipar explícitamente
+      error: (error: any) => {
         console.error('Error al cargar trazabilidad:', error);
         this.loading = false;
       }

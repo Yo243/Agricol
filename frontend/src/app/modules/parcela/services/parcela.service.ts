@@ -15,7 +15,7 @@ import {
   EstadisticasParcelas,
   ReporteProduccion,
   TrazabilidadParcela
-} from '../../../models/parcelas.model';
+} from '../../../models/parcela.model';
 
 @Injectable({
   providedIn: 'root'

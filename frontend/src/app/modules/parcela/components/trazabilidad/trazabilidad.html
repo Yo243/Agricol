@@ -1,155 +1,156 @@
-<div>
-  <!-- Loading -->
-  <div *ngIf="loading" class="text-center py-8">
-    <div class="inline-block animate-spin rounded-full h-8 w-8 border-4 border-green-500 border-t-transparent"></div>
-    <p class="mt-2 text-gray-600">Cargando trazabilidad...</p>
+<div *ngIf="loading" class="text-center py-12">
+  <div class="inline-block animate-spin rounded-full h-12 w-12 border-4 border-green-500 border-t-transparent"></div>
+  <p class="text-gray-600 mt-4">Cargando trazabilidad...</p>
+</div>
+
+<div *ngIf="!loading && trazabilidad">
+  <!-- Sin eventos -->
+  <div *ngIf="trazabilidad.periodos.length === 0" class="text-center py-12">
+    <div class="text-6xl mb-4">📋</div>
+    <p class="text-gray-600">No hay eventos de trazabilidad registrados</p>
   </div>
 
-  <!-- Sin datos -->
-  <div *ngIf="!loading && !trazabilidad" class="text-center py-12">
-    <div class="text-6xl mb-4">📊</div>
-    <h3 class="text-xl font-semibold text-gray-700 mb-2">No hay datos de trazabilidad</h3>
-    <p class="text-gray-500">Comienza registrando períodos y aplicaciones</p>
-  </div>
-
-  <!-- Timeline -->
-  <div *ngIf="!loading && trazabilidad" class="space-y-8">
-    <!-- Info de la parcela -->
-    <div class="bg-gradient-to-r from-green-50 to-blue-50 rounded-lg p-6">
-      <h3 class="text-xl font-bold text-gray-800 mb-4">
-        🗺️ {{ trazabilidad.parcela.nombre }} ({{ trazabilidad.parcela.codigo }})
-      </h3>
-      <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
-        <div>
-          <p class="text-sm text-gray-600">Superficie</p>
-          <p class="font-semibold text-gray-800">{{ formatearHectareas(trazabilidad.parcela.superficie) }}</p>
-        </div>
-        <div *ngIf="trazabilidad.parcela.ubicacion">
-          <p class="text-sm text-gray-600">Ubicación</p>
-          <p class="font-semibold text-gray-800">{{ trazabilidad.parcela.ubicacion }}</p>
-        </div>
-        <div>
-          <p class="text-sm text-gray-600">Total de Eventos</p>
-          <p class="font-semibold text-gray-800">
-            {{ trazabilidad.trazabilidad.reduce((sum, t) => sum + t.eventos.length, 0) }}
-          </p>
-        </div>
-      </div>
-    </div>
-
-    <!-- Timeline por período -->
-    <div *ngFor="let item of trazabilidad.trazabilidad; let periodoIndex = index" class="relative">
-      <!-- Línea vertical del timeline -->
-      <div *ngIf="periodoIndex < trazabilidad.trazabilidad.length - 1" 
-           class="absolute left-8 top-20 bottom-0 w-1 bg-green-200"></div>
-
+  <!-- Timeline de Eventos -->
+  <div *ngIf="trazabilidad.periodos.length > 0" class="space-y-8">
+    <div *ngFor="let periodo of trazabilidad.periodos" class="relative">
       <!-- Período Header -->
-      <div class="relative mb-6">
-        <div class="flex items-start gap-4">
-          <div class="flex-shrink-0 w-16 h-16 bg-green-600 rounded-full flex items-center justify-center text-white text-2xl shadow-lg z-10">
-            📅
+      <div class="bg-green-50 border-l-4 border-green-500 rounded-lg p-4 mb-4">
+        <div class="flex items-center justify-between">
+          <div>
+            <h3 class="text-lg font-bold text-gray-800">
+              🌱 {{ periodo.cultivo?.nombre }}
+            </h3>
+            <p class="text-sm text-gray-600">
+              {{ formatearFecha(periodo.fechaInicio) }}
+              <span *ngIf="periodo.fechaCosechaReal">
+                → {{ formatearFecha(periodo.fechaCosechaReal) }}
+              </span>
+            </p>
           </div>
-          <div class="flex-1 bg-white rounded-lg shadow-lg p-6">
-            <div class="flex items-start justify-between mb-4">
-              <div>
-                <h4 class="text-lg font-bold text-gray-800 mb-1">{{ item.periodo.codigo }}</h4>
-                <p class="text-gray-600 mb-2">🌾 {{ item.periodo.cultivo }}</p>
-                <div class="flex items-center gap-4 text-sm text-gray-600">
-                  <span>📅 Inicio: {{ formatearFecha(item.periodo.fechaInicio) }}</span>
-                  <span *ngIf="item.periodo.fechaFin">📅 Fin: {{ formatearFecha(item.periodo.fechaFin) }}</span>
-                </div>
-              </div>
-              <div class="text-right">
-                <div class="inline-block px-3 py-1 rounded-full text-xs font-medium"
-                     [ngClass]="{
-                       'bg-blue-100 text-blue-800': item.periodo.estado === 'En Curso',
-                       'bg-green-100 text-green-800': item.periodo.estado === 'Finalizado',
-                       'bg-red-100 text-red-800': item.periodo.estado === 'Cancelado'
-                     }">
-                  {{ item.periodo.estado }}
-                </div>
-              </div>
-            </div>
-
-            <div class="grid grid-cols-2 md:grid-cols-4 gap-4 pt-4 border-t border-gray-200">
-              <div>
-                <p class="text-xs text-gray-600">Hectáreas</p>
-                <p class="font-semibold text-gray-800">{{ formatearHectareas(item.periodo.hectareas) }}</p>
-              </div>
-              <div>
-                <p class="text-xs text-gray-600">Costo Total</p>
-                <p class="font-semibold text-gray-800">{{ formatearCosto(item.periodo.costoTotal) }}</p>
-              </div>
-              <div *ngIf="item.periodo.rendimiento">
-                <p class="text-xs text-gray-600">Rendimiento</p>
-                <p class="font-semibold text-gray-800">{{ item.periodo.rendimiento }} ton</p>
-              </div>
-              <div>
-                <p class="text-xs text-gray-600">Eventos</p>
-                <p class="font-semibold text-gray-800">{{ item.eventos.length }}</p>
-              </div>
-            </div>
+          <span [class]="'px-3 py-1 rounded-full text-xs font-semibold ' + (periodo.estado === 'En Curso' ? 'bg-yellow-100 text-yellow-800' : 'bg-gray-100 text-gray-800')">
+            {{ periodo.estado }}
+          </span>
+        </div>
+        <div class="grid grid-cols-2 md:grid-cols-4 gap-4 mt-3">
+          <div>
+            <p class="text-xs text-gray-600">Hectáreas</p>
+            <p class="text-sm font-semibold">{{ formatearHectareas(periodo.hectareasSembradas) }}</p>
+          </div>
+          <div>
+            <p class="text-xs text-gray-600">Rendimiento</p>
+            <p class="text-sm font-semibold">
+              {{ periodo.rendimientoReal || periodo.rendimientoEsperado || 0 }} ton
+            </p>
+          </div>
+          <div>
+            <p class="text-xs text-gray-600">Aplicaciones</p>
+            <p class="text-sm font-semibold">{{ periodo.aplicaciones?.length || 0 }}</p>
+          </div>
+          <div>
+            <p class="text-xs text-gray-600">Costo Total</p>
+            <p class="text-sm font-semibold">{{ formatearCosto(periodo.costoTotal) }}</p>
           </div>
         </div>
       </div>
 
-      <!-- Eventos del período -->
-      <div class="ml-20 space-y-4 mb-8">
-        <div *ngFor="let evento of item.eventos; let eventoIndex = index" class="relative">
-          <!-- Línea conectora -->
-          <div class="absolute -left-9 top-8 w-8 h-0.5 bg-green-200"></div>
+      <!-- Aplicaciones del Período -->
+      <div class="ml-8 space-y-4">
+        <div *ngFor="let aplicacion of periodo.aplicaciones" class="relative">
+          <!-- Línea de conexión -->
+          <div class="absolute -left-8 top-0 bottom-0 w-0.5 bg-gray-300"></div>
           
-          <!-- Evento Card -->
-          <div class="bg-gray-50 rounded-lg p-4 hover:shadow-md transition-shadow border-l-4"
-               [ngClass]="{
-                 'border-green-500': evento.tipo === 'Aplicación' && evento.tipoAplicacion === 'Fertilización',
-                 'border-blue-500': evento.tipo === 'Aplicación' && evento.tipoAplicacion === 'Riego',
-                 'border-purple-500': evento.tipo === 'Aplicación' && evento.tipoAplicacion === 'Fumigación',
-                 'border-yellow-500': evento.tipo === 'Actividad'
-               }">
-            <div class="flex items-start justify-between mb-2">
-              <div class="flex items-center gap-2">
-                <span class="text-2xl">{{ getEventIcon(evento.tipo, evento.tipoAplicacion || evento.tipoActividad) }}</span>
-                <div>
-                  <h5 class="font-semibold text-gray-800">
-                    {{ evento.tipoAplicacion || evento.nombre }}
-                  </h5>
-                  <p class="text-xs text-gray-600">{{ formatearFecha(evento.fecha) }}</p>
+          <!-- Punto de evento -->
+          <div class="absolute -left-10 top-3 w-4 h-4 rounded-full bg-blue-500 border-2 border-white"></div>
+
+          <!-- Contenido del evento -->
+          <div class="bg-white border rounded-lg p-4 hover:shadow-md transition-shadow">
+            <div class="flex items-start gap-3">
+              <div class="text-3xl">
+                {{ getEventIcon('Aplicación', aplicacion.tipoAplicacion) }}
+              </div>
+              <div class="flex-1">
+                <div class="flex items-start justify-between mb-2">
+                  <div>
+                    <h4 class="font-bold text-gray-800">{{ aplicacion.tipoAplicacion }}</h4>
+                    <p class="text-sm text-gray-600">{{ formatearFecha(aplicacion.fecha) }}</p>
+                  </div>
+                  <span class="px-3 py-1 bg-blue-100 text-blue-800 rounded-full text-xs font-semibold">
+                    {{ formatearHectareas(aplicacion.hectareasAplicadas) }}
+                  </span>
+                </div>
+
+                <!-- Insumos -->
+                <div class="mt-3">
+                  <p class="text-sm font-semibold text-gray-700 mb-2">Insumos aplicados:</p>
+                  <div class="bg-gray-50 rounded p-3 space-y-2">
+                    <div *ngFor="let insumo of aplicacion.insumos" class="flex items-center justify-between text-sm">
+                      <div>
+                        <span class="font-medium text-gray-800">{{ insumo.insumo?.nombre }}</span>
+                        <span class="text-gray-600 ml-2">
+                          ({{ insumo.dosisPorHectarea }} {{ insumo.insumo?.unidadMedida }}/ha)
+                        </span>
+                      </div>
+                      <span class="font-semibold text-gray-800">
+                        {{ insumo.cantidad }} {{ insumo.insumo?.unidadMedida }}
+                      </span>
+                    </div>
+                  </div>
+                </div>
+
+                <!-- Footer -->
+                <div class="mt-3 flex items-center justify-between text-sm">
+                  <span class="text-gray-600" *ngIf="aplicacion.responsable">
+                    👤 {{ aplicacion.responsable }}
+                  </span>
+                  <span class="font-bold text-gray-800">
+                    Total: {{ formatearCosto(aplicacion.costoTotal) }}
+                  </span>
+                </div>
+
+                <!-- Observaciones -->
+                <div *ngIf="aplicacion.observaciones" class="mt-2 text-sm text-gray-600 italic">
+                  💬 {{ aplicacion.observaciones }}
                 </div>
               </div>
-              <div class="text-right">
-                <p *ngIf="evento.costo" class="font-semibold text-gray-800">{{ formatearCosto(evento.costo) }}</p>
-                <p *ngIf="evento.hectareas" class="text-xs text-gray-600">{{ formatearHectareas(evento.hectareas) }}</p>
-              </div>
-            </div>
-
-            <!-- Insumos aplicados -->
-            <div *ngIf="evento.insumos && evento.insumos.length > 0" class="mt-3 space-y-1">
-              <p class="text-xs font-medium text-gray-700 mb-2">Insumos:</p>
-              <div *ngFor="let insumo of evento.insumos" 
-                   class="flex items-center justify-between bg-white rounded px-3 py-2 text-xs">
-                <span class="text-gray-700">{{ insumo.nombre }}</span>
-                <span class="font-medium text-gray-800">
-                  {{ insumo.cantidad }} {{ insumo.unidad }}
-                  <span class="text-gray-500 ml-1">({{ insumo.dosis }}/ha)</span>
-                </span>
-              </div>
-            </div>
-
-            <!-- Responsable -->
-            <div *ngIf="evento.responsable" class="mt-2 text-xs text-gray-600">
-              👤 {{ evento.responsable }}
             </div>
           </div>
+        </div>
+
+        <!-- Mensaje si no hay aplicaciones -->
+        <div *ngIf="!periodo.aplicaciones || periodo.aplicaciones.length === 0" 
+             class="text-center py-6 text-gray-500 text-sm">
+          No hay aplicaciones registradas en este período
         </div>
       </div>
     </div>
+  </div>
 
-    <!-- Sin eventos -->
-    <div *ngIf="trazabilidad.trazabilidad.length === 0" class="text-center py-12">
-      <div class="text-6xl mb-4">📊</div>
-      <h3 class="text-xl font-semibold text-gray-700 mb-2">No hay eventos registrados</h3>
-      <p class="text-gray-500">Los períodos y aplicaciones aparecerán aquí</p>
+  <!-- Resumen Final -->
+  <div class="mt-8 bg-gray-50 rounded-lg p-6">
+    <h3 class="text-lg font-bold text-gray-800 mb-4">📊 Resumen de Trazabilidad</h3>
+    <div class="grid grid-cols-1 md:grid-cols-4 gap-4">
+      <div>
+        <p class="text-sm text-gray-600">Total Períodos</p>
+        <p class="text-2xl font-bold text-gray-800">{{ trazabilidad.periodos.length }}</p>
+      </div>
+      <div>
+        <p class="text-sm text-gray-600">Total Aplicaciones</p>
+        <p class="text-2xl font-bold text-gray-800">
+          {{ trazabilidad.periodos.reduce((sum, p) => sum + (p.aplicaciones?.length || 0), 0) }}
+        </p>
+      </div>
+      <div>
+        <p class="text-sm text-gray-600">Inversión Total</p>
+        <p class="text-2xl font-bold text-gray-800">
+          {{ formatearCosto(trazabilidad.periodos.reduce((sum, p) => sum + p.costoTotal, 0)) }}
+        </p>
+      </div>
+      <div>
+        <p class="text-sm text-gray-600">Producción Total</p>
+        <p class="text-2xl font-bold text-gray-800">
+          {{ trazabilidad.periodos.reduce((sum, p) => sum + (p.rendimientoReal || 0), 0) }} ton
+        </p>
+      </div>
     </div>
   </div>
 </div>

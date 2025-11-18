@@ -1,9 +1,9 @@
-import { Component, EventEmitter, Input, OnInit, Output } from '@angular/core';
+import { Component, EventEmitter, Input, OnInit, Output, inject } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
-import { ParcelasService } from '../../../services/parcelas.service';  // ← CAMBIAR
+import { ParcelasService } from '../../services/parcela.service';  // ✅ CORREGIDO
 import { HttpClient } from '@angular/common/http';
-import { Parcela, Cultivo, CreatePeriodoSiembraDto } from '../../../../../models/parcelas.model';  // ← CAMBIAR
+import { Parcela, Cultivo, CreatePeriodoSiembraDto } from '../../../../models/parcela.model';  // ✅ CORREGIDO
 
 @Component({
   selector: 'app-form-periodo',
@@ -13,6 +13,9 @@ import { Parcela, Cultivo, CreatePeriodoSiembraDto } from '../../../../../models
   styleUrl: './form-periodo.component.css'
 })
 export class FormPeriodoComponent implements OnInit {
+  private parcelasService = inject(ParcelasService);
+  private http = inject(HttpClient);
+
   @Input() parcelaId?: number;
   @Output() onClose = new EventEmitter<void>();
   @Output() onSave = new EventEmitter<void>();
@@ -30,11 +33,6 @@ export class FormPeriodoComponent implements OnInit {
     rendimientoEsperado: 0,
     observaciones: ''
   };
-
-  constructor(
-    private parcelasService: ParcelasService,
-    private http: HttpClient
-  ) {}
 
   ngOnInit() {
     this.cargarDatos();

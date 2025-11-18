@@ -3,154 +3,160 @@
     <!-- Header -->
     <div class="sticky top-0 bg-white border-b border-gray-200 px-6 py-4">
       <div class="flex items-center justify-between">
-        <h2 class="text-xl font-bold text-gray-800">📅 Nuevo Período de Siembra</h2>
-        <button (click)="cerrar()" type="button" class="text-gray-500 hover:text-gray-700 text-2xl">✕</button>
+        <h2 class="text-xl font-bold text-gray-800">🌱 Iniciar Período de Siembra</h2>
+        <button (click)="cerrar()" type="button" class="text-gray-500 hover:text-gray-700 text-2xl">
+          ✕
+        </button>
       </div>
     </div>
 
-    <!-- Body -->
-    <form (ngSubmit)="guardar()" class="p-6 space-y-6">
-      <div *ngIf="loadingData" class="text-center py-8">
-        <div class="inline-block animate-spin rounded-full h-8 w-8 border-4 border-green-500 border-t-transparent"></div>
-        <p class="mt-2 text-gray-600">Cargando datos...</p>
+    <!-- Loading -->
+    <div *ngIf="loadingData" class="p-12 text-center">
+      <div class="inline-block animate-spin rounded-full h-12 w-12 border-4 border-green-500 border-t-transparent"></div>
+      <p class="text-gray-600 mt-4">Cargando datos...</p>
+    </div>
+
+    <!-- Formulario -->
+    <form *ngIf="!loadingData" (ngSubmit)="guardar()" class="p-6 space-y-6">
+      <!-- Selección de Parcela y Cultivo -->
+      <div class="space-y-4">
+        <h3 class="text-lg font-semibold text-gray-700 border-b pb-2">📋 Información General</h3>
+        
+        <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+          <!-- Parcela -->
+          <div>
+            <label class="block text-sm font-medium text-gray-700 mb-1">
+              Parcela <span class="text-red-500">*</span>
+            </label>
+            <select
+              [(ngModel)]="formData.parcelaId"
+              name="parcelaId"
+              (ngModelChange)="onParcelaChange()"
+              [disabled]="!!parcelaId"
+              required
+              class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-green-500 focus:border-transparent">
+              <option value="0">Seleccionar parcela...</option>
+              <option *ngFor="let parcela of parcelas" [value]="parcela.id">
+                {{ parcela.nombre }} ({{ parcela.superficieHa }} ha)
+              </option>
+            </select>
+          </div>
+
+          <!-- Cultivo -->
+          <div>
+            <label class="block text-sm font-medium text-gray-700 mb-1">
+              Cultivo <span class="text-red-500">*</span>
+            </label>
+            <select
+              [(ngModel)]="formData.cultivoId"
+              name="cultivoId"
+              (ngModelChange)="onCultivoChange()"
+              required
+              class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-green-500 focus:border-transparent">
+              <option value="0">Seleccionar cultivo...</option>
+              <option *ngFor="let cultivo of cultivos" [value]="cultivo.id">
+                {{ cultivo.nombre }}
+              </option>
+            </select>
+          </div>
+        </div>
       </div>
 
-      <div *ngIf="!loadingData" class="space-y-6">
-        <!-- Parcela y Cultivo -->
-        <div class="space-y-4">
-          <h3 class="text-lg font-semibold text-gray-700 border-b pb-2">🗺️ Parcela y Cultivo</h3>
-          
-          <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
-            <!-- Parcela -->
-            <div>
-              <label class="block text-sm font-medium text-gray-700 mb-1">
-                Parcela <span class="text-red-500">*</span>
-              </label>
-              <select
-                [(ngModel)]="formData.parcelaId"
-                name="parcelaId"
-                (ngModelChange)="onParcelaChange()"
-                required
-                class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-green-500 focus:border-transparent">
-                <option [value]="0">Seleccionar parcela...</option>
-                <option *ngFor="let parcela of parcelas" [value]="parcela.id">
-                  {{ parcela.nombre }} ({{ parcela.superficieHa }} ha)
-                </option>
-              </select>
-            </div>
+      <!-- Fechas y Hectáreas -->
+      <div class="space-y-4">
+        <h3 class="text-lg font-semibold text-gray-700 border-b pb-2">📅 Fechas y Superficie</h3>
+        
+        <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
+          <!-- Fecha Inicio -->
+          <div>
+            <label class="block text-sm font-medium text-gray-700 mb-1">
+              Fecha de Inicio <span class="text-red-500">*</span>
+            </label>
+            <input
+              type="date"
+              [(ngModel)]="formData.fechaInicio"
+              name="fechaInicio"
+              required
+              class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-green-500 focus:border-transparent">
+          </div>
 
-            <!-- Cultivo -->
-            <div>
-              <label class="block text-sm font-medium text-gray-700 mb-1">
-                Cultivo <span class="text-red-500">*</span>
-              </label>
-              <select
-                [(ngModel)]="formData.cultivoId"
-                name="cultivoId"
-                (ngModelChange)="onCultivoChange()"
-                required
-                class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-green-500 focus:border-transparent">
-                <option [value]="0">Seleccionar cultivo...</option>
-                <option *ngFor="let cultivo of cultivos" [value]="cultivo.id">
-                  {{ cultivo.nombre }} - {{ cultivo.variedad }}
-                </option>
-              </select>
-            </div>
+          <!-- Fecha Cosecha Esperada -->
+          <div>
+            <label class="block text-sm font-medium text-gray-700 mb-1">
+              Fecha Cosecha Esperada
+            </label>
+            <input
+              type="date"
+              [(ngModel)]="formData.fechaCosechaEsperada"
+              name="fechaCosechaEsperada"
+              class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-green-500 focus:border-transparent">
+          </div>
+
+          <!-- Hectáreas Sembradas -->
+          <div>
+            <label class="block text-sm font-medium text-gray-700 mb-1">
+              Hectáreas Sembradas <span class="text-red-500">*</span>
+            </label>
+            <input
+              type="number"
+              [(ngModel)]="formData.hectareasSembradas"
+              name="hectareasSembradas"
+              required
+              min="0.01"
+              step="0.01"
+              placeholder="0.00"
+              class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-green-500 focus:border-transparent">
           </div>
         </div>
+      </div>
 
-        <!-- Fechas -->
-        <div class="space-y-4">
-          <h3 class="text-lg font-semibold text-gray-700 border-b pb-2">📆 Fechas</h3>
-          
-          <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
-            <!-- Fecha de Inicio -->
-            <div>
-              <label class="block text-sm font-medium text-gray-700 mb-1">
-                Fecha de Inicio <span class="text-red-500">*</span>
-              </label>
-              <input
-                type="date"
-                [(ngModel)]="formData.fechaInicio"
-                name="fechaInicio"
-                required
-                class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-green-500 focus:border-transparent">
-            </div>
-
-            <!-- Fecha Cosecha Esperada -->
-            <div>
-              <label class="block text-sm font-medium text-gray-700 mb-1">Fecha Cosecha Esperada</label>
-              <input
-                type="date"
-                [(ngModel)]="formData.fechaCosechaEsperada"
-                name="fechaCosechaEsperada"
-                class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-green-500 focus:border-transparent">
-            </div>
-          </div>
-        </div>
-
-        <!-- Hectáreas y Rendimiento -->
-        <div class="space-y-4">
-          <h3 class="text-lg font-semibold text-gray-700 border-b pb-2">📊 Producción</h3>
-          
-          <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
-            <!-- Hectáreas Sembradas -->
-            <div>
-              <label class="block text-sm font-medium text-gray-700 mb-1">
-                Hectáreas Sembradas <span class="text-red-500">*</span>
-              </label>
-              <input
-                type="number"
-                [(ngModel)]="formData.hectareasSembradas"
-                name="hectareasSembradas"
-                required
-                min="0.01"
-                step="0.01"
-                placeholder="0.00"
-                class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-green-500 focus:border-transparent">
-            </div>
-
-            <!-- Rendimiento Esperado -->
-            <div>
-              <label class="block text-sm font-medium text-gray-700 mb-1">Rendimiento Esperado (ton/ha)</label>
-              <input
-                type="number"
-                [(ngModel)]="formData.rendimientoEsperado"
-                name="rendimientoEsperado"
-                min="0"
-                step="0.1"
-                placeholder="0.0"
-                class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-green-500 focus:border-transparent">
-            </div>
-          </div>
-        </div>
-
-        <!-- Observaciones -->
+      <!-- Rendimiento -->
+      <div class="space-y-4">
+        <h3 class="text-lg font-semibold text-gray-700 border-b pb-2">📊 Rendimiento</h3>
+        
         <div>
-          <label class="block text-sm font-medium text-gray-700 mb-1">Observaciones</label>
-          <textarea
-            [(ngModel)]="formData.observaciones"
-            name="observaciones"
-            rows="3"
-            placeholder="Notas sobre este período de siembra..."
-            class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-green-500 focus:border-transparent resize-none"></textarea>
+          <label class="block text-sm font-medium text-gray-700 mb-1">
+            Rendimiento Esperado (ton)
+          </label>
+          <input
+            type="number"
+            [(ngModel)]="formData.rendimientoEsperado"
+            name="rendimientoEsperado"
+            min="0"
+            step="0.01"
+            placeholder="0.00"
+            class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-green-500 focus:border-transparent">
+          <p class="text-xs text-gray-500 mt-1">
+            Este valor se calcula automáticamente al seleccionar el cultivo
+          </p>
         </div>
+      </div>
 
-        <!-- Botones -->
-        <div class="flex gap-3 pt-4 border-t">
-          <button
-            type="button"
-            (click)="cerrar()"
-            class="flex-1 px-4 py-2 border border-gray-300 text-gray-700 rounded-lg hover:bg-gray-50 transition-colors">
-            Cancelar
-          </button>
-          <button
-            type="submit"
-            [disabled]="loading"
-            class="flex-1 px-4 py-2 bg-green-600 text-white rounded-lg hover:bg-green-700 transition-colors disabled:opacity-50">
-            {{ loading ? 'Guardando...' : 'Crear Período' }}
-          </button>
-        </div>
+      <!-- Observaciones -->
+      <div>
+        <label class="block text-sm font-medium text-gray-700 mb-1">Observaciones</label>
+        <textarea
+          [(ngModel)]="formData.observaciones"
+          name="observaciones"
+          rows="3"
+          placeholder="Notas adicionales sobre este período..."
+          class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-green-500 focus:border-transparent resize-none"></textarea>
+      </div>
+
+      <!-- Botones -->
+      <div class="flex gap-3 pt-4 border-t">
+        <button
+          type="button"
+          (click)="cerrar()"
+          class="flex-1 px-4 py-2 border border-gray-300 text-gray-700 rounded-lg hover:bg-gray-50 transition-colors">
+          Cancelar
+        </button>
+        <button
+          type="submit"
+          [disabled]="loading"
+          class="flex-1 px-4 py-2 bg-green-600 text-white rounded-lg hover:bg-green-700 transition-colors disabled:opacity-50 disabled:cursor-not-allowed">
+          {{ loading ? 'Guardando...' : 'Iniciar Período' }}
+        </button>
       </div>
     </form>
   </div>
