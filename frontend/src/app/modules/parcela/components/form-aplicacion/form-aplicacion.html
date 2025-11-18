@@ -1,0 +1,219 @@
+<div class="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center p-4 z-50">
+  <div class="bg-white rounded-lg max-w-4xl w-full max-h-[90vh] overflow-y-auto">
+    <!-- Header -->
+    <div class="sticky top-0 bg-white border-b border-gray-200 px-6 py-4">
+      <div class="flex items-center justify-between">
+        <h2 class="text-xl font-bold text-gray-800">💧 Registrar Aplicación</h2>
+        <button (click)="cerrar()" type="button" class="text-gray-500 hover:text-gray-700 text-2xl">✕</button>
+      </div>
+    </div>
+
+    <!-- Body -->
+    <form (ngSubmit)="guardar()" class="p-6 space-y-6">
+      <div *ngIf="loadingData" class="text-center py-8">
+        <div class="inline-block animate-spin rounded-full h-8 w-8 border-4 border-green-500 border-t-transparent"></div>
+        <p class="mt-2 text-gray-600">Cargando datos...</p>
+      </div>
+
+      <div *ngIf="!loadingData" class="space-y-6">
+        <!-- Período y Tipo -->
+        <div class="space-y-4">
+          <h3 class="text-lg font-semibold text-gray-700 border-b pb-2">📋 Información General</h3>
+          
+          <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
+            <!-- Período de Siembra -->
+            <div>
+              <label class="block text-sm font-medium text-gray-700 mb-1">
+                Período de Siembra <span class="text-red-500">*</span>
+              </label>
+              <select
+                [(ngModel)]="formData.periodoSiembraId"
+                name="periodoSiembraId"
+                (ngModelChange)="onPeriodoChange()"
+                required
+                class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-green-500 focus:border-transparent">
+                <option [value]="0">Seleccionar...</option>
+                <option *ngFor="let periodo of periodos" [value]="periodo.id">
+                  {{ periodo.codigo }} - {{ periodo.cultivo?.nombre }}
+                </option>
+              </select>
+            </div>
+
+            <!-- Tipo de Aplicación -->
+            <div>
+              <label class="block text-sm font-medium text-gray-700 mb-1">
+                Tipo de Aplicación <span class="text-red-500">*</span>
+              </label>
+              <select
+                [(ngModel)]="formData.tipoAplicacion"
+                name="tipoAplicacion"
+                required
+                class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-green-500 focus:border-transparent">
+                <option *ngFor="let tipo of TIPOS_APLICACION" [value]="tipo">{{ tipo }}</option>
+              </select>
+            </div>
+
+            <!-- Fecha -->
+            <div>
+              <label class="block text-sm font-medium text-gray-700 mb-1">
+                Fecha <span class="text-red-500">*</span>
+              </label>
+              <input
+                type="date"
+                [(ngModel)]="formData.fecha"
+                name="fecha"
+                required
+                class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-green-500 focus:border-transparent">
+            </div>
+
+            <!-- Hectáreas Aplicadas -->
+            <div>
+              <label class="block text-sm font-medium text-gray-700 mb-1">
+                Hectáreas Aplicadas <span class="text-red-500">*</span>
+              </label>
+              <input
+                type="number"
+                [(ngModel)]="formData.hectareasAplicadas"
+                name="hectareasAplicadas"
+                required
+                min="0.01"
+                step="0.01"
+                placeholder="0.00"
+                class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-green-500 focus:border-transparent">
+            </div>
+
+            <!-- Responsable -->
+            <div class="md:col-span-2">
+              <label class="block text-sm font-medium text-gray-700 mb-1">Responsable</label>
+              <input
+                type="text"
+                [(ngModel)]="formData.responsable"
+                name="responsable"
+                placeholder="Nombre del responsable..."
+                class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-green-500 focus:border-transparent">
+            </div>
+          </div>
+        </div>
+
+        <!-- Insumos -->
+        <div class="space-y-4">
+          <h3 class="text-lg font-semibold text-gray-700 border-b pb-2">🌱 Insumos a Aplicar</h3>
+          
+          <!-- Agregar Insumo -->
+          <div class="flex gap-2">
+            <select
+              [(ngModel)]="insumoSeleccionado"
+              name="insumoSeleccionado"
+              class="flex-1 px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-green-500 focus:border-transparent">
+              <option [value]="0">Seleccionar insumo...</option>
+              <option *ngFor="let insumo of insumos" [value]="insumo.id">
+                {{ insumo.nombre }} (Stock: {{ insumo.stockActual }} {{ insumo.unidadMedida }})
+              </option>
+            </select>
+            <button
+              type="button"
+              (click)="agregarInsumo()"
+              class="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors">
+              ➕ Agregar
+            </button>
+          </div>
+
+          <!-- Lista de Insumos -->
+          <div *ngIf="insumosSeleccionados.length > 0" class="space-y-3">
+            <div *ngFor="let insumo of insumosSeleccionados; let i = index" 
+                 class="border border-gray-200 rounded-lg p-4 bg-gray-50">
+              <div class="flex items-start justify-between mb-3">
+                <div>
+                  <h4 class="font-semibold text-gray-800">{{ insumo.nombre }}</h4>
+                  <p class="text-sm text-gray-600">Stock disponible: {{ insumo.stockDisponible }} {{ insumo.unidadMedida }}</p>
+                </div>
+                <button
+                  type="button"
+                  (click)="eliminarInsumo(i)"
+                  class="text-red-600 hover:text-red-800">
+                  🗑️
+                </button>
+              </div>
+
+              <div class="grid grid-cols-1 md:grid-cols-3 gap-3">
+                <!-- Dosis por Hectárea -->
+                <div>
+                  <label class="block text-xs font-medium text-gray-700 mb-1">
+                    Dosis/ha ({{ insumo.unidadMedida }})
+                  </label>
+                  <input
+                    type="number"
+                    [(ngModel)]="insumo.dosisPorHectarea"
+                    [name]="'dosis' + i"
+                    (ngModelChange)="calcularCantidad(insumo)"
+                    min="0"
+                    step="0.1"
+                    placeholder="0.0"
+                    class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-green-500 focus:border-transparent text-sm">
+                </div>
+
+                <!-- Cantidad Total -->
+                <div>
+                  <label class="block text-xs font-medium text-gray-700 mb-1">
+                    Cantidad Total ({{ insumo.unidadMedida }})
+                  </label>
+                  <input
+                    type="number"
+                    [(ngModel)]="insumo.cantidad"
+                    [name]="'cantidad' + i"
+                    min="0"
+                    step="0.1"
+                    placeholder="0.0"
+                    class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-green-500 focus:border-transparent text-sm">
+                </div>
+
+                <!-- Validación de Stock -->
+                <div class="flex items-end">
+                  <div *ngIf="insumo.cantidad > (insumo.stockDisponible || 0)" 
+                       class="text-xs text-red-600 p-2 bg-red-50 rounded">
+                    ⚠️ Stock insuficiente
+                  </div>
+                  <div *ngIf="insumo.cantidad > 0 && insumo.cantidad <= (insumo.stockDisponible || 0)"
+                       class="text-xs text-green-600 p-2 bg-green-50 rounded">
+                    ✅ Stock disponible
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <div *ngIf="insumosSeleccionados.length === 0" class="text-center py-6 text-gray-500">
+            No hay insumos agregados. Selecciona un insumo arriba y haz clic en "Agregar".
+          </div>
+        </div>
+
+        <!-- Observaciones -->
+        <div>
+          <label class="block text-sm font-medium text-gray-700 mb-1">Observaciones</label>
+          <textarea
+            [(ngModel)]="formData.observaciones"
+            name="observaciones"
+            rows="3"
+            placeholder="Notas sobre esta aplicación..."
+            class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-green-500 focus:border-transparent resize-none"></textarea>
+        </div>
+
+        <!-- Botones -->
+        <div class="flex gap-3 pt-4 border-t">
+          <button
+            type="button"
+            (click)="cerrar()"
+            class="flex-1 px-4 py-2 border border-gray-300 text-gray-700 rounded-lg hover:bg-gray-50 transition-colors">
+            Cancelar
+          </button>
+          <button
+            type="submit"
+            [disabled]="loading || insumosSeleccionados.length === 0"
+            class="flex-1 px-4 py-2 bg-green-600 text-white rounded-lg hover:bg-green-700 transition-colors disabled:opacity-50">
+            {{ loading ? 'Registrando...' : 'Registrar Aplicación' }}
+          </button>
+        </div>
+      </div>
+    </form>
+  </div>
+</div>

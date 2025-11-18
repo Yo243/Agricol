@@ -3,25 +3,17 @@ const router = express.Router();
 
 const authRoutes = require('./auth.routes');
 const inventarioRoutes = require('./inventario.routes');
-// Importa otras rutas que tengas...
+const parcelasRoutes = require('./parcelas.routes');  // ← AGREGAR
 
-router.get('/', (req, res) => {
-  res.json({
-    message: 'AgriCol API v1.0',
-    endpoints: {
-      health: '/health',
-      auth: '/api/auth',
-      inventario: '/api/inventario',
-      parcelas: '/api/parcelas',
-      ordenes: '/api/ordenes',
-      reportes: '/api/reportes'
-    }
-  });
-});
-
-// Rutas
 router.use('/auth', authRoutes);
 router.use('/inventario', inventarioRoutes);
-// Agrega otras rutas...
+router.use('/parcelas', parcelasRoutes);  // ← AGREGAR
+
+router.get('/health', (req, res) => {
+  res.json({ 
+    status: 'OK', 
+    timestamp: new Date().toISOString() 
+  });
+});
 
 module.exports = router;

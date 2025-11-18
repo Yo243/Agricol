@@ -29,4 +29,29 @@ export const routes: Routes = [
     canActivate: [AuthGuard]
   },
   
+  // ==========================================
+  // RUTAS DE PARCELAS (NUEVO MÓDULO)
+  // ==========================================
+  
+  // Lista de Parcelas
+  {
+    path: 'parcelas',
+    loadComponent: () => import('./modules/parcelas/pages/parcelas/parcelas.component').then(m => m.ParcelasComponent),
+    canActivate: [AuthGuard]
+  },
+  
+  // Detalle de Parcela (componente auxiliar)
+  {
+    path: 'parcelas/:id',
+    loadComponent: () => import('./modules/parcelas/components/detalle-parcela/detalle-parcela.component').then(m => m.DetalleParcelaComponent),
+    canActivate: [AuthGuard]
+  },
+  
+  // ==========================================
+  // RUTA 404 - Página no encontrada
+  // ==========================================
+  {
+    path: '**',
+    redirectTo: '/dashboard'
+  }
 ];
