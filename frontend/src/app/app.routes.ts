@@ -2,54 +2,61 @@ import { Routes } from '@angular/router';
 import { AuthGuard } from './core/guards/auth.guard';
 
 export const routes: Routes = [
-  // Ruta raíz - redirige al login
   {
     path: '',
     redirectTo: '/login',
     pathMatch: 'full'
   },
-  
-  // Ruta de Login (sin protección)
+
   {
     path: 'login',
-    loadComponent: () => import('./modules/auth/login.component').then(m => m.LoginComponent)
+    loadComponent: () =>
+      import('./modules/auth/login.component').then((m) => m.LoginComponent)
   },
-  
-  // Ruta de Dashboard (protegida)
+
   {
     path: 'dashboard',
-    loadComponent: () => import('./modules/dashboard/pages/dashboard/dashboard.component').then(m => m.DashboardComponent),
+    loadComponent: () =>
+      import('./modules/dashboard/pages/dashboard/dashboard.component').then(
+        (m) => m.DashboardComponent
+      ),
     canActivate: [AuthGuard]
   },
-  
-  // Ruta de Inventario (protegida)
+
   {
     path: 'inventario',
-    loadComponent: () => import('./modules/inventario/pages/inventario/inventario.component').then(m => m.InventarioComponent),
+    loadComponent: () =>
+      import(
+        './modules/inventario/pages/inventario/inventario.component'
+      ).then((m) => m.InventarioComponent),
     canActivate: [AuthGuard]
   },
-  
-  // ==========================================
-  // RUTAS DE PARCELAS (SINGULAR)
-  // ==========================================
-  
-  // Lista de Parcelas
+
+  // =============================
+  // PARCELAS (CARPETA REAL = parcela)
+  // =============================
+
   {
     path: 'parcelas',
-    loadComponent: () => import('./modules/parcelas/pages/parcela/parcela.component').then(m => m.ParcelaComponent),
+    loadComponent: () =>
+      import('./modules/parcela/pages/parcela/parcela.component').then(
+        (m) => m.ParcelaComponent
+      ),
     canActivate: [AuthGuard]
   },
-  
-  // Detalle de Parcela
+
   {
     path: 'parcelas/:id',
-    loadComponent: () => import('./modules/parcelas/components/detalle-parcela/detalle-parcela.component').then(m => m.DetalleParcelaComponent),
+    loadComponent: () =>
+      import(
+        './modules/parcela/components/detalle-parcela/detalle-parcela'
+      ).then((m) => m.DetalleParcelaComponent),
     canActivate: [AuthGuard]
   },
-  
-  // ==========================================
-  // RUTA 404 - Página no encontrada
-  // ==========================================
+
+  // =============================
+  // 404
+  // =============================
   {
     path: '**',
     redirectTo: '/dashboard'

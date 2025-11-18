@@ -2,10 +2,12 @@ import { Component, OnInit, inject } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { ActivatedRoute, Router, RouterLink } from '@angular/router';
 import { ParcelasService } from '../../services/parcela.service';
-// ✅ RUTAS CORRECTAS - Solo subir 1 nivel porque están al mismo nivel
-import { FormPeriodoComponent } from '../form-periodo/form-periodo.component';
-import { FormAplicacionComponent } from '../form-aplicacion/form-aplicacion.component';
-import { TrazabilidadComponent } from '../trazabilidad/trazabilidad.component';
+
+// RUTAS CORRECTAS
+import { FormPeriodoComponent } from '../form-periodo/form-periodo';
+import { FormAplicacionComponent } from '../form-aplicacion/form-aplicacion';
+import { TrazabilidadComponent } from '../trazabilidad/trazabilidad';
+
 import {
   Parcela,
   PeriodoSiembra,
@@ -20,14 +22,14 @@ import {
   selector: 'app-detalle-parcela',
   standalone: true,
   imports: [
-    CommonModule, 
-    RouterLink, 
-    FormPeriodoComponent, 
+    CommonModule,
+    RouterLink,
+    FormPeriodoComponent,
     FormAplicacionComponent,
     TrazabilidadComponent
   ],
-  templateUrl: './detalle-parcela.component.html',
-  styleUrl: './detalle-parcela.component.css'
+  templateUrl: './detalle-parcela.html',
+  styleUrls: ['./detalle-parcela.css']
 })
 export class DetalleParcelaComponent implements OnInit {
   private route = inject(ActivatedRoute);
@@ -38,29 +40,24 @@ export class DetalleParcelaComponent implements OnInit {
   periodos: PeriodoSiembra[] = [];
   aplicaciones: AplicacionParcela[] = [];
   loading = false;
-  
-  // Tabs
+
   tabActiva: 'periodos' | 'aplicaciones' | 'trazabilidad' = 'periodos';
-  
-  // Modales
+
   mostrarFormPeriodo = false;
   mostrarFormAplicacion = false;
-  
-  // Estadísticas
+
   periodosActivos = 0;
   totalAplicaciones = 0;
   costoTotal = 0;
 
   ngOnInit() {
     const id = Number(this.route.snapshot.paramMap.get('id'));
-    if (id) {
-      this.cargarParcela(id);
-    }
+    if (id) this.cargarParcela(id);
   }
 
   cargarParcela(id: number) {
     this.loading = true;
-    
+
     this.parcelasService.getParcelaById(id).subscribe({
       next: (parcela) => {
         this.parcela = parcela;
@@ -78,7 +75,7 @@ export class DetalleParcelaComponent implements OnInit {
 
   cargarPeriodos() {
     if (!this.parcela) return;
-    
+
     this.parcelasService.getPeriodosSiembra(this.parcela.id).subscribe({
       next: (periodos) => {
         this.periodos = periodos;
@@ -91,7 +88,7 @@ export class DetalleParcelaComponent implements OnInit {
 
   cargarAplicaciones() {
     if (!this.parcela) return;
-    
+
     this.parcelasService.getAplicaciones(this.parcela.id).subscribe({
       next: (aplicaciones) => {
         this.aplicaciones = aplicaciones;

@@ -1,22 +1,32 @@
 import { Component, Input, OnInit, inject } from '@angular/core';
 import { CommonModule } from '@angular/common';
-import { ParcelasService } from '../../services/parcela.service';  // ✅ CORREGIDO
-import { TrazabilidadParcela, formatearCosto, formatearHectareas } from '../../../../models/parcela.model';  // ✅ CORREGIDO
+import { ParcelasService } from '../../services/parcela.service';
+import {
+  TrazabilidadParcela,
+  formatearCosto,
+  formatearHectareas
+} from '../../../../models/parcela.model';
 
 @Component({
   selector: 'app-trazabilidad',
   standalone: true,
   imports: [CommonModule],
-  templateUrl: './trazabilidad.component.html',
-  styleUrl: './trazabilidad.component.css'
+  templateUrl: './trazabilidad.html',
+  styleUrls: ['./trazabilidad.css']
 })
 export class TrazabilidadComponent implements OnInit {
   private parcelasService = inject(ParcelasService);
-  
+
   @Input() parcelaId!: number;
-  
+
   trazabilidad?: TrazabilidadParcela;
   loading = false;
+
+  // RESUMEN | Angular 16+ NO permite reduce() en templates
+  totalPeriodos = 0;
+  totalEventos = 0;
+  totalCosto = 0;
+  totalProduccion = 0;
 
   ngOnInit() {
     if (this.parcelaId) {
@@ -26,16 +36,39 @@ export class TrazabilidadComponent implements OnInit {
 
   cargarTrazabilidad() {
     this.loading = true;
+
     this.parcelasService.getTrazabilidad(this.parcelaId).subscribe({
       next: (data: TrazabilidadParcela) => {
         this.trazabilidad = data;
+        this.calcularResumen();
         this.loading = false;
       },
-      error: (error: any) => {
+      error: (error) => {
         console.error('Error al cargar trazabilidad:', error);
         this.loading = false;
       }
     });
+  }
+
+  private calcularResumen() {
+    if (!this.trazabilidad) return;
+
+    this.totalPeriodos = this.trazabilidad.trazabilidad.length;
+
+    this.totalEventos = this.trazabilidad.trazabilidad.reduce(
+      (sum, item) => sum + item.eventos.length,
+      0
+    );
+
+    this.totalCosto = this.trazabilidad.trazabilidad.reduce(
+      (sum, item) => sum + (item.periodo.costoTotal || 0),
+      0
+    );
+
+    this.totalProduccion = this.trazabilidad.trazabilidad.reduce(
+      (sum, item) => sum + (item.periodo.rendimiento || 0),
+      0
+    );
   }
 
   formatearFecha(fecha: Date): string {

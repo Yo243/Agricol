@@ -262,6 +262,20 @@ export interface TrazabilidadParcela {
   }[];
 }
 
+
+export interface UpdateParcelaDto {
+  codigo?: string;
+  nombre?: string;
+  superficieHa?: number;
+  ubicacion?: string;
+  coordenadas?: string;
+  tipoSuelo?: string;
+  sistemaRiego?: string;
+  estado?: EstadoParcela;
+  observaciones?: string;
+}
+
+
 export interface EventoTrazabilidad {
   fecha: Date;
   tipo: 'Aplicación' | 'Actividad';
@@ -360,4 +374,20 @@ export function formatearCosto(costo: number): string {
     style: 'currency',
     currency: 'MXN'
   }).format(costo);
-}
+}  
+
+export const TIPOS_SUELO: string[] = [
+  'Arenoso',
+  'Arcilloso',
+  'Limoso',
+  'Franco',
+  'Pedregoso',
+];
+
+export const SISTEMAS_RIEGO: string[] = [
+  'Gravedad',
+  'Aspersión',
+  'Goteo',
+  'Microaspersión',
+  'Riego por Surcos'
+];

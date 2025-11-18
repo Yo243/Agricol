@@ -1,18 +1,19 @@
 import { Component, EventEmitter, Input, OnInit, Output, inject } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
-import { ParcelasService } from '../../services/parcela.service';  // ✅ CORREGIDO
+import { ParcelasService } from '../../services/parcela.service';
 import { HttpClient } from '@angular/common/http';
-import { Parcela, Cultivo, CreatePeriodoSiembraDto } from '../../../../models/parcela.model';  // ✅ CORREGIDO
+import { Parcela, Cultivo, CreatePeriodoSiembraDto } from '../../../../models/parcela.model';
 
 @Component({
   selector: 'app-form-periodo',
   standalone: true,
   imports: [CommonModule, FormsModule],
-  templateUrl: './form-periodo.component.html',
-  styleUrl: './form-periodo.component.css'
+  templateUrl: './form-periodo.html',
+  styleUrls: ['./form-periodo.css']
 })
 export class FormPeriodoComponent implements OnInit {
+
   private parcelasService = inject(ParcelasService);
   private http = inject(HttpClient);
 
@@ -43,8 +44,8 @@ export class FormPeriodoComponent implements OnInit {
 
   cargarDatos() {
     this.loadingData = true;
-    
-    // Cargar parcelas
+
+    // Cargar parcelas activas
     this.parcelasService.getParcelas(true, 'Activa').subscribe({
       next: (parcelas) => {
         this.parcelas = parcelas;
@@ -75,11 +76,11 @@ export class FormPeriodoComponent implements OnInit {
   onCultivoChange() {
     const cultivo = this.cultivos.find(c => c.id === this.formData.cultivoId);
     if (cultivo) {
-      this.formData.rendimientoEsperado = cultivo.rendimientoEsperado 
-        ? cultivo.rendimientoEsperado * this.formData.hectareasSembradas 
+      this.formData.rendimientoEsperado = cultivo.rendimientoEsperado
+        ? cultivo.rendimientoEsperado * this.formData.hectareasSembradas
         : 0;
-      
-      // Calcular fecha esperada de cosecha
+
+      // Fecha estimada de cosecha
       if (cultivo.diasCiclo) {
         const fechaInicio = new Date(this.formData.fechaInicio);
         fechaInicio.setDate(fechaInicio.getDate() + cultivo.diasCiclo);
@@ -89,9 +90,7 @@ export class FormPeriodoComponent implements OnInit {
   }
 
   guardar() {
-    if (!this.validarFormulario()) {
-      return;
-    }
+    if (!this.validarFormulario()) return;
 
     this.loading = true;
 

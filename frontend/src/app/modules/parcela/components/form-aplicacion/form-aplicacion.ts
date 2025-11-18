@@ -32,8 +32,8 @@ interface InsumoAplicacion {
   selector: 'app-form-aplicacion',
   standalone: true,
   imports: [CommonModule, FormsModule],
-  templateUrl: './form-aplicacion.component.html',
-  styleUrl: './form-aplicacion.component.css'
+  templateUrl: './form-aplicacion.html',
+  styleUrls: ['./form-aplicacion.css']
 })
 export class FormAplicacionComponent implements OnInit {
   private parcelasService = inject(ParcelasService);

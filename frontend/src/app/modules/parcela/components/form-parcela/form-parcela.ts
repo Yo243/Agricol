@@ -1,7 +1,7 @@
 import { Component, EventEmitter, Input, OnInit, Output, inject } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
-import { ParcelasService } from '../../services/parcela.service';  // ✅ CORREGIDO
+import { ParcelasService } from '../../services/parcela.service';
 import {
   Parcela,
   CreateParcelaDto,
@@ -10,16 +10,17 @@ import {
   ESTADOS_PARCELA,
   TIPOS_SUELO,
   SISTEMAS_RIEGO
-} from '../../../../models/parcela.model';  // ✅ CORREGIDO
+} from '../../../../models/parcela.model';
 
 @Component({
   selector: 'app-form-parcela',
   standalone: true,
   imports: [CommonModule, FormsModule],
-  templateUrl: './form-parcela.component.html',
-  styleUrl: './form-parcela.component.css'
+  templateUrl: './form-parcela.html',
+  styleUrls: ['./form-parcela.css']
 })
 export class FormParcelaComponent implements OnInit {
+
   private parcelasService = inject(ParcelasService);
 
   @Input() parcela?: Parcela;
@@ -29,7 +30,6 @@ export class FormParcelaComponent implements OnInit {
   loading = false;
   modoEdicion = false;
 
-  // Constantes para el template
   ESTADOS_PARCELA = ESTADOS_PARCELA;
   TIPOS_SUELO = TIPOS_SUELO;
   SISTEMAS_RIEGO = SISTEMAS_RIEGO;
@@ -79,9 +79,7 @@ export class FormParcelaComponent implements OnInit {
   }
 
   guardar() {
-    if (!this.validarFormulario()) {
-      return;
-    }
+    if (!this.validarFormulario()) return;
 
     this.loading = true;
 

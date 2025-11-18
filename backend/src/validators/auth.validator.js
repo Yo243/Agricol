@@ -1,49 +1,70 @@
 const Joi = require('joi');
 
 /**
- * Validación para registro
+ * Esquema de validación para Login
  */
-exports.registerSchema = Joi.object({
+const loginSchema = Joi.object({
   email: Joi.string()
     .email()
     .required()
     .messages({
-      'string.email': 'Debe ser un correo válido',
-      'any.required': 'El correo es requerido'
+      'string.email': 'El correo electrónico no es válido',
+      'any.required': 'El correo electrónico es requerido',
+      'string.empty': 'El correo electrónico no puede estar vacío'
     }),
   
   password: Joi.string()
     .min(6)
     .required()
     .messages({
-      'string.min': 'La contraseña debe tener mínimo 6 caracteres',
-      'any.required': 'La contraseña es requerida'
-    }),
-  
-  name: Joi.string()
-    .min(2)
-    .required()
-    .messages({
-      'string.min': 'El nombre debe tener mínimo 2 caracteres',
-      'any.required': 'El nombre es requerido'
+      'string.min': 'La contraseña debe tener al menos 6 caracteres',
+      'any.required': 'La contraseña es requerida',
+      'string.empty': 'La contraseña no puede estar vacía'
     })
 });
 
 /**
- * Validación para login
+ * Esquema de validación para Registro
  */
-exports.loginSchema = Joi.object({
+const registerSchema = Joi.object({
+  nombre: Joi.string()
+    .min(2)
+    .max(100)
+    .required()
+    .messages({
+      'string.min': 'El nombre debe tener al menos 2 caracteres',
+      'string.max': 'El nombre no puede tener más de 100 caracteres',
+      'any.required': 'El nombre es requerido',
+      'string.empty': 'El nombre no puede estar vacío'
+    }),
+  
   email: Joi.string()
     .email()
     .required()
     .messages({
-      'string.email': 'Debe ser un correo válido',
-      'any.required': 'El correo es requerido'
+      'string.email': 'El correo electrónico no es válido',
+      'any.required': 'El correo electrónico es requerido',
+      'string.empty': 'El correo electrónico no puede estar vacío'
     }),
   
   password: Joi.string()
+    .min(6)
     .required()
     .messages({
-      'any.required': 'La contraseña es requerida'
+      'string.min': 'La contraseña debe tener al menos 6 caracteres',
+      'any.required': 'La contraseña es requerida',
+      'string.empty': 'La contraseña no puede estar vacía'
+    }),
+  
+  rol: Joi.string()
+    .valid('ADMIN', 'USER')
+    .default('USER')
+    .messages({
+      'any.only': 'El rol debe ser ADMIN o USER'
     })
 });
+
+module.exports = {
+  loginSchema,
+  registerSchema
+};
