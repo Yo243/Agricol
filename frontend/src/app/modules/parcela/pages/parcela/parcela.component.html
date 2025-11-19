@@ -1,169 +1,237 @@
-<div class="container mx-auto px-4 py-6">
-  <!-- Header -->
-  <div class="mb-6">
-    <div class="flex items-center justify-between mb-4">
-      <div>
-        <h1 class="text-3xl font-bold text-gray-800">🗺️ Gestión de Parcelas</h1>
-        <p class="text-gray-600 mt-1">Administra tus parcelas agrícolas</p>
+<div class="min-h-screen bg-gradient-to-br from-gray-50 to-gray-100">
+  <div class="container mx-auto px-4 py-8">
+    <!-- Header Mejorado con Gradiente -->
+    <div class="mb-8">
+      <div class="flex items-center justify-between mb-6">
+        <div class="flex items-center gap-4">
+          <div class="w-16 h-16 bg-gradient-to-br from-green-500 to-green-600 rounded-2xl flex items-center justify-center shadow-xl transform hover:scale-105 transition-transform">
+            <span class="text-3xl">🗺️</span>
+          </div>
+          <div>
+            <h1 class="text-4xl font-bold bg-gradient-to-r from-gray-800 to-gray-600 bg-clip-text text-transparent">
+              Gestión de Parcelas
+            </h1>
+            <p class="text-gray-600 mt-1 font-medium">Administra tus parcelas agrícolas</p>
+          </div>
+        </div>
+        <button
+          (click)="abrirFormulario()"
+          class="group px-6 py-3.5 bg-gradient-to-r from-green-600 to-green-700 text-white rounded-xl hover:from-green-700 hover:to-green-800 transition-all duration-300 flex items-center gap-3 shadow-lg hover:shadow-2xl transform hover:scale-105">
+          <span class="text-xl group-hover:rotate-90 transition-transform duration-300">➕</span>
+          <span class="font-semibold">Nueva Parcela</span>
+        </button>
       </div>
+
+      <!-- Estadísticas Mejoradas con Gradientes -->
+      <div class="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8">
+        <!-- Total Parcelas -->
+        <div class="group bg-white rounded-2xl shadow-lg hover:shadow-2xl transition-all duration-300 overflow-hidden transform hover:-translate-y-1">
+          <div class="p-6">
+            <div class="flex items-center justify-between">
+              <div>
+                <p class="text-sm font-semibold text-gray-600 mb-2">Total Parcelas</p>
+                <p class="text-4xl font-bold bg-gradient-to-r from-blue-600 to-blue-500 bg-clip-text text-transparent">
+                  {{ totalParcelas }}
+                </p>
+              </div>
+              <div class="w-20 h-20 bg-gradient-to-br from-blue-100 to-blue-200 rounded-2xl flex items-center justify-center group-hover:scale-110 transition-transform duration-300">
+                <span class="text-4xl">🗺️</span>
+              </div>
+            </div>
+          </div>
+          <div class="h-2 bg-gradient-to-r from-blue-500 to-blue-600"></div>
+        </div>
+
+        <!-- Superficie Total -->
+        <div class="group bg-white rounded-2xl shadow-lg hover:shadow-2xl transition-all duration-300 overflow-hidden transform hover:-translate-y-1">
+          <div class="p-6">
+            <div class="flex items-center justify-between">
+              <div>
+                <p class="text-sm font-semibold text-gray-600 mb-2">Superficie Total</p>
+                <p class="text-4xl font-bold bg-gradient-to-r from-green-600 to-green-500 bg-clip-text text-transparent">
+                  {{ formatearHectareas(superficieTotal) }}
+                </p>
+              </div>
+              <div class="w-20 h-20 bg-gradient-to-br from-green-100 to-green-200 rounded-2xl flex items-center justify-center group-hover:scale-110 transition-transform duration-300">
+                <span class="text-4xl">📏</span>
+              </div>
+            </div>
+          </div>
+          <div class="h-2 bg-gradient-to-r from-green-500 to-green-600"></div>
+        </div>
+
+        <!-- Parcelas Activas -->
+        <div class="group bg-white rounded-2xl shadow-lg hover:shadow-2xl transition-all duration-300 overflow-hidden transform hover:-translate-y-1">
+          <div class="p-6">
+            <div class="flex items-center justify-between">
+              <div>
+                <p class="text-sm font-semibold text-gray-600 mb-2">Parcelas Activas</p>
+                <p class="text-4xl font-bold bg-gradient-to-r from-yellow-600 to-yellow-500 bg-clip-text text-transparent">
+                  {{ parcelasActivas }}
+                </p>
+              </div>
+              <div class="w-20 h-20 bg-gradient-to-br from-yellow-100 to-yellow-200 rounded-2xl flex items-center justify-center group-hover:scale-110 transition-transform duration-300">
+                <span class="text-4xl">✅</span>
+              </div>
+            </div>
+          </div>
+          <div class="h-2 bg-gradient-to-r from-yellow-500 to-yellow-600"></div>
+        </div>
+      </div>
+
+      <!-- Filtros Mejorados -->
+      <div class="bg-white rounded-2xl shadow-lg p-6">
+        <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+          <!-- Búsqueda -->
+          <div class="relative">
+            <label class="block text-sm font-bold text-gray-700 mb-3 flex items-center gap-2">
+              <span class="text-xl">🔍</span>
+              Buscar Parcela
+            </label>
+            <div class="relative">
+              <input
+                type="text"
+                [(ngModel)]="busqueda"
+                (ngModelChange)="aplicarFiltros()"
+                placeholder="Nombre, código o ubicación..."
+                class="w-full pl-12 pr-4 py-3.5 border-2 border-gray-200 rounded-xl focus:ring-2 focus:ring-green-500 focus:border-green-500 transition-all duration-200 bg-gray-50 hover:bg-white">
+              <span class="absolute left-4 top-1/2 transform -translate-y-1/2 text-gray-400 text-xl">🔍</span>
+            </div>
+          </div>
+
+          <!-- Filtro Estado -->
+          <div>
+            <label class="block text-sm font-bold text-gray-700 mb-3 flex items-center gap-2">
+              <span class="text-xl">📊</span>
+              Filtrar por Estado
+            </label>
+            <select
+              [(ngModel)]="estadoFiltro"
+              (ngModelChange)="aplicarFiltros()"
+              class="w-full px-4 py-3.5 border-2 border-gray-200 rounded-xl focus:ring-2 focus:ring-green-500 focus:border-green-500 transition-all duration-200 cursor-pointer bg-gray-50 hover:bg-white font-medium">
+              <option value="todos">🌐 Todos los estados</option>
+              <option *ngFor="let estado of ESTADOS_PARCELA" [value]="estado">{{ estado }}</option>
+            </select>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Loading Mejorado -->
+    <div *ngIf="loading" class="flex flex-col items-center justify-center py-24">
+      <div class="relative">
+        <div class="w-24 h-24 border-4 border-green-200 border-t-green-600 rounded-full animate-spin"></div>
+        <div class="absolute inset-0 flex items-center justify-center">
+          <span class="text-3xl animate-pulse">🌱</span>
+        </div>
+      </div>
+      <p class="text-gray-600 mt-6 font-semibold text-lg">Cargando parcelas...</p>
+    </div>
+
+    <!-- Lista de Parcelas Mejorada -->
+    <div *ngIf="!loading && parcelasFiltradas.length > 0" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
+      <div *ngFor="let parcela of parcelasFiltradas" 
+           class="group bg-white rounded-2xl shadow-lg hover:shadow-2xl transition-all duration-300 overflow-hidden transform hover:-translate-y-2">
+        
+        <!-- Header con Gradiente -->
+        <div class="relative bg-gradient-to-br from-green-50 via-green-100 to-green-50 p-6 border-b-4 border-green-500">
+          <div class="absolute top-0 right-0 w-32 h-32 bg-green-200 rounded-full opacity-20 -mr-16 -mt-16"></div>
+          <div class="relative">
+            <div class="flex items-start justify-between mb-3">
+              <div class="flex-1">
+                <h3 class="text-xl font-bold text-gray-800 mb-1.5 group-hover:text-green-700 transition-colors">
+                  {{ parcela.nombre }}
+                </h3>
+                <p class="text-sm text-gray-600 font-semibold bg-white px-3 py-1 rounded-full inline-block">
+                  {{ parcela.codigo }}
+                </p>
+              </div>
+              <span [class]="'px-4 py-2 rounded-xl text-xs font-bold shadow-md transform group-hover:scale-105 transition-transform ' + getEstadoColor(parcela.estado)">
+                {{ parcela.estado }}
+              </span>
+            </div>
+          </div>
+        </div>
+
+        <!-- Información -->
+        <div class="p-6 space-y-4">
+          <!-- Superficie -->
+          <div class="flex items-center gap-4 bg-gradient-to-r from-blue-50 to-blue-100 rounded-xl p-4 transform hover:scale-105 transition-transform">
+            <div class="w-14 h-14 bg-gradient-to-br from-blue-500 to-blue-600 rounded-xl flex items-center justify-center flex-shrink-0 shadow-md">
+              <span class="text-2xl">📏</span>
+            </div>
+            <div>
+              <p class="text-xs text-gray-600 font-semibold mb-1">Superficie</p>
+              <p class="text-xl font-bold text-gray-800">{{ formatearHectareas(parcela.superficieHa) }}</p>
+            </div>
+          </div>
+
+          <!-- Ubicación -->
+          <div class="flex items-center gap-4 bg-gradient-to-r from-red-50 to-red-100 rounded-xl p-4" *ngIf="parcela.ubicacion">
+            <div class="w-14 h-14 bg-gradient-to-br from-red-500 to-red-600 rounded-xl flex items-center justify-center flex-shrink-0 shadow-md">
+              <span class="text-2xl">📍</span>
+            </div>
+            <div class="flex-1 min-w-0">
+              <p class="text-xs text-gray-600 font-semibold mb-1">Ubicación</p>
+              <p class="text-sm font-bold text-gray-800 truncate">{{ parcela.ubicacion }}</p>
+            </div>
+          </div>
+
+          <!-- Características -->
+          <div class="grid grid-cols-2 gap-3">
+            <div class="bg-gradient-to-br from-green-50 to-green-100 rounded-xl p-3 text-center" *ngIf="parcela.tipoSuelo">
+              <div class="text-2xl mb-1">🌱</div>
+              <p class="text-xs text-gray-600 font-semibold mb-1">Suelo</p>
+              <p class="text-xs font-bold text-gray-800 truncate">{{ parcela.tipoSuelo }}</p>
+            </div>
+
+            <div class="bg-gradient-to-br from-cyan-50 to-cyan-100 rounded-xl p-3 text-center" *ngIf="parcela.sistemaRiego">
+              <div class="text-2xl mb-1">💧</div>
+              <p class="text-xs text-gray-600 font-semibold mb-1">Riego</p>
+              <p class="text-xs font-bold text-gray-800 truncate">{{ parcela.sistemaRiego }}</p>
+            </div>
+          </div>
+        </div>
+
+        <!-- Acciones -->
+        <div class="p-4 bg-gray-50 border-t border-gray-100 flex gap-3">
+          <a
+            [routerLink]="['/parcelas', parcela.id]"
+            class="flex-1 px-4 py-3 bg-gradient-to-r from-blue-600 to-blue-700 text-white text-center rounded-xl hover:from-blue-700 hover:to-blue-800 transition-all duration-200 text-sm font-bold shadow-md hover:shadow-xl transform hover:scale-105">
+            Ver Detalle
+          </a>
+          <button
+            (click)="abrirFormulario(parcela)"
+            class="px-4 py-3 bg-gradient-to-r from-yellow-500 to-yellow-600 text-white rounded-xl hover:from-yellow-600 hover:to-yellow-700 transition-all duration-200 shadow-md hover:shadow-xl transform hover:scale-105">
+            ✏️
+          </button>
+          <button
+            (click)="eliminarParcela(parcela.id)"
+            class="px-4 py-3 bg-gradient-to-r from-red-600 to-red-700 text-white rounded-xl hover:from-red-700 hover:to-red-800 transition-all duration-200 shadow-md hover:shadow-xl transform hover:scale-105">
+            🗑️
+          </button>
+        </div>
+      </div>
+    </div>
+
+    <!-- Sin resultados Mejorado -->
+    <div *ngIf="!loading && parcelasFiltradas.length === 0" class="text-center py-24">
+      <div class="inline-block mb-8">
+        <div class="w-40 h-40 bg-gradient-to-br from-gray-100 to-gray-200 rounded-full flex items-center justify-center shadow-xl">
+          <span class="text-7xl">🗺️</span>
+        </div>
+      </div>
+      <h3 class="text-3xl font-bold text-gray-700 mb-4">No hay parcelas</h3>
+      <p class="text-gray-600 mb-10 max-w-md mx-auto text-lg">
+        {{ parcelas.length === 0 ? 'Crea tu primera parcela para comenzar a gestionar tu producción agrícola' : 'No se encontraron parcelas con los filtros aplicados' }}
+      </p>
       <button
+        *ngIf="parcelas.length === 0"
         (click)="abrirFormulario()"
-        class="px-6 py-3 bg-green-600 text-white rounded-lg hover:bg-green-700 transition-colors flex items-center gap-2 shadow-lg">
-        <span class="text-xl">➕</span>
-        Nueva Parcela
+        class="px-10 py-4 bg-gradient-to-r from-green-600 to-green-700 text-white rounded-xl hover:from-green-700 hover:to-green-800 transition-all duration-200 font-bold text-lg shadow-xl hover:shadow-2xl transform hover:scale-105">
+        ➕ Crear Primera Parcela
       </button>
     </div>
-
-    <!-- Estadísticas -->
-    <div class="grid grid-cols-1 md:grid-cols-3 gap-4 mb-6">
-      <div class="bg-white rounded-lg shadow p-4 border-l-4 border-blue-500">
-        <div class="flex items-center justify-between">
-          <div>
-            <p class="text-gray-600 text-sm">Total Parcelas</p>
-            <p class="text-2xl font-bold text-gray-800">{{ totalParcelas }}</p>
-          </div>
-          <div class="text-4xl">🗺️</div>
-        </div>
-      </div>
-
-      <div class="bg-white rounded-lg shadow p-4 border-l-4 border-green-500">
-        <div class="flex items-center justify-between">
-          <div>
-            <p class="text-gray-600 text-sm">Superficie Total</p>
-            <p class="text-2xl font-bold text-gray-800">{{ formatearHectareas(superficieTotal) }}</p>
-          </div>
-          <div class="text-4xl">📏</div>
-        </div>
-      </div>
-
-      <div class="bg-white rounded-lg shadow p-4 border-l-4 border-yellow-500">
-        <div class="flex items-center justify-between">
-          <div>
-            <p class="text-gray-600 text-sm">Parcelas Activas</p>
-            <p class="text-2xl font-bold text-gray-800">{{ parcelasActivas }}</p>
-          </div>
-          <div class="text-4xl">✅</div>
-        </div>
-      </div>
-    </div>
-
-    <!-- Filtros -->
-    <div class="bg-white rounded-lg shadow p-4">
-      <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
-        <!-- Búsqueda -->
-        <div>
-          <label class="block text-sm font-medium text-gray-700 mb-2">🔍 Buscar</label>
-          <input
-            type="text"
-            [(ngModel)]="busqueda"
-            (ngModelChange)="aplicarFiltros()"
-            placeholder="Buscar por nombre, código o ubicación..."
-            class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-green-500 focus:border-transparent">
-        </div>
-
-        <!-- Filtro Estado -->
-        <div>
-          <label class="block text-sm font-medium text-gray-700 mb-2">📊 Estado</label>
-          <select
-            [(ngModel)]="estadoFiltro"
-            (ngModelChange)="aplicarFiltros()"
-            class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-green-500 focus:border-transparent">
-            <option value="todos">Todos los estados</option>
-            <option *ngFor="let estado of ESTADOS_PARCELA" [value]="estado">{{ estado }}</option>
-          </select>
-        </div>
-      </div>
-    </div>
-  </div>
-
-  <!-- Loading -->
-  <div *ngIf="loading" class="text-center py-12">
-    <div class="inline-block animate-spin rounded-full h-12 w-12 border-4 border-green-500 border-t-transparent"></div>
-    <p class="text-gray-600 mt-4">Cargando parcelas...</p>
-  </div>
-
-  <!-- Lista de Parcelas -->
-  <div *ngIf="!loading && parcelasFiltradas.length > 0" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-    <div *ngFor="let parcela of parcelasFiltradas" 
-         class="bg-white rounded-lg shadow-md hover:shadow-xl transition-shadow overflow-hidden">
-      <!-- Header de la tarjeta -->
-      <div class="p-4 border-b border-gray-200">
-        <div class="flex items-start justify-between mb-2">
-          <div class="flex-1">
-            <h3 class="text-lg font-bold text-gray-800 mb-1">{{ parcela.nombre }}</h3>
-            <p class="text-sm text-gray-500">{{ parcela.codigo }}</p>
-          </div>
-          <span [class]="'px-3 py-1 rounded-full text-xs font-semibold ' + getEstadoColor(parcela.estado)">
-            {{ parcela.estado }}
-          </span>
-        </div>
-      </div>
-
-      <!-- Información -->
-      <div class="p-4 space-y-3">
-        <div class="flex items-center gap-2 text-gray-700">
-          <span class="text-xl">📏</span>
-          <span class="text-sm">
-            <strong>Superficie:</strong> {{ formatearHectareas(parcela.superficieHa) }}
-          </span>
-        </div>
-
-        <div class="flex items-center gap-2 text-gray-700" *ngIf="parcela.ubicacion">
-          <span class="text-xl">📍</span>
-          <span class="text-sm">
-            <strong>Ubicación:</strong> {{ parcela.ubicacion }}
-          </span>
-        </div>
-
-        <div class="flex items-center gap-2 text-gray-700" *ngIf="parcela.tipoSuelo">
-          <span class="text-xl">🌱</span>
-          <span class="text-sm">
-            <strong>Suelo:</strong> {{ parcela.tipoSuelo }}
-          </span>
-        </div>
-
-        <div class="flex items-center gap-2 text-gray-700" *ngIf="parcela.sistemaRiego">
-          <span class="text-xl">💧</span>
-          <span class="text-sm">
-            <strong>Riego:</strong> {{ parcela.sistemaRiego }}
-          </span>
-        </div>
-      </div>
-
-      <!-- Acciones -->
-      <div class="p-4 bg-gray-50 border-t border-gray-200 flex gap-2">
-        <a
-          [routerLink]="['/parcelas', parcela.id]"
-          class="flex-1 px-4 py-2 bg-blue-600 text-white text-center rounded-lg hover:bg-blue-700 transition-colors text-sm font-medium">
-          Ver Detalle
-        </a>
-        <button
-          (click)="abrirFormulario(parcela)"
-          class="px-4 py-2 bg-yellow-500 text-white rounded-lg hover:bg-yellow-600 transition-colors">
-          ✏️
-        </button>
-        <button
-          (click)="eliminarParcela(parcela.id)"
-          class="px-4 py-2 bg-red-600 text-white rounded-lg hover:bg-red-700 transition-colors">
-          🗑️
-        </button>
-      </div>
-    </div>
-  </div>
-
-  <!-- Sin resultados -->
-  <div *ngIf="!loading && parcelasFiltradas.length === 0" class="text-center py-12">
-    <div class="text-6xl mb-4">🗺️</div>
-    <h3 class="text-xl font-semibold text-gray-700 mb-2">No hay parcelas</h3>
-    <p class="text-gray-600 mb-6">
-      {{ parcelas.length === 0 ? 'Crea tu primera parcela para comenzar' : 'No se encontraron parcelas con los filtros aplicados' }}
-    </p>
-    <button
-      *ngIf="parcelas.length === 0"
-      (click)="abrirFormulario()"
-      class="px-6 py-3 bg-green-600 text-white rounded-lg hover:bg-green-700 transition-colors">
-      ➕ Crear Primera Parcela
-    </button>
   </div>
 </div>
 
