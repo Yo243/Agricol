@@ -1,0 +1,179 @@
+<!-- src/app/modules/orden-aplicacion/pages/orden-create/orden-create.component.html -->
+
+<div class="page-container">
+  <div class="page-header">
+    <h1>Nueva Orden de Aplicación</h1>
+  </div>
+
+  <div *ngIf="error" class="alert alert-danger">{{ error }}</div>
+  <div *ngIf="success" class="alert alert-success">{{ success }}</div>
+  <div *ngIf="loading" class="loading-spinner">Procesando...</div>
+
+  <form (ngSubmit)="onSubmit()" *ngIf="!loading" class="orden-form">
+    
+    <!-- Sección: Información Básica -->
+    <div class="form-section">
+      <h2>Información Básica</h2>
+
+      <div class="form-row">
+        <div class="form-group">
+          <label for="parcela">Parcela *</label>
+          <select 
+            id="parcela" 
+            [(ngModel)]="orden.parcelaId" 
+            name="parcelaId" 
+            required 
+            class="form-control">
+            <option [value]="0">Selecciona una parcela</option>
+            <option *ngFor="let parcela of parcelas" [value]="parcela.id">
+              {{ parcela.nombre }} - {{ parcela.superficie }} ha
+            </option>
+          </select>
+          <small *ngIf="orden.parcelaId > 0" class="form-hint">
+            Superficie disponible: {{ getParcelaSuperficie(orden.parcelaId) }} ha
+          </small>
+        </div>
+
+        <div class="form-group">
+          <label for="receta">Receta de Aplicación *</label>
+          <select 
+            id="receta" 
+            [(ngModel)]="orden.recetaId" 
+            name="recetaId" 
+            (change)="onRecetaChange()"
+            required 
+            class="form-control">
+            <option [value]="0">Selecciona una receta</option>
+            <option *ngFor="let receta of recetas" [value]="receta.id">
+              {{ receta.nombre }}
+              <span *ngIf="receta.etapaCultivo"> - {{ receta.etapaCultivo }}</span>
+            </option>
+          </select>
+        </div>
+      </div>
+
+      <div class="form-row">
+        <div class="form-group">
+          <label for="hectareas">Hectáreas a Aplicar *</label>
+          <input 
+            type="number" 
+            id="hectareas" 
+            [(ngModel)]="orden.hectareasAplicadas"
+            (ngModelChange)="onHectareasChange()"
+            name="hectareas"
+            min="0.01"
+            step="0.01"
+            required
+            class="form-control">
+        </div>
+
+        <div class="form-group">
+          <label for="fecha">Fecha de Aplicación</label>
+          <input 
+            type="date" 
+            id="fecha" 
+            [(ngModel)]="orden.fechaAplicacion"
+            name="fecha"
+            class="form-control">
+        </div>
+      </div>
+
+      <div class="form-group">
+        <label for="observaciones">Observaciones</label>
+        <textarea 
+          id="observaciones" 
+          [(ngModel)]="orden.observaciones"
+          name="observaciones"
+          rows="3"
+          placeholder="Notas adicionales sobre la aplicación..."
+          class="form-control"></textarea>
+      </div>
+    </div>
+
+    <!-- Sección: Detalles Calculados -->
+    <div class="form-section" *ngIf="detallesCalculados.length > 0">
+      <div class="section-header">
+        <h2>Insumos Requeridos (Calculado Automáticamente)</h2>
+        <button 
+          type="button" 
+          class="btn btn-secondary" 
+          (click)="validarStock()">
+          Validar Stock
+        </button>
+      </div>
+
+      <div class="detalle-table">
+        <table>
+          <thead>
+            <tr>
+              <th>Insumo</th>
+              <th>Cantidad Calculada</th>
+              <th>Unidad</th>
+              <th>Costo Unit.</th>
+              <th>Costo Total</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr *ngFor="let detalle of detallesCalculados">
+              <td>{{ detalle.insumo?.nombre }}</td>
+              <td class="text-right">{{ detalle.cantidadCalculada.toFixed(2) }}</td>
+              <td>{{ detalle.unidadMedida }}</td>
+              <td class="text-right">${{ detalle.costoUnitario.toFixed(2) }}</td>
+              <td class="text-right">${{ detalle.costoTotal.toFixed(2) }}</td>
+            </tr>
+          </tbody>
+          <tfoot>
+            <tr class="total">
+              <td colspan="4"><strong>Costo Total:</strong></td>
+              <td class="text-right"><strong>${{ costoTotal.toFixed(2) }}</strong></td>
+            </tr>
+          </tfoot>
+        </table>
+      </div>
+    </div>
+
+    <!-- Validación de Stock -->
+    <div class="form-section" *ngIf="mostrandoValidacion && validacionStock">
+      <h2>Validación de Stock</h2>
+
+      <div *ngIf="validacionStock.esValido" class="alert alert-success">
+        ✓ Stock disponible para todos los insumos
+      </div>
+
+      <div *ngIf="!validacionStock.esValido" class="alert alert-warning">
+        <h3>⚠️ Stock Insuficiente</h3>
+        <p>Los siguientes insumos no tienen stock suficiente:</p>
+        
+        <div class="stock-errors">
+          <div *ngFor="let error of validacionStock.errores" class="stock-error-item">
+            <div class="error-header">
+              <strong>{{ error.insumoNombre }}</strong>
+            </div>
+            <div class="error-details">
+              <span>Requerido: {{ error.cantidadRequerida }}</span>
+              <span>Disponible: {{ error.stockDisponible }}</span>
+              <span class="faltante">Faltante: {{ error.faltante }}</span>
+            </div>
+          </div>
+        </div>
+
+        <p class="warning-note">
+          Puedes crear la orden, pero quedará pendiente hasta tener stock suficiente.
+        </p>
+      </div>
+    </div>
+
+    <!-- Botones de Acción -->
+    <div class="form-actions">
+      <button type="button" class="btn btn-secondary" (click)="onCancel()">
+        Cancelar
+      </button>
+      <button 
+        type="submit" 
+        class="btn btn-primary" 
+        [disabled]="detallesCalculados.length === 0 || loading">
+        Crear Orden
+      </button>
+    </div>
+  </form>
+</div>

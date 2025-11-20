@@ -1,0 +1,141 @@
+<!-- src/app/modules/orden-aplicacion/pages/orden-list/orden-list.component.html -->
+
+<div class="page-container">
+  <div class="page-header">
+    <h1>Órdenes de Aplicación</h1>
+    <button class="btn btn-primary" (click)="createOrden()">
+      + Nueva Orden
+    </button>
+  </div>
+
+  <!-- Estadísticas Rápidas -->
+  <div class="stats-container">
+    <div class="stat-card">
+      <div class="stat-label">Total</div>
+      <div class="stat-value">{{ totalOrdenes }}</div>
+    </div>
+    <div class="stat-card warning">
+      <div class="stat-label">Pendientes</div>
+      <div class="stat-value">{{ ordenesPendientes }}</div>
+    </div>
+    <div class="stat-card success">
+      <div class="stat-label">Aplicadas</div>
+      <div class="stat-value">{{ ordenesAplicadas }}</div>
+    </div>
+  </div>
+
+  <!-- Filtros -->
+  <div class="filters-section">
+    <div class="filter-row">
+      <div class="filter-group">
+        <label>Buscar:</label>
+        <input 
+          type="text" 
+          [(ngModel)]="searchTerm" 
+          (keyup.enter)="onSearch()"
+          placeholder="Buscar por parcela, receta..."
+          class="form-control">
+      </div>
+
+      <div class="filter-group">
+        <label>Parcela:</label>
+        <select [(ngModel)]="filters.parcelaId" (change)="onFilterChange()" class="form-control">
+          <option [value]="undefined">Todas</option>
+          <option *ngFor="let parcela of parcelas" [value]="parcela.id">
+            {{ parcela.nombre }}
+          </option>
+        </select>
+      </div>
+
+      <div class="filter-group">
+        <label>Estado:</label>
+        <select [(ngModel)]="filters.estado" (change)="onFilterChange()" class="form-control">
+          <option [value]="undefined">Todos</option>
+          <option value="pendiente">Pendiente</option>
+          <option value="aplicada">Aplicada</option>
+          <option value="cancelada">Cancelada</option>
+        </select>
+      </div>
+
+      <div class="filter-actions">
+        <button class="btn btn-secondary" (click)="clearFilters()">Limpiar</button>
+        <button class="btn btn-primary" (click)="onSearch()">Buscar</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Mensajes -->
+  <div *ngIf="error" class="alert alert-danger">{{ error }}</div>
+  <div *ngIf="loading" class="loading-spinner">Cargando...</div>
+
+  <!-- Tabla de Órdenes -->
+  <div *ngIf="!loading && ordenes.length > 0" class="table-container">
+    <table class="data-table">
+      <thead>
+        <tr>
+          <th>ID</th>
+          <th>Parcela</th>
+          <th>Receta</th>
+          <th>Hectáreas</th>
+          <th>Fecha</th>
+          <th>Costo Total</th>
+          <th>Estado</th>
+          <th>Acciones</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr *ngFor="let orden of ordenes">
+          <td>#{{ orden.id }}</td>
+          <td>{{ orden.parcela?.nombre }}</td>
+          <td>{{ orden.receta?.nombre }}</td>
+          <td>{{ orden.hectareasAplicadas }} ha</td>
+          <td>{{ orden.fechaAplicacion | date:'dd/MM/yyyy' }}</td>
+          <td>${{ orden.costoTotal?.toFixed(2) }}</td>
+          <td>
+            <span class="badge" [ngClass]="getEstadoBadgeClass(orden.estado)">
+              {{ orden.estado }}
+            </span>
+          </td>
+          <td class="actions">
+            <button 
+              class="btn-icon btn-info" 
+              (click)="viewOrden(orden.id!)" 
+              title="Ver detalle">
+              👁️
+            </button>
+            
+            <button 
+              *ngIf="orden.estado === 'pendiente'"
+              class="btn-icon btn-success" 
+              (click)="cerrarOrden(orden)" 
+              title="Cerrar orden y descontar inventario">
+              ✓
+            </button>
+            
+            <button 
+              *ngIf="orden.estado === 'pendiente'"
+              class="btn-icon btn-warning" 
+              (click)="cancelarOrden(orden)" 
+              title="Cancelar orden">
+              ✕
+            </button>
+            
+            <button 
+              *ngIf="orden.estado !== 'aplicada'"
+              class="btn-icon btn-danger" 
+              (click)="deleteOrden(orden)" 
+              title="Eliminar">
+              🗑️
+            </button>
+          </td>
+        </tr>
+      </tbody>
+    </table>
+  </div>
+
+  <!-- Sin resultados -->
+  <div *ngIf="!loading && ordenes.length === 0" class="empty-state">
+    <p>No se encontraron órdenes de aplicación</p>
+    <button class="btn btn-primary" (click)="createOrden()">Crear Primera Orden</button>
+  </div>
+</div>

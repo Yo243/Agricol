@@ -1,5 +1,6 @@
 import { Routes } from '@angular/router';
 import { AuthGuard } from './core/guards/auth.guard';
+import { MainLayoutComponent } from './shared/components/main-layout/main-layout.component';
 
 export const routes: Routes = [
   {
@@ -90,6 +91,37 @@ export const routes: Routes = [
     loadComponent: () =>
       import('./modules/receta/pages/receta-detail/receta-detail.component').then(
         (m) => m.RecetaDetailComponent
+      ),
+    canActivate: [AuthGuard]
+  },
+
+  // =============================
+  // ÓRDENES DE APLICACIÓN
+  // =============================
+
+  {
+    path: 'ordenes',
+    loadComponent: () =>
+      import('./modules/ordenes/pages/orden-list/orden-list.component').then(
+        (m) => m.OrdenListComponent
+      ),
+    canActivate: [AuthGuard]
+  },
+
+  {
+    path: 'ordenes/nueva',
+    loadComponent: () =>
+      import('./modules/ordenes/pages/orden-create/orden-create.component').then(
+        (m) => m.OrdenCreateComponent
+      ),
+    canActivate: [AuthGuard]
+  },
+
+  {
+    path: 'ordenes/:id',
+    loadComponent: () =>
+      import('./modules/ordenes/pages/orden-detail/orden-detail.component').then(
+        (m) => m.OrdenDetailComponent
       ),
     canActivate: [AuthGuard]
   },

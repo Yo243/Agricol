@@ -1,0 +1,166 @@
+<!-- src/app/modules/ordenes/pages/orden-detail/orden-detail.component.html -->
+
+<div class="page-container">
+  <div class="page-header">
+    <div>
+      <button class="btn-back" (click)="backToList()">← Volver</button>
+      <h1 *ngIf="orden">Orden #{{ orden.id }}</h1>
+    </div>
+    <div class="header-actions" *ngIf="orden">
+      <span class="badge" [ngClass]="getEstadoBadgeClass(orden.estado)">
+        {{ getEstadoTexto(orden.estado) }}
+      </span>
+    </div>
+  </div>
+
+  <div *ngIf="error" class="alert alert-danger">{{ error }}</div>
+  <div *ngIf="loading" class="loading-spinner">Cargando...</div>
+
+  <div *ngIf="orden && !loading" class="detail-content">
+    
+    <!-- Información General -->
+    <div class="info-section">
+      <h2>Información General</h2>
+      <div class="info-grid">
+        <div class="info-item">
+          <label>Parcela:</label>
+          <span>{{ orden.parcela?.nombre }}</span>
+        </div>
+        <div class="info-item">
+          <label>Superficie Parcela:</label>
+          <span>{{ orden.parcela?.superficie }} ha</span>
+        </div>
+        <div class="info-item">
+          <label>Hectáreas Aplicadas:</label>
+          <span class="highlight">{{ orden.hectareasAplicadas }} ha</span>
+        </div>
+        <div class="info-item">
+          <label>Fecha de Aplicación:</label>
+          <span>{{ orden.fechaAplicacion | date:'dd/MM/yyyy' }}</span>
+        </div>
+        <div class="info-item">
+          <label>Receta Utilizada:</label>
+          <span>{{ orden.receta?.nombre }}</span>
+        </div>
+        <div class="info-item" *ngIf="orden.receta?.etapaCultivo">
+          <label>Etapa del Cultivo:</label>
+          <span>{{ orden.receta?.etapaCultivo }}</span>
+        </div>
+        <div class="info-item" *ngIf="orden.operador">
+          <label>Operador:</label>
+          <span>{{ orden.operador }}</span>
+        </div>
+        <div class="info-item">
+          <label>Costo Total:</label>
+          <span class="cost-total">${{ orden.costoTotal?.toFixed(2) }}</span>
+        </div>
+      </div>
+
+      <div class="info-item full-width" *ngIf="orden.observaciones">
+        <label>Observaciones:</label>
+        <p class="observaciones">{{ orden.observaciones }}</p>
+      </div>
+    </div>
+
+    <!-- Detalles de Insumos -->
+    <div class="info-section">
+      <h2>Insumos Aplicados</h2>
+      <div class="table-container">
+        <table class="detail-table">
+          <thead>
+            <tr>
+              <th>Insumo</th>
+              <th>Cantidad Aplicada</th>
+              <th>Unidad</th>
+              <th>Costo Unitario</th>
+              <th>Costo Total</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr *ngFor="let detalle of orden.detalles">
+              <td>
+                <strong>{{ detalle.insumo?.nombre }}</strong>
+                <br>
+                <small *ngIf="detalle.insumo?.categoria">{{ detalle.insumo?.categoria }}</small>
+              </td>
+              <td class="text-right">{{ detalle.cantidadCalculada.toFixed(2) }}</td>
+              <td>{{ detalle.unidadMedida }}</td>
+              <td class="text-right">${{ detalle.costoUnitario.toFixed(2) }}</td>
+              <td class="text-right"><strong>${{ detalle.costoTotal.toFixed(2) }}</strong></td>
+            </tr>
+          </tbody>
+          <tfoot>
+            <tr class="total-row">
+              <td colspan="4"><strong>Total:</strong></td>
+              <td class="text-right"><strong>${{ orden.costoTotal?.toFixed(2) }}</strong></td>
+            </tr>
+          </tfoot>
+        </table>
+      </div>
+    </div>
+
+    <!-- Cálculo por Hectárea -->
+    <div class="info-section calculation-section">
+      <h2>Detalle del Cálculo</h2>
+      <div class="calculation-card">
+        <div class="calc-item">
+          <span class="calc-label">Costo por Hectárea:</span>
+          <span class="calc-value">${{ (orden.costoTotal! / orden.hectareasAplicadas).toFixed(2) }}/ha</span>
+        </div>
+        <div class="calc-item">
+          <span class="calc-label">Hectáreas Aplicadas:</span>
+          <span class="calc-value">{{ orden.hectareasAplicadas }} ha</span>
+        </div>
+        <div class="calc-item">
+          <span class="calc-label">Total Insumos:</span>
+          <span class="calc-value">{{ orden.detalles.length }} productos</span>
+        </div>
+      </div>
+    </div>
+
+    <!-- Fechas de Registro -->
+    <div class="info-section metadata-section">
+      <h2>Información de Registro</h2>
+      <div class="info-grid">
+        <div class="info-item" *ngIf="orden.createdAt">
+          <label>Creado:</label>
+          <span>{{ orden.createdAt | date:'dd/MM/yyyy HH:mm' }}</span>
+        </div>
+        <div class="info-item" *ngIf="orden.updatedAt">
+          <label>Última Actualización:</label>
+          <span>{{ orden.updatedAt | date:'dd/MM/yyyy HH:mm' }}</span>
+        </div>
+      </div>
+    </div>
+
+    <!-- Acciones -->
+    <div class="actions-section">
+      <button 
+        *ngIf="orden.estado === 'pendiente'" 
+        class="btn btn-success" 
+        (click)="cerrarOrden()">
+        ✓ Cerrar Orden y Descontar Inventario
+      </button>
+      
+      <button 
+        *ngIf="orden.estado === 'pendiente'" 
+        class="btn btn-warning" 
+        (click)="cancelarOrden()">
+        ✕ Cancelar Orden
+      </button>
+      
+      <button 
+        *ngIf="orden.estado !== 'aplicada'" 
+        class="btn btn-danger" 
+        (click)="eliminarOrden()">
+        🗑️ Eliminar Orden
+      </button>
+
+      <button 
+        class="btn btn-secondary" 
+        (click)="backToList()">
+        Volver a la Lista
+      </button>
+    </div>
+  </div>
+</div>

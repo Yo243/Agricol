@@ -1,0 +1,63 @@
+<aside class="sidebar" [class.collapsed]="isCollapsed">
+  <!-- Header del Sidebar -->
+  <div class="sidebar-header">
+    <div class="logo-container">
+      <div class="logo">
+        <span class="logo-icon">A</span>
+      </div>
+      <div class="logo-text" *ngIf="!isCollapsed">
+        <h2>AgriCol</h2>
+        <p>Gestión Inteligente</p>
+      </div>
+    </div>
+  </div>
+
+  <!-- Navegación Principal -->
+  <nav class="sidebar-nav">
+    <ul class="nav-list">
+      <li *ngFor="let item of menuItems" class="nav-item">
+        <a 
+          [routerLink]="item.route" 
+          class="nav-link"
+          [class.active]="isActive(item.route)"
+          [title]="item.label">
+          <span class="nav-icon">{{ item.icon }}</span>
+          <span class="nav-label" *ngIf="!isCollapsed">{{ item.label }}</span>
+          <span 
+            *ngIf="item.badge && !isCollapsed" 
+            class="nav-badge"
+            [class.badge-warning]="item.badgeColor === 'warning'"
+            [class.badge-info]="item.badgeColor === 'info'">
+            {{ item.badge }}
+          </span>
+        </a>
+      </li>
+    </ul>
+  </nav>
+
+  <!-- Footer del Sidebar (Usuario) -->
+  <div class="sidebar-footer">
+    <div class="user-info">
+      <div class="user-avatar">
+        <span>{{ userName.charAt(0).toUpperCase() }}</span>
+      </div>
+      <div class="user-details" *ngIf="!isCollapsed">
+        <p class="user-name">{{ userName }}</p>
+        <p class="user-role">{{ userRole }}</p>
+      </div>
+    </div>
+    <button 
+      class="logout-btn" 
+      (click)="logout()"
+      [title]="isCollapsed ? 'Cerrar Sesión' : ''">
+      <span class="logout-icon">🚪</span>
+      <span *ngIf="!isCollapsed">Cerrar Sesión</span>
+    </button>
+  </div>
+
+  <!-- Botón para colapsar/expandir -->
+  <button class="toggle-btn" (click)="toggleSidebar()">
+    <span *ngIf="!isCollapsed">◀</span>
+    <span *ngIf="isCollapsed">▶</span>
+  </button>
+</aside>
