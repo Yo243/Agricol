@@ -242,6 +242,7 @@ model RecetaDetalle {
   receta             Receta           @relation(fields: [recetaId], references: [id], onDelete: Cascade)
   insumo             InventarioItem   @relation(fields: [insumoId], references: [id])
 
+  @@unique([recetaId, insumoId])
   @@map("receta_detalles")
 }
 

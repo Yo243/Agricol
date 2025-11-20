@@ -1,0 +1,182 @@
+<div class="detail-container">
+
+  <!-- Loading -->
+  <div *ngIf="loading" class="loading">
+    <p>Cargando receta...</p>
+  </div>
+
+  <!-- Error -->
+  <div *ngIf="error" class="error-message">
+    {{ error }}
+  </div>
+
+  <!-- Contenido -->
+  <ng-container *ngIf="receta as r">
+
+    <!-- Header -->
+    <div class="header">
+      <div>
+        <h1>{{ r.nombre }}</h1>
+        <span class="badge" [class.badge-active]="r.activo" [class.badge-inactive]="!r.activo">
+          {{ r.activo ? 'Activa' : 'Inactiva' }}
+        </span>
+      </div>
+
+      <div class="actions">
+        <button class="btn btn-secondary" (click)="backToList()">⬅️ Volver</button>
+        <button class="btn btn-warning" (click)="editReceta()">✏️ Editar</button>
+        <button class="btn btn-danger" (click)="deleteReceta()">🗑️ Eliminar</button>
+      </div>
+    </div>
+
+    <!-- Información General -->
+    <div class="info-section">
+      <h2>📋 Información General</h2>
+
+      <div class="info-grid">
+
+        <div class="info-item">
+          <span class="label">🌾 Cultivo:</span>
+          <span class="value">{{ r.cultivo ? r.cultivo.nombre : 'N/A' }}</span>
+        </div>
+
+        <div class="info-item" *ngIf="r.cultivo && r.cultivo.variedad">
+          <span class="label">🌱 Variedad:</span>
+          <span class="value">{{ r.cultivo.variedad }}</span>
+        </div>
+
+        <div class="info-item" *ngIf="r.etapaCultivo">
+          <span class="label">📅 Etapa:</span>
+          <span class="value">{{ r.etapaCultivo }}</span>
+        </div>
+
+        <div class="info-item">
+          <span class="label">🧪 Insumos:</span>
+          <span class="value">{{ r.detalles.length }}</span>
+        </div>
+
+        <div class="info-item">
+          <span class="label">💰 Costo/ha:</span>
+          <span class="value">${{ (r.costoPorHectarea || 0).toFixed(2) }}</span>
+        </div>
+
+      </div>
+
+      <div class="description-box" *ngIf="r.descripcion">
+        <strong>Descripción:</strong>
+        <p>{{ r.descripcion }}</p>
+      </div>
+    </div>
+
+    <!-- Detalles de Insumos -->
+    <div class="insumos-section">
+      <h2>🧪 Insumos de la Receta</h2>
+
+      <div class="table-responsive">
+        <table class="table">
+
+          <thead>
+            <tr>
+              <th>Orden</th>
+              <th>Insumo</th>
+              <th>Categoría</th>
+              <th>Dosis/ha</th>
+              <th>Unidad</th>
+              <th>Costo Unit.</th>
+              <th>Costo/ha</th>
+            </tr>
+          </thead>
+
+          <tbody>
+            <tr *ngFor="let d of r.detalles">
+
+              <td>{{ d.orden }}</td>
+
+              <td>{{ d.insumo ? d.insumo.nombre : 'N/A' }}</td>
+
+              <td>{{ d.insumo ? d.insumo.categoria : 'N/A' }}</td>
+
+              <td>{{ d.dosisPorHectarea }}</td>
+
+              <td>{{ d.unidadMedida }}</td>
+
+              <td>
+                ${{ (d.insumo ? d.insumo.costoUnitario : 0).toFixed(2) }}
+              </td>
+
+              <td>
+                ${{ calcularCostoDetalle(d.insumo, d.dosisPorHectarea).toFixed(2) }}
+              </td>
+
+            </tr>
+          </tbody>
+
+          <tfoot>
+            <tr>
+              <td colspan="6"><strong>Total por Hectárea:</strong></td>
+              <td><strong>${{ (r.costoPorHectarea || 0).toFixed(2) }}</strong></td>
+            </tr>
+          </tfoot>
+
+        </table>
+      </div>
+    </div>
+
+    <!-- Simulación de Aplicación -->
+    <div class="simulation-section">
+      <h2>🧮 Simulación de Aplicación</h2>
+
+      <div class="simulation-controls">
+        <label>Hectáreas a aplicar:</label>
+        <input 
+          type="number"
+          min="0.1"
+          step="0.1"
+          class="form-control"
+          [(ngModel)]="hectareasSimulacion"
+        >
+      </div>
+
+      <div class="simulation-results">
+        <h3>Cantidades para {{ hectareasSimulacion }} hectáreas:</h3>
+
+        <div class="results-grid">
+
+          <div class="result-card" *ngFor="let d of r.detalles">
+
+            <div class="result-header">
+              <strong>{{ d.insumo ? d.insumo.nombre : 'N/A' }}</strong>
+            </div>
+
+            <div class="result-body">
+
+              <div class="result-item">
+                <span class="label">Cantidad:</span>
+                <span class="value">
+                  {{ calcularCantidad(d.dosisPorHectarea).toFixed(2) }} {{ d.unidadMedida }}
+                </span>
+              </div>
+
+              <div class="result-item">
+                <span class="label">Costo:</span>
+                <span class="value">
+                  ${{ (calcularCantidad(d.dosisPorHectarea) * (d.insumo ? d.insumo.costoUnitario : 0)).toFixed(2) }}
+                </span>
+              </div>
+
+            </div>
+
+          </div>
+        </div>
+
+        <div class="total-cost">
+          <h3>
+            Costo Total: ${{ ((r.costoPorHectarea || 0) * hectareasSimulacion).toFixed(2) }}
+          </h3>
+        </div>
+      </div>
+
+    </div>
+
+  </ng-container>
+</div>

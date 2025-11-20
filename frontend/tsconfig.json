@@ -13,10 +13,13 @@
     "target": "ES2022",
     "module": "preserve",
 
-    /* 👇 AGREGAR ESTO 👇 */
     "baseUrl": "src",
     "paths": {
-      "@env/*": ["environments/*"]
+      "@models/*": ["app/core/*"],
+      "@core/*": ["app/core/*"],
+      "@env/*": ["app/environments/*"],
+      "@services/*": ["app/core/services/*"],
+      "@modules/*": ["app/modules/*"]
     }
   },
   "angularCompilerOptions": {

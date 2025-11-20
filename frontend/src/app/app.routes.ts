@@ -55,6 +55,46 @@ export const routes: Routes = [
   },
 
   // =============================
+  // RECETAS
+  // =============================
+
+  {
+    path: 'receta',
+    loadComponent: () =>
+      import('./modules/receta/pages/receta-list/receta-list.component').then(
+        (m) => m.RecetaListComponent
+      ),
+    canActivate: [AuthGuard]
+  },
+
+  {
+    path: 'receta/nueva',
+    loadComponent: () =>
+      import('./modules/receta/pages/receta-create-edit/receta-create-edit.component').then(
+        (m) => m.RecetaCreateEditComponent
+      ),
+    canActivate: [AuthGuard]
+  },
+
+  {
+    path: 'receta/editar/:id',
+    loadComponent: () =>
+      import('./modules/receta/pages/receta-create-edit/receta-create-edit.component').then(
+        (m) => m.RecetaCreateEditComponent
+      ),
+    canActivate: [AuthGuard]
+  },
+
+  {
+    path: 'receta/:id',
+    loadComponent: () =>
+      import('./modules/receta/pages/receta-detail/receta-detail.component').then(
+        (m) => m.RecetaDetailComponent
+      ),
+    canActivate: [AuthGuard]
+  },
+
+  // =============================
   // 404
   // =============================
   {

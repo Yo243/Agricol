@@ -1,0 +1,145 @@
+<!-- src/app/modules/receta/pages/receta-create-edit/receta-create-edit.component.html -->
+
+<div class="page-container">
+  <div class="page-header">
+    <h1>{{ isEditMode ? 'Editar Receta' : 'Nueva Receta' }}</h1>
+  </div>
+
+  <div *ngIf="error" class="alert alert-danger">{{ error }}</div>
+  <div *ngIf="loading" class="loading-spinner">Cargando...</div>
+
+  <form (ngSubmit)="onSubmit()" *ngIf="!loading" class="receta-form">
+    
+    <!-- Información Básica -->
+    <div class="form-section">
+      <h2>Información Básica</h2>
+      
+      <div class="form-group">
+        <label for="nombre">Nombre *</label>
+        <input type="text" id="nombre" [(ngModel)]="receta.nombre" name="nombre" 
+               placeholder="Nombre de la receta" required class="form-control">
+      </div>
+
+      <div class="form-row">
+        <div class="form-group">
+          <label for="cultivo">Cultivo *</label>
+          <select id="cultivo" [(ngModel)]="receta.cultivoId" name="cultivoId" 
+                  required class="form-control">
+            <option [value]="0">Selecciona un cultivo</option>
+            <option *ngFor="let cultivo of cultivos" [value]="cultivo.id">
+              {{ cultivo.nombre }}
+            </option>
+          </select>
+        </div>
+
+        <div class="form-group">
+          <label for="etapa">Etapa del Cultivo</label>
+          <input type="text" id="etapa" [(ngModel)]="receta.etapaCultivo" 
+                 name="etapaCultivo" placeholder="Ej: Vegetativa" class="form-control">
+        </div>
+      </div>
+
+      <div class="form-group">
+        <label for="descripcion">Descripción</label>
+        <textarea id="descripcion" [(ngModel)]="receta.descripcion" name="descripcion"
+                  rows="3" placeholder="Descripción de la receta" class="form-control"></textarea>
+      </div>
+    </div>
+
+    <!-- Insumos -->
+    <div class="form-section">
+      <h2>Insumos</h2>
+
+      <!-- Agregar Insumo -->
+      <div class="add-insumo">
+        <div class="form-row">
+          <div class="form-group flex-2">
+            <label>Insumo</label>
+            <select [(ngModel)]="nuevoDetalle.insumoId" name="insumoId" class="form-control"
+                    [disabled]="insumosDisponibles.length === 0">
+              <option [value]="0">Selecciona un insumo</option>
+              <option *ngFor="let insumo of insumosDisponibles" [value]="insumo.id">
+                {{ insumo.nombre }} ({{ insumo.unidadMedida }})
+              </option>
+            </select>
+          </div>
+
+          <div class="form-group">
+            <label>Dosis/ha</label>
+            <input type="number" [(ngModel)]="nuevoDetalle.dosisPorHectarea" name="dosis"
+                   min="0" step="0.001" class="form-control">
+          </div>
+
+          <div class="form-group">
+            <label>Unidad</label>
+            <select [(ngModel)]="nuevoDetalle.unidadMedida" name="unidad" class="form-control">
+              <option value="kg">kg</option>
+              <option value="litros">litros</option>
+              <option value="gramos">gramos</option>
+              <option value="ml">ml</option>
+            </select>
+          </div>
+
+          <div class="form-group">
+            <button type="button" class="btn btn-success" (click)="agregarInsumo()"
+                    [disabled]="nuevoDetalle.insumoId === 0">
+              Agregar
+            </button>
+          </div>
+        </div>
+      </div>
+
+      <!-- Lista de Insumos -->
+      <div *ngIf="receta.detalles.length > 0" class="insumos-table">
+        <table>
+          <thead>
+            <tr>
+              <th>#</th>
+              <th>Insumo</th>
+              <th>Dosis/ha</th>
+              <th>Unidad</th>
+              <th>Costo Unit.</th>
+              <th>Subtotal</th>
+              <th>Acciones</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr *ngFor="let detalle of receta.detalles; let i = index">
+              <td>{{ i + 1 }}</td>
+              <td>{{ getInsumoNombre(detalle.insumoId) }}</td>
+              <td>{{ detalle.dosisPorHectarea }}</td>
+              <td>{{ detalle.unidadMedida }}</td>
+              <td>${{ getInsumoCosto(detalle.insumoId).toFixed(2) }}</td>
+              <td>${{ (getInsumoCosto(detalle.insumoId) * detalle.dosisPorHectarea).toFixed(2) }}</td>
+              <td class="actions">
+                <button type="button" (click)="moverInsumo(i, 'arriba')" 
+                        [disabled]="i === 0" class="btn-icon">↑</button>
+                <button type="button" (click)="moverInsumo(i, 'abajo')" 
+                        [disabled]="i === receta.detalles.length - 1" class="btn-icon">↓</button>
+                <button type="button" (click)="eliminarInsumo(i)" class="btn-icon btn-danger">×</button>
+              </td>
+            </tr>
+          </tbody>
+          <tfoot>
+            <tr class="total">
+              <td colspan="5"><strong>Costo Total / ha:</strong></td>
+              <td colspan="2"><strong>${{ costoTotal.toFixed(2) }}</strong></td>
+            </tr>
+          </tfoot>
+        </table>
+      </div>
+
+      <div *ngIf="receta.detalles.length === 0" class="empty-state">
+        No hay insumos agregados. Agrega al menos uno para continuar.
+      </div>
+    </div>
+
+    <!-- Botones -->
+    <div class="form-actions">
+      <button type="button" class="btn btn-secondary" (click)="onCancel()">Cancelar</button>
+      <button type="submit" class="btn btn-primary" [disabled]="receta.detalles.length === 0">
+        {{ isEditMode ? 'Actualizar' : 'Guardar' }}
+      </button>
+    </div>
+  </form>
+</div>

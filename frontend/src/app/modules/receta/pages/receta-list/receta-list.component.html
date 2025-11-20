@@ -1,0 +1,94 @@
+<!-- src/app/modules/receta/pages/receta-list/receta-list.component.html -->
+
+<div class="page-container">
+  <div class="page-header">
+    <h1>Recetas de Aplicación</h1>
+    <button class="btn btn-primary" (click)="createReceta()">+ Nueva Receta</button>
+  </div>
+
+  <!-- Filtros -->
+  <div class="filters-section">
+    <div class="search-bar">
+      <input type="text" [(ngModel)]="searchTerm" placeholder="Buscar receta..." 
+             (keyup.enter)="onSearch()" class="search-input">
+      <button class="btn btn-secondary" (click)="onSearch()">Buscar</button>
+    </div>
+
+    <div class="filters">
+      <div class="filter-item">
+        <label>Cultivo</label>
+        <select [(ngModel)]="filters.cultivoId" (change)="onFilterChange()" class="filter-select">
+          <option [value]="undefined">Todos</option>
+          <option *ngFor="let cultivo of cultivos" [value]="cultivo.id">{{ cultivo.nombre }}</option>
+        </select>
+      </div>
+
+      <div class="filter-item">
+        <label>Etapa</label>
+        <select [(ngModel)]="filters.etapaCultivo" (change)="onFilterChange()" class="filter-select">
+          <option [value]="undefined">Todas</option>
+          <option *ngFor="let etapa of etapas" [value]="etapa">{{ etapa }}</option>
+        </select>
+      </div>
+
+      <div class="filter-item">
+        <label>Estado</label>
+        <select [(ngModel)]="filters.activo" (change)="onFilterChange()" class="filter-select">
+          <option [value]="true">Activas</option>
+          <option [value]="false">Inactivas</option>
+          <option [value]="undefined">Todas</option>
+        </select>
+      </div>
+
+      <button class="btn-link" (click)="clearFilters()">Limpiar filtros</button>
+    </div>
+  </div>
+
+  <!-- Loading -->
+  <div *ngIf="loading" class="loading">Cargando recetas...</div>
+
+  <!-- Error -->
+  <div *ngIf="error" class="alert alert-danger">{{ error }}</div>
+
+  <!-- Recetas Grid -->
+  <div class="recetas-grid" *ngIf="!loading && !error">
+    <div class="receta-card" *ngFor="let receta of recetas">
+      <div class="card-header">
+        <h3>{{ receta.nombre }}</h3>
+        <span class="badge" [class.active]="receta.activo" [class.inactive]="!receta.activo">
+          {{ receta.activo ? 'Activa' : 'Inactiva' }}
+        </span>
+      </div>
+
+      <div class="card-body">
+        <div class="info-item">
+          <span class="label">Cultivo:</span>
+          <span>{{ receta.cultivo?.nombre || 'N/A' }}</span>
+        </div>
+        <div class="info-item" *ngIf="receta.etapaCultivo">
+          <span class="label">Etapa:</span>
+          <span>{{ receta.etapaCultivo }}</span>
+        </div>
+        <div class="info-item">
+          <span class="label">Insumos:</span>
+          <span>{{ receta.numeroInsumos || 0 }}</span>
+        </div>
+        <div class="info-item">
+          <span class="label">Costo/ha:</span>
+          <span class="cost">${{ (receta.costoPorHectarea || 0).toFixed(2) }}</span>
+        </div>
+      </div>
+
+      <div class="card-actions">
+        <button class="btn-sm btn-info" (click)="viewReceta(receta.id!)">Ver</button>
+        <button class="btn-sm btn-warning" (click)="editReceta(receta.id!)">Editar</button>
+        <button class="btn-sm btn-danger" (click)="deleteReceta(receta)">Eliminar</button>
+      </div>
+    </div>
+
+    <div class="empty-state" *ngIf="recetas.length === 0">
+      <p>No se encontraron recetas</p>
+      <button class="btn btn-primary" (click)="createReceta()">Crear primera receta</button>
+    </div>
+  </div>
+</div>

@@ -26,7 +26,9 @@ app.get('/', (req, res) => {
     version: '1.0.0',
     endpoints: {
       auth: '/api/auth',
-      inventario: '/api/inventario'
+      inventario: '/api/inventario',
+      parcelas: '/api/parcelas',
+      recetas: '/api/recetas'
     }
   });
 });
