@@ -1,0 +1,133 @@
+<div class="periodos-list">
+  <!-- Header -->
+  <div class="page-header">
+    <div class="header-content">
+      <h1>🌱 Períodos de Siembra</h1>
+      <p>Gestiona los ciclos de cultivo en tus parcelas</p>
+    </div>
+    <button class="btn btn-primary" routerLink="/periodos-siembra/nuevo">
+      + Nuevo Período
+    </button>
+  </div>
+
+  <!-- Filtros -->
+  <div class="filters-card">
+    <div class="filter-tabs">
+      <button 
+        class="filter-tab"
+        [class.active]="filtroEstado === 'todos'"
+        (click)="cambiarFiltro('todos')">
+        Todos
+      </button>
+      <button 
+        class="filter-tab"
+        [class.active]="filtroEstado === 'activos'"
+        (click)="cambiarFiltro('activos')">
+        Activos
+      </button>
+      <button 
+        class="filter-tab"
+        [class.active]="filtroEstado === 'finalizados'"
+        (click)="cambiarFiltro('finalizados')">
+        Finalizados
+      </button>
+    </div>
+  </div>
+
+  <!-- Loading -->
+  <div *ngIf="loading" class="loading-container">
+    <div class="spinner"></div>
+    <p>Cargando períodos...</p>
+  </div>
+
+  <!-- Empty State -->
+  <div *ngIf="!loading && periodos.length === 0" class="empty-state">
+    <div class="empty-icon">🌱</div>
+    <h3>No hay períodos de siembra</h3>
+    <p>Crea tu primer período de siembra para comenzar a dar seguimiento</p>
+    <button class="btn btn-primary" routerLink="/periodos-siembra/nuevo">
+      Crear Primer Período
+    </button>
+  </div>
+
+  <!-- Grid de Períodos -->
+  <div *ngIf="!loading && periodos.length > 0" class="periodos-grid">
+    <div *ngFor="let periodo of periodos" class="periodo-card">
+      <!-- Header -->
+      <div class="periodo-header">
+        <div class="header-info">
+          <h3>{{ periodo.cultivo?.nombre }}</h3>
+          <span class="periodo-codigo">{{ periodo.codigo }}</span>
+        </div>
+        <span class="badge" [ngClass]="getEstadoBadgeClass(periodo.estado)">
+          {{ periodo.estado }}
+        </span>
+      </div>
+
+      <!-- Info Principal -->
+      <div class="periodo-body">
+        <div class="info-item">
+          <span class="icon">📍</span>
+          <div class="info-content">
+            <span class="label">Parcela</span>
+            <span class="value">{{ periodo.parcela?.nombre }}</span>
+          </div>
+        </div>
+
+        <div class="info-item">
+          <span class="icon">📏</span>
+          <div class="info-content">
+            <span class="label">Hectáreas</span>
+            <span class="value">{{ periodo.hectareasSembradas }} ha</span>
+          </div>
+        </div>
+
+        <div class="info-item">
+          <span class="icon">📅</span>
+          <div class="info-content">
+            <span class="label">Fecha Siembra</span>
+            <span class="value">{{ periodo.fechaInicio | date: 'dd/MM/yyyy' }}</span>
+          </div>
+        </div>
+
+        <div class="info-item">
+          <span class="icon">🎯</span>
+          <div class="info-content">
+            <span class="label">Cosecha Esperada</span>
+            <span class="value">{{ periodo.fechaCosechaEsperada | date: 'dd/MM/yyyy' }}</span>
+          </div>
+        </div>
+      </div>
+
+      <!-- Progreso -->
+      <div class="periodo-progress" *ngIf="periodo.estado === 'En Curso'">
+        <div class="progress-header">
+          <span class="progress-label">Progreso del Ciclo</span>
+          <span class="progress-value">{{ calcularProgreso(periodo) }}%</span>
+        </div>
+        <div class="progress-bar">
+          <div class="progress-fill" [style.width.%]="calcularProgreso(periodo)"></div>
+        </div>
+      </div>
+
+      <!-- Rendimiento (si está finalizado) -->
+      <div class="periodo-rendimiento" *ngIf="periodo.estado === 'Finalizado' && periodo.rendimientoReal">
+        <div class="rendimiento-item">
+          <span class="label">Rendimiento Real:</span>
+          <span class="value success">{{ periodo.rendimientoReal }} ton/ha</span>
+        </div>
+        <div class="rendimiento-item" *ngIf="periodo.rendimientoEsperado">
+          <span class="label">Rendimiento Esperado:</span>
+          <span class="value">{{ periodo.rendimientoEsperado }} ton/ha</span>
+        </div>
+      </div>
+
+      <!-- Acciones -->
+      <div class="periodo-actions">
+        <button class="btn btn-sm btn-outline" [routerLink]="['/periodos-siembra', periodo.id]">
+          Ver Detalle
+        </button>
+      </div>
+    </div>
+  </div>
+</div>

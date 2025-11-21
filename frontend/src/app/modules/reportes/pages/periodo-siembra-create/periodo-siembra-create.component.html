@@ -1,0 +1,203 @@
+<div class="periodo-siembra-create">
+  <!-- Header -->
+  <div class="page-header">
+    <div class="header-content">
+      <button class="btn-back" (click)="cancel()">
+        ← Volver
+      </button>
+      <h1>🌱 Nuevo Período de Siembra</h1>
+      <p>Registra un nuevo ciclo de cultivo en una parcela</p>
+    </div>
+  </div>
+
+  <!-- Alert de Error -->
+  <div *ngIf="errorMessage" class="alert alert-error">
+    {{ errorMessage }}
+  </div>
+
+  <!-- Formulario -->
+  <form [formGroup]="periodoForm" (ngSubmit)="onSubmit()" class="form-card">
+    
+    <!-- Información de Parcela y Cultivo -->
+    <div class="form-section">
+      <h2>📍 Ubicación y Cultivo</h2>
+      
+      <div class="form-row">
+        <div class="form-group">
+          <label for="parcelaId">Parcela *</label>
+          <select 
+            id="parcelaId" 
+            formControlName="parcelaId"
+            (change)="onParcelaChange()"
+            class="form-control"
+            [class.invalid]="periodoForm.get('parcelaId')?.invalid && periodoForm.get('parcelaId')?.touched">
+            <option value="">Seleccione una parcela</option>
+            <option *ngFor="let parcela of parcelas" [value]="parcela.id">
+              {{ parcela.nombre }} ({{ parcela.superficieHa }} ha)
+            </option>
+          </select>
+          <span *ngIf="periodoForm.get('parcelaId')?.invalid && periodoForm.get('parcelaId')?.touched" 
+                class="error-message">
+            La parcela es obligatoria
+          </span>
+        </div>
+
+        <div class="form-group">
+          <label for="cultivoId">Cultivo *</label>
+          <select 
+            id="cultivoId" 
+            formControlName="cultivoId"
+            (change)="onCultivoChange()"
+            class="form-control"
+            [class.invalid]="periodoForm.get('cultivoId')?.invalid && periodoForm.get('cultivoId')?.touched">
+            <option value="">Seleccione un cultivo</option>
+            <option *ngFor="let cultivo of cultivos" [value]="cultivo.id">
+              {{ cultivo.nombre }} {{ cultivo.variedad ? '- ' + cultivo.variedad : '' }}
+            </option>
+          </select>
+          <span *ngIf="periodoForm.get('cultivoId')?.invalid && periodoForm.get('cultivoId')?.touched" 
+                class="error-message">
+            El cultivo es obligatorio
+          </span>
+        </div>
+      </div>
+    </div>
+
+    <!-- Fechas -->
+    <div class="form-section">
+      <h2>📅 Fechas del Ciclo</h2>
+      
+      <div class="form-row">
+        <div class="form-group">
+          <label for="fechaInicio">Fecha de Siembra *</label>
+          <input 
+            type="date" 
+            id="fechaInicio" 
+            formControlName="fechaInicio"
+            class="form-control"
+            [class.invalid]="periodoForm.get('fechaInicio')?.invalid && periodoForm.get('fechaInicio')?.touched">
+          <span *ngIf="periodoForm.get('fechaInicio')?.invalid && periodoForm.get('fechaInicio')?.touched" 
+                class="error-message">
+            La fecha de siembra es obligatoria
+          </span>
+        </div>
+
+        <div class="form-group">
+          <label for="fechaCosechaEsperada">Fecha de Cosecha Esperada *</label>
+          <input 
+            type="date" 
+            id="fechaCosechaEsperada" 
+            formControlName="fechaCosechaEsperada"
+            class="form-control"
+            [class.invalid]="periodoForm.get('fechaCosechaEsperada')?.invalid && periodoForm.get('fechaCosechaEsperada')?.touched">
+          <span *ngIf="periodoForm.get('fechaCosechaEsperada')?.invalid && periodoForm.get('fechaCosechaEsperada')?.touched" 
+                class="error-message">
+            La fecha de cosecha esperada es obligatoria
+          </span>
+          <small class="help-text">
+            Se calcula automáticamente según el ciclo del cultivo
+          </small>
+        </div>
+      </div>
+    </div>
+
+    <!-- Datos de Producción -->
+    <div class="form-section">
+      <h2>📊 Datos de Producción</h2>
+      
+      <div class="form-row">
+        <div class="form-group">
+          <label for="hectareasSembradas">Hectáreas Sembradas *</label>
+          <input 
+            type="number" 
+            id="hectareasSembradas" 
+            formControlName="hectareasSembradas"
+            step="0.1"
+            min="0.1"
+            placeholder="0.0"
+            class="form-control"
+            [class.invalid]="periodoForm.get('hectareasSembradas')?.invalid && periodoForm.get('hectareasSembradas')?.touched">
+          <span *ngIf="periodoForm.get('hectareasSembradas')?.invalid && periodoForm.get('hectareasSembradas')?.touched" 
+                class="error-message">
+            Las hectáreas sembradas son obligatorias (mínimo 0.1)
+          </span>
+          <small class="help-text">
+            Se autocompleta con el tamaño de la parcela seleccionada
+          </small>
+        </div>
+
+        <div class="form-group">
+          <label for="rendimientoEsperado">Rendimiento Esperado (ton/ha)</label>
+          <input 
+            type="number" 
+            id="rendimientoEsperado" 
+            formControlName="rendimientoEsperado"
+            step="0.1"
+            min="0"
+            placeholder="0.0"
+            class="form-control">
+          <small class="help-text">
+            Toneladas por hectárea que esperas cosechar
+          </small>
+        </div>
+      </div>
+    </div>
+
+    <!-- Observaciones -->
+    <div class="form-section">
+      <h2>📝 Observaciones</h2>
+      
+      <div class="form-group">
+        <label for="observaciones">Notas Adicionales</label>
+        <textarea 
+          id="observaciones" 
+          formControlName="observaciones"
+          rows="4"
+          placeholder="Escribe cualquier observación sobre este período de siembra..."
+          class="form-control"></textarea>
+        <small class="help-text">
+          Ejemplo: Tipo de semilla, condiciones especiales, etc.
+        </small>
+      </div>
+    </div>
+
+    <!-- Botones -->
+    <div class="form-actions">
+      <button type="button" class="btn btn-secondary" (click)="cancel()" [disabled]="loading">
+        Cancelar
+      </button>
+      <button type="submit" class="btn btn-primary" [disabled]="loading || periodoForm.invalid">
+        <span *ngIf="!loading">✓ Crear Período de Siembra</span>
+        <span *ngIf="loading">
+          <span class="spinner-small"></span> Creando...
+        </span>
+      </button>
+    </div>
+
+  </form>
+
+  <!-- Preview de Información -->
+  <div class="preview-card" *ngIf="periodoForm.valid">
+    <h3>📋 Vista Previa</h3>
+    <div class="preview-grid">
+      <div class="preview-item">
+        <span class="label">Parcela:</span>
+        <span class="value">{{ getNombreParcela() }}</span>
+      </div>
+      <div class="preview-item">
+        <span class="label">Cultivo:</span>
+        <span class="value">{{ getNombreCultivo() }}</span>
+      </div>
+      <div class="preview-item">
+        <span class="label">Hectáreas:</span>
+        <span class="value">{{ periodoForm.get('hectareasSembradas')?.value }} ha</span>
+      </div>
+      <div class="preview-item">
+        <span class="label">Duración Estimada:</span>
+        <span class="value">
+          {{ calcularDiferenciaDias(periodoForm.get('fechaInicio')?.value, periodoForm.get('fechaCosechaEsperada')?.value) }} días
+        </span>
+      </div>
+    </div>
+  </div>
+</div>

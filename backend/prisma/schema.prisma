@@ -57,10 +57,12 @@ model InventarioItem {
   alertas           AlertaInventario[]
   recetaDetalles    RecetaDetalle[]
   aplicaciones      AplicacionInsumo[]
-  // Nueva relación con órdenes
   ordenDetalles     OrdenDetalle[]
 
   @@map("inventario_items")
+  @@index([categoria])
+  @@index([estado])
+  @@index([activo])
 }
 
 model MovimientoInventario {
@@ -81,6 +83,9 @@ model MovimientoInventario {
   item              InventarioItem @relation(fields: [itemId], references: [id], onDelete: Cascade)
 
   @@map("movimientos_inventario")
+  @@index([itemId])
+  @@index([tipo])
+  @@index([fecha])
 }
 
 model AlertaInventario {
@@ -99,6 +104,9 @@ model AlertaInventario {
   item        InventarioItem @relation(fields: [itemId], references: [id], onDelete: Cascade)
 
   @@map("alertas_inventario")
+  @@index([itemId])
+  @@index([leida])
+  @@index([fecha])
 }
 
 // ==========================================
@@ -120,6 +128,8 @@ model Cultivo {
   recetas           Receta[]
 
   @@map("cultivos")
+  @@index([activo])
+  @@index([nombre])
 }
 
 // ==========================================
@@ -142,10 +152,12 @@ model Parcela {
 
   periodosSiembra PeriodoSiembra[]
   aplicaciones    AplicacionParcela[]
-  // Nueva relación con órdenes
   ordenesAplicacion OrdenAplicacion[]
 
   @@map("parcelas")
+  @@index([activo])
+  @@index([estado])
+  @@index([nombre])
 }
 
 // ==========================================
@@ -165,7 +177,7 @@ model PeriodoSiembra {
   rendimientoReal     Float?
   costoTotal          Float     @default(0)
   estado              String    @default("En Curso")
-  observaciones       String?
+  observaciones       String?   @db.Text
   createdAt           DateTime  @default(now())
   updatedAt           DateTime  @updatedAt
 
@@ -175,6 +187,11 @@ model PeriodoSiembra {
   actividades         Actividad[]
 
   @@map("periodos_siembra")
+  @@index([parcelaId])
+  @@index([cultivoId])
+  @@index([estado])
+  @@index([fechaInicio])
+  @@index([fechaCosechaEsperada])
 }
 
 // ==========================================
@@ -189,14 +206,18 @@ model AplicacionParcela {
   tipoAplicacion    String
   costoTotal        Float     @default(0)
   responsable       String?
-  observaciones     String?
+  observaciones     String?   @db.Text
   createdAt         DateTime  @default(now())
 
-  periodoSiembra    PeriodoSiembra @relation(fields: [periodoSiembraId], references: [id])
+  periodoSiembra    PeriodoSiembra @relation(fields: [periodoSiembraId], references: [id], onDelete: Cascade)
   parcela           Parcela        @relation(fields: [parcelaId], references: [id])
   insumos           AplicacionInsumo[]
 
   @@map("aplicaciones_parcela")
+  @@index([periodoSiembraId])
+  @@index([parcelaId])
+  @@index([fecha])
+  @@index([tipoAplicacion])
 }
 
 // ==========================================
@@ -217,6 +238,8 @@ model AplicacionInsumo {
   insumo              InventarioItem    @relation(fields: [insumoId], references: [id])
 
   @@map("aplicaciones_insumos")
+  @@index([aplicacionId])
+  @@index([insumoId])
 }
 
 // ==========================================
@@ -226,7 +249,7 @@ model Receta {
   id          Int      @id @default(autoincrement())
   cultivoId   Int
   nombre      String
-  descripcion String?
+  descripcion String?  @db.Text
   etapaCultivo String?
   activo      Boolean  @default(true)
   createdAt   DateTime @default(now())
@@ -234,10 +257,11 @@ model Receta {
 
   cultivo     Cultivo           @relation(fields: [cultivoId], references: [id])
   detalles    RecetaDetalle[]
-  // Nueva relación con órdenes
   ordenesAplicacion OrdenAplicacion[]
 
   @@map("recetas")
+  @@index([cultivoId])
+  @@index([activo])
 }
 
 model RecetaDetalle {
@@ -253,6 +277,8 @@ model RecetaDetalle {
 
   @@unique([recetaId, insumoId])
   @@map("receta_detalles")
+  @@index([recetaId])
+  @@index([insumoId])
 }
 
 // ==========================================
@@ -268,17 +294,20 @@ model Actividad {
   estado            String    @default("Pendiente")
   responsable       String?
   costo             Float?
-  observaciones     String?
+  observaciones     String?   @db.Text
   createdAt         DateTime  @default(now())
   updatedAt         DateTime  @updatedAt
 
-  periodoSiembra    PeriodoSiembra @relation(fields: [periodoSiembraId], references: [id])
+  periodoSiembra    PeriodoSiembra @relation(fields: [periodoSiembraId], references: [id], onDelete: Cascade)
 
   @@map("actividades")
+  @@index([periodoSiembraId])
+  @@index([estado])
+  @@index([fechaProgramada])
 }
 
 // ==========================================
-// ÓRDENES DE APLICACIÓN (NUEVO MÓDULO)
+// ÓRDENES DE APLICACIÓN
 // ==========================================
 model OrdenAplicacion {
   id                  Int       @id @default(autoincrement())
@@ -294,13 +323,16 @@ model OrdenAplicacion {
   createdAt           DateTime  @default(now())
   updatedAt           DateTime  @updatedAt
 
-  // Relaciones
   parcela             Parcela   @relation(fields: [parcelaId], references: [id])
   receta              Receta    @relation(fields: [recetaId], references: [id])
   operador            User?     @relation(fields: [operadorId], references: [id])
   detalles            OrdenDetalle[]
 
   @@map("ordenes_aplicacion")
+  @@index([parcelaId])
+  @@index([recetaId])
+  @@index([estado])
+  @@index([fechaCreacion])
 }
 
 model OrdenDetalle {
@@ -313,11 +345,12 @@ model OrdenDetalle {
   costoTotal          Float
   createdAt           DateTime  @default(now())
 
-  // Relaciones
   orden               OrdenAplicacion @relation(fields: [ordenId], references: [id], onDelete: Cascade)
   insumo              InventarioItem @relation(fields: [insumoId], references: [id])
 
   @@map("orden_detalles")
+  @@index([ordenId])
+  @@index([insumoId])
 }
 
 enum EstadoOrden {
