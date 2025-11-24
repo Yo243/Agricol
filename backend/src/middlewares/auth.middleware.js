@@ -21,6 +21,13 @@ const verifyToken = (req, res, next) => {
     req.userId = decoded.userId;
     req.userEmail = decoded.email;
     req.userRole = decoded.role;
+    
+    // ✅ AGREGAR: Objeto req.user para compatibilidad con controllers
+    req.user = {
+      id: decoded.userId,
+      email: decoded.email,
+      role: decoded.role
+    };
 
     next();
 
@@ -41,14 +48,25 @@ const verifyToken = (req, res, next) => {
  * Middleware para verificar rol de administrador
  */
 const isAdmin = (req, res, next) => {
-  if (req.userRole !== 'admin') {
+  // ✅ MEJORADO: Verificar que req.user existe
+  if (!req.user) {
+    return res.status(401).json({ 
+      message: 'No autenticado' 
+    });
+  }
+
+  if (req.user.role !== 'admin') {
     return res.status(403).json({ 
       message: 'Acceso denegado. Se requiere rol de administrador' 
     });
   }
+  
   next();
 };
 
-// Exportar como función por defecto
-module.exports = verifyToken;
-module.exports.isAdmin = isAdmin;
+// ✅ CORREGIDO: Exportar ambos middlewares correctamente
+module.exports = {
+  verifyToken,
+  authenticateToken: verifyToken,  // Alias para compatibilidad
+  isAdmin
+};

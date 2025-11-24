@@ -1,7 +1,7 @@
 const express = require('express');
 const router = express.Router();
 const periodosSiembraController = require('../controllers/periodos-siembra.controller');
-const authenticateToken = require('../middlewares/auth.middleware');
+const { authenticateToken } = require('../middlewares/auth.middleware');  // ← LÍNEA 4 CORREGIDA
 
 const {
   validateCreatePeriodo,

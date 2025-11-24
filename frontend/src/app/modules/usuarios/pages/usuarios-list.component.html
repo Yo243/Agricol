@@ -1,0 +1,197 @@
+<div class="usuarios-container">
+  <!-- Header -->
+  <div class="page-header">
+    <div class="header-content">
+      <h1>Gestión de Usuarios</h1>
+      <p class="subtitle">Administra los usuarios del sistema y sus permisos</p>
+    </div>
+    <div class="header-actions">
+      <button class="btn btn-primary" (click)="nuevoUsuario()">
+        <span class="icon">+</span>
+        Nuevo Usuario
+      </button>
+    </div>
+  </div>
+
+  <!-- Loading -->
+  <div *ngIf="loading" class="loading-container">
+    <div class="spinner"></div>
+    <p>Cargando usuarios...</p>
+  </div>
+
+  <!-- Error -->
+  <div *ngIf="errorMessage && !loading" class="error-card">
+    <p>{{ errorMessage }}</p>
+    <button class="btn btn-secondary" (click)="loadUsuarios()">Reintentar</button>
+  </div>
+
+  <!-- Content -->
+  <div *ngIf="!loading && !errorMessage" class="content">
+    <!-- Estadísticas -->
+    <div class="stats-grid">
+      <div class="stat-card">
+        <div class="stat-icon user-icon">
+          <span>👥</span>
+        </div>
+        <div class="stat-content">
+          <p class="stat-label">Total Usuarios</p>
+          <p class="stat-value">{{ totalUsuarios }}</p>
+        </div>
+      </div>
+
+      <div class="stat-card">
+        <div class="stat-icon admin-icon">
+          <span>🛡️</span>
+        </div>
+        <div class="stat-content">
+          <p class="stat-label">Administradores</p>
+          <p class="stat-value admin-value">{{ totalAdministradores }}</p>
+        </div>
+      </div>
+
+      <div class="stat-card">
+        <div class="stat-icon operador-icon">
+          <span>👤</span>
+        </div>
+        <div class="stat-content">
+          <p class="stat-label">Operadores</p>
+          <p class="stat-value">{{ totalOperadores }}</p>
+        </div>
+      </div>
+
+      <div class="stat-card">
+        <div class="stat-icon active-icon">
+          <span>✓</span>
+        </div>
+        <div class="stat-content">
+          <p class="stat-label">Usuarios Activos</p>
+          <p class="stat-value active-value">{{ usuariosActivos }}</p>
+        </div>
+      </div>
+    </div>
+
+    <!-- Filtros -->
+    <div class="filters-section">
+      <h2 class="section-title">Filtros</h2>
+      <div class="filters-grid">
+        <div class="form-group">
+          <label>Buscar por nombre o email</label>
+          <input 
+            type="text" 
+            class="form-control" 
+            [(ngModel)]="filtroNombre"
+            placeholder="Buscar usuario...">
+        </div>
+
+        <div class="form-group">
+          <label>Rol</label>
+          <select class="form-control" [(ngModel)]="filtroRol">
+            <option value="">Todos</option>
+            <option value="admin">Administrador</option>
+            <option value="user">Operador</option>
+          </select>
+        </div>
+
+        <div class="form-group">
+          <label>Estado</label>
+          <select class="form-control" [(ngModel)]="filtroEstado">
+            <option value="">Todos</option>
+            <option value="activo">Activo</option>
+            <option value="inactivo">Inactivo</option>
+          </select>
+        </div>
+
+        <div class="form-group">
+          <label>&nbsp;</label>
+          <button class="btn btn-secondary btn-block" (click)="limpiarFiltros()">
+            Limpiar Filtros
+          </button>
+        </div>
+      </div>
+    </div>
+
+    <!-- Tabla de Usuarios -->
+    <div class="table-section">
+      <div class="section-header">
+        <h2 class="section-title">Lista de Usuarios</h2>
+        <p class="section-subtitle">Usuarios registrados en el sistema con sus roles y permisos</p>
+      </div>
+
+      <!-- Empty State -->
+      <div *ngIf="usuariosFiltrados.length === 0" class="empty-state">
+        <span class="empty-icon">👥</span>
+        <h3>No se encontraron usuarios</h3>
+        <p>No hay usuarios que coincidan con los filtros seleccionados</p>
+        <button class="btn btn-primary" (click)="limpiarFiltros()">
+          Limpiar Filtros
+        </button>
+      </div>
+
+      <!-- Tabla -->
+      <div *ngIf="usuariosFiltrados.length > 0" class="table-container">
+        <table class="usuarios-table">
+          <thead>
+            <tr>
+              <th>Usuario</th>
+              <th>Email</th>
+              <th>Rol</th>
+              <th>Estado</th>
+              <th>Último Acceso</th>
+              <th>Acciones</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr *ngFor="let usuario of usuariosFiltrados" class="table-row">
+              <td>
+                <div class="user-cell">
+                  <div class="user-avatar">
+                    <span>{{ usuario.name.charAt(0).toUpperCase() }}</span>
+                  </div>
+                  <span class="user-name">{{ usuario.name }}</span>
+                </div>
+              </td>
+              <td>
+                <span class="email-text">{{ usuario.email }}</span>
+              </td>
+              <td>
+                <span class="badge" [ngClass]="getRolClass(usuario.role)">
+                  {{ getRolLabel(usuario.role) }}
+                </span>
+              </td>
+              <td>
+                <span class="badge" [ngClass]="getEstadoClass(usuario)">
+                  {{ getEstadoLabel(usuario) }}
+                </span>
+              </td>
+              <td>
+                <span class="date-text">{{ formatearFecha(usuario.updatedAt) }}</span>
+              </td>
+              <td>
+                <div class="actions-cell">
+                  <button 
+                    class="btn-icon btn-edit" 
+                    (click)="editarUsuario(usuario.id)"
+                    title="Editar usuario">
+                    <span>✏️</span>
+                  </button>
+                  <button 
+                    class="btn-icon btn-toggle" 
+                    (click)="toggleEstado(usuario)"
+                    [title]="usuario.activo !== false ? 'Desactivar' : 'Activar'">
+                    <span>{{ usuario.activo !== false ? '🔒' : '🔓' }}</span>
+                  </button>
+                  <button 
+                    class="btn-icon btn-delete" 
+                    (click)="eliminarUsuario(usuario)"
+                    title="Eliminar usuario">
+                    <span>🗑️</span>
+                  </button>
+                </div>
+              </td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+  </div>
+</div>

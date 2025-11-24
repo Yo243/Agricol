@@ -1,10 +1,10 @@
 const express = require('express');
 const router = express.Router();
 const parcelasController = require('../controllers/parcelas.controller');
-const authMiddleware = require('../middlewares/auth.middleware');
+const { verifyToken } = require('../middlewares/auth.middleware');  // ← LÍNEA 4 CORREGIDA
 
 // Todas las rutas requieren autenticación
-router.use(authMiddleware);
+router.use(verifyToken);  // ← LÍNEA 7 CORREGIDA
 
 // ==========================================
 // RUTAS DE PARCELAS

@@ -1,7 +1,7 @@
 const express = require('express');
 const router = express.Router();
 
-const authenticateToken = require('../middlewares/auth.middleware');
+const { authenticateToken } = require('../middlewares/auth.middleware');  // ← CORREGIDO: agregar { }
 const reportesController = require('../controllers/reportes.controller');
 
 const {

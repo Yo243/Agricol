@@ -1,7 +1,7 @@
 const express = require('express');
 const router = express.Router();
 const inventarioController = require('../controllers/inventario.controller');
-const authMiddleware = require('../middlewares/auth.middleware');
+const { verifyToken } = require('../middlewares/auth.middleware');  // ← CORREGIDO
 const validate = require('../middlewares/validate.middleware');
 const { 
   validateCreateItem, 
@@ -10,7 +10,7 @@ const {
 } = require('../validators/inventario.validator');
 
 // Todas las rutas requieren autenticación
-router.use(authMiddleware);
+router.use(verifyToken);  // ← CORREGIDO
 
 // Rutas específicas (ANTES de /:id)
 router.get('/estadisticas', inventarioController.getEstadisticas);

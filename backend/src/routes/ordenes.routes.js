@@ -1,10 +1,10 @@
 const express = require('express');
 const router = express.Router();
 const ordenesController = require('../controllers/ordenes.controller');
-const authMiddleware = require('../middlewares/auth.middleware');  // ✅ SIN destructuring
+const { verifyToken } = require('../middlewares/auth.middleware');  // ← CORREGIDO
 
 // Aplicar autenticación a todas las rutas
-router.use(authMiddleware);
+router.use(verifyToken);  // ← CORREGIDO
 
 // Rutas básicas CRUD
 router.get('/', ordenesController.getAll);

@@ -121,6 +121,16 @@ export const routes: Routes = [
           import('./modules/reportes/pages/periodo-siembra-create/periodo-siembra-create.component').then(
             (m) => m.PeriodoSiembraCreateComponent
           )
+      },
+      // =========================================================
+
+      // ==================== MÓDULO DE USUARIOS ====================
+      {
+        path: 'usuarios',
+        loadComponent: () =>
+          import('./modules/usuarios/pages/usuarios-list.component').then(
+            (m) => m.UsuariosListComponent
+          )
       }
       // =========================================================
     ]
