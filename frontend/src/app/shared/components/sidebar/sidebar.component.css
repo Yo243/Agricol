@@ -8,7 +8,7 @@
   color: white;
   display: flex;
   flex-direction: column;
-  transition: width 0.3s ease;
+  transition: width 0.3s ease, transform 0.3s ease;
   z-index: 1000;
   box-shadow: 2px 0 10px rgba(0, 0, 0, 0.1);
   overflow: hidden;
@@ -67,6 +67,41 @@
   white-space: nowrap;
 }
 
+/* ==================== BOTÓN TOGGLE (FLECHA A LA IZQUIERDA) ==================== */
+.toggle-btn {
+  position: absolute;
+  left: 12px;
+  top: 50%;
+  transform: translateY(-50%);
+  width: 32px;
+  height: 32px;
+  background: rgba(255, 255, 255, 0.2);
+  color: white;
+  border: none;
+  border-radius: 50%;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: all 0.2s ease;
+  z-index: 10;
+}
+
+.toggle-btn:hover {
+  background: rgba(255, 255, 255, 0.3);
+  transform: translateY(-50%) scale(1.1);
+}
+
+.arrow {
+  font-size: 0.875rem;
+  transition: transform 0.3s ease;
+  display: inline-block;
+}
+
+.arrow.rotated {
+  transform: rotate(180deg);
+}
+
 /* ==================== NAVEGACIÓN ==================== */
 .sidebar-nav {
   flex: 1;
@@ -105,17 +140,31 @@
   transition: all 0.2s ease;
   position: relative;
   white-space: nowrap;
+  cursor: pointer;
 }
 
 .nav-link:hover {
   background: rgba(255, 255, 255, 0.1);
   color: white;
+  transform: translateX(4px);
 }
 
 .nav-link.active {
   background: white;
   color: #0f766e;
   font-weight: 600;
+}
+
+.nav-link.active::before {
+  content: '';
+  position: absolute;
+  left: 0;
+  top: 50%;
+  transform: translateY(-50%);
+  width: 4px;
+  height: 24px;
+  background: #0f766e;
+  border-radius: 0 4px 4px 0;
 }
 
 .nav-icon {
@@ -229,32 +278,6 @@
   font-size: 1.25rem;
 }
 
-/* ==================== BOTÓN TOGGLE ==================== */
-.toggle-btn {
-  position: absolute;
-  top: 50%;
-  right: -15px;
-  transform: translateY(-50%);
-  width: 30px;
-  height: 30px;
-  background: white;
-  color: #0f766e;
-  border: none;
-  border-radius: 50%;
-  cursor: pointer;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.15);
-  transition: all 0.2s ease;
-  font-size: 0.75rem;
-}
-
-.toggle-btn:hover {
-  background: #f0fdfa;
-  transform: translateY(-50%) scale(1.1);
-}
-
 /* ==================== ESTADO COLLAPSED ==================== */
 .sidebar.collapsed .logo-text,
 .sidebar.collapsed .nav-label,
@@ -271,6 +294,7 @@
 
 .sidebar.collapsed .user-info {
   justify-content: center;
+  padding: 0.75rem;
 }
 
 .sidebar.collapsed .logout-btn {
@@ -278,19 +302,69 @@
   padding: 0.75rem;
 }
 
+/* ==================== MOBILE ==================== */
+.mobile-overlay {
+  display: none;
+  position: fixed;
+  inset: 0;
+  background: rgba(0, 0, 0, 0.5);
+  z-index: 999;
+  opacity: 0;
+  visibility: hidden;
+  transition: opacity 0.3s ease, visibility 0.3s ease;
+}
+
+.mobile-overlay.active {
+  opacity: 1;
+  visibility: visible;
+}
+
+.mobile-menu-btn {
+  display: none;
+  position: fixed;
+  top: 1rem;
+  left: 1rem;
+  width: 48px;
+  height: 48px;
+  background: #0f766e;
+  border: none;
+  border-radius: 12px;
+  color: white;
+  font-size: 1.5rem;
+  cursor: pointer;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.15);
+  z-index: 998;
+  align-items: center;
+  justify-content: center;
+  transition: all 0.2s ease;
+}
+
+.mobile-menu-btn:hover {
+  background: #115e59;
+  transform: scale(1.05);
+}
+
 /* ==================== RESPONSIVE ==================== */
-@media (max-width: 768px) {
+@media (max-width: 1024px) {
   .sidebar {
-    width: 260px;
     transform: translateX(-100%);
   }
 
-  .sidebar.show {
+  .sidebar.mobile-open {
     transform: translateX(0);
   }
 
   .sidebar.collapsed {
+    width: 260px;
     transform: translateX(-100%);
+  }
+
+  .mobile-overlay {
+    display: block;
+  }
+
+  .mobile-menu-btn {
+    display: flex;
   }
 
   .toggle-btn {
@@ -298,8 +372,22 @@
   }
 }
 
+@media (max-width: 768px) {
+  .sidebar {
+    width: 280px;
+  }
+}
+
 @media (max-width: 480px) {
   .sidebar {
     width: 100%;
+  }
+
+  .nav-item {
+    padding: 0 0.5rem;
+  }
+
+  .sidebar-header {
+    padding: 1.25rem 1rem;
   }
 }

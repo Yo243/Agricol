@@ -1,0 +1,227 @@
+/* ===========================================================
+   THEME GLOBAL DE AGRICOL (Mini UI Kit compatible con tu CSS)
+   No reemplaza tu código: lo unifica y profesionaliza.
+   =========================================================== */
+
+/* ---------------------
+   PALETA DE COLORES
+---------------------- */
+:root {
+  /* Verde corporativo agrícola */
+  --primary: #1a7f5a;
+  --primary-light: #38a37c;
+  --primary-dark: #166649;
+
+  /* Grises corporativos */
+  --gray-900: #1a1a1a;
+  --gray-700: #3f3f3f;
+  --gray-500: #6b6b6b;
+  --gray-300: #d1d1d1;
+  --gray-200: #e5e5e5;
+  --gray-100: #f3f3f3;
+
+  /* Estados */
+  --success-bg: #d1f0d0;
+  --success-text: #2e7d32;
+
+  --warning-bg: #fff4d8;
+  --warning-text: #b68a00;
+
+  --danger-bg: #fde4e4;
+  --danger-text: #c0392b;
+
+  --info-bg: #e9f3ff;
+  --info-text: #2667cf;
+
+  /* UI */
+  --radius: 12px;
+  --radius-sm: 6px;
+  --radius-lg: 16px;
+
+  --shadow-card: 0 4px 14px rgba(0, 0, 0, 0.06);
+  --shadow-soft: 0 2px 10px rgba(0, 0, 0, 0.04);
+
+  --transition: 0.25s ease;
+}
+
+/* ---------------------
+   TARJETAS (ui-card)
+---------------------- */
+.ui-card {
+  background: #ffffff;
+  border-radius: var(--radius-lg);
+  border: 1px solid var(--gray-200);
+  box-shadow: var(--shadow-card);
+  padding: 1.5rem;
+  transition: var(--transition);
+}
+
+.ui-card:hover {
+  border-color: var(--gray-300);
+}
+
+/* ---------------------
+   SECCIONES
+---------------------- */
+.ui-section {
+  margin-bottom: 1.75rem;
+}
+
+/* ---------------------
+   TITULOS Y ENCABEZADOS
+---------------------- */
+.ui-page-header {
+  font-size: 1.9rem;
+  font-weight: 600;
+  color: var(--gray-900);
+  margin-bottom: 1rem;
+}
+
+.ui-subtitle {
+  font-size: 1rem;
+  color: var(--gray-600);
+  margin-bottom: 1.25rem;
+}
+
+/* ---------------------
+   INPUTS (ui-input)
+---------------------- */
+.ui-input {
+  border-radius: var(--radius);
+  border: 1px solid var(--gray-300);
+  padding: 0.6rem 0.9rem;
+  font-size: 0.95rem;
+  transition: var(--transition);
+  background: #fff;
+}
+
+.ui-input:focus {
+  border-color: var(--primary);
+  box-shadow: 0 0 0 2px rgba(26, 127, 90, 0.15);
+  outline: none;
+}
+
+/* ---------------------
+   BOTONES (ui-button)
+---------------------- */
+.ui-button {
+  font-size: 0.95rem;
+  padding: 0.6rem 1.2rem;
+  border-radius: var(--radius);
+  font-weight: 500;
+  cursor: pointer;
+  transition: var(--transition);
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+}
+
+.ui-button-primary {
+  background: var(--primary);
+  color: white;
+}
+
+.ui-button-primary:hover {
+  background: var(--primary-dark);
+}
+
+.ui-button-outline {
+  border: 1px solid var(--primary);
+  color: var(--primary-dark);
+}
+
+.ui-button-outline:hover {
+  background: var(--primary-light);
+  color: white;
+}
+
+/* ---------------------
+   BADGES (ui-badge)
+---------------------- */
+.ui-badge {
+  padding: 0.25rem 0.65rem;
+  border-radius: var(--radius-sm);
+  font-size: 0.78rem;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.4px;
+  display: inline-block;
+}
+
+.ui-badge-success {
+  background: var(--success-bg);
+  color: var(--success-text);
+}
+
+.ui-badge-warning {
+  background: var(--warning-bg);
+  color: var(--warning-text);
+}
+
+.ui-badge-danger {
+  background: var(--danger-bg);
+  color: var(--danger-text);
+}
+
+.ui-badge-info {
+  background: var(--info-bg);
+  color: var(--info-text);
+}
+
+/* ---------------------
+   TABLAS (ui-table)
+---------------------- */
+.ui-table {
+  width: 100%;
+  border-collapse: collapse;
+}
+
+.ui-table th {
+  background: var(--gray-100);
+  padding: 0.85rem;
+  font-weight: 600;
+  text-align: left;
+  color: var(--gray-700);
+  border-bottom: 1px solid var(--gray-300);
+}
+
+.ui-table td {
+  padding: 0.85rem;
+  border-bottom: 1px solid var(--gray-200);
+}
+
+.ui-table tr:hover td {
+  background: var(--gray-100);
+}
+
+/* ---------------------
+   CARDS ESTADISTICAS (ui-stat-card)
+---------------------- */
+.ui-stat-card {
+  background: white;
+  border-radius: var(--radius-lg);
+  padding: 1.25rem;
+  box-shadow: var(--shadow-soft);
+  border: 1px solid var(--gray-200);
+  transition: var(--transition);
+}
+
+.ui-stat-card:hover {
+  border-color: var(--gray-300);
+}
+
+/* ---------------------
+   UTILS
+---------------------- */
+.ui-flex-between {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.ui-flex-center {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+}

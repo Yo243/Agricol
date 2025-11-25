@@ -1,179 +1,332 @@
-<!-- src/app/modules/orden-aplicacion/pages/orden-create/orden-create.component.html -->
+<!-- Nueva Orden de Aplicación -->
 
 <div class="page-container">
+  <!-- Header -->
   <div class="page-header">
-    <h1>Nueva Orden de Aplicación</h1>
+    <div class="header-content">
+      <h1 class="page-title">
+        <svg class="title-icon" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"/>
+        </svg>
+        Nueva Orden de Aplicación
+      </h1>
+      <p class="page-subtitle">Crea una orden basada en recetas y parcelas</p>
+    </div>
   </div>
 
-  <div *ngIf="error" class="alert alert-danger">{{ error }}</div>
-  <div *ngIf="success" class="alert alert-success">{{ success }}</div>
-  <div *ngIf="loading" class="loading-spinner">Procesando...</div>
+  <!-- Alertas -->
+  <div *ngIf="error" class="alert alert-error">
+    <svg class="alert-icon" fill="currentColor" viewBox="0 0 20 20">
+      <path fill-rule="evenodd"
+            d="M10 18a8 8 0 100-16 8 8 0 000 16zM8.707 7.293a1 1 0 00-1.414 1.414L8.586 10l-1.293 1.293a1 1 0 101.414 1.414L10 11.414l1.293 1.293a1 1 0 001.414-1.414L11.414 10l1.293-1.293a1 1 0 00-1.414-1.414L10 8.586 8.707 7.293z"
+            clip-rule="evenodd"/>
+    </svg>
+    <span>{{ error }}</span>
+  </div>
 
-  <form (ngSubmit)="onSubmit()" *ngIf="!loading" class="orden-form">
-    
-    <!-- Sección: Información Básica -->
-    <div class="form-section">
-      <h2>Información Básica</h2>
+  <div *ngIf="success" class="alert alert-success">
+    <svg class="alert-icon" fill="currentColor" viewBox="0 0 20 20">
+      <path fill-rule="evenodd"
+            d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z"
+            clip-rule="evenodd"/>
+    </svg>
+    <span>{{ success }}</span>
+  </div>
 
-      <div class="form-row">
-        <div class="form-group">
-          <label for="parcela">Parcela *</label>
-          <select 
-            id="parcela" 
-            [(ngModel)]="orden.parcelaId" 
-            name="parcelaId" 
-            required 
-            class="form-control">
-            <option [value]="0">Selecciona una parcela</option>
-            <option *ngFor="let parcela of parcelas" [value]="parcela.id">
-              {{ parcela.nombre }} - {{ parcela.superficie }} ha
-            </option>
-          </select>
-          <small *ngIf="orden.parcelaId > 0" class="form-hint">
-            Superficie disponible: {{ getParcelaSuperficie(orden.parcelaId) }} ha
-          </small>
+  <!-- Loading -->
+  <div *ngIf="loading" class="loading-overlay">
+    <div class="loading-card">
+      <svg class="loading-spinner" fill="none" viewBox="0 0 24 24">
+        <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
+        <path class="opacity-75" fill="currentColor"
+              d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+      </svg>
+      <p class="loading-text">Procesando orden...</p>
+    </div>
+  </div>
+
+  <!-- Formulario -->
+  <form (ngSubmit)="onSubmit()" *ngIf="!loading" class="form-grid">
+
+    <!-- Columna Principal -->
+    <div class="form-main">
+
+      <!-- Sección: Información Básica -->
+      <div class="form-card">
+        <div class="card-header">
+          <h2 class="card-title">
+            <span class="step-badge">1</span>
+            Información Básica
+          </h2>
         </div>
+        <div class="card-body">
 
-        <div class="form-group">
-          <label for="receta">Receta de Aplicación *</label>
-          <select 
-            id="receta" 
-            [(ngModel)]="orden.recetaId" 
-            name="recetaId" 
-            (change)="onRecetaChange()"
-            required 
-            class="form-control">
-            <option [value]="0">Selecciona una receta</option>
-            <option *ngFor="let receta of recetas" [value]="receta.id">
-              {{ receta.nombre }}
-              <span *ngIf="receta.etapaCultivo"> - {{ receta.etapaCultivo }}</span>
-            </option>
-          </select>
+          <div class="form-row-2">
+            <!-- Parcela -->
+            <div class="form-group">
+              <label class="form-label" for="parcela">
+                Parcela <span class="required">*</span>
+              </label>
+              <select
+                id="parcela"
+                [(ngModel)]="orden.parcelaId"
+                name="parcelaId"
+                required
+                class="form-input">
+                <option [value]="0">Selecciona una parcela</option>
+                <option *ngFor="let parcela of parcelas" [value]="parcela.id">
+                  {{ parcela.nombre }} - {{ parcela.superficie }} ha
+                </option>
+              </select>
+              <small *ngIf="orden.parcelaId > 0" class="form-hint">
+                <svg class="hint-icon" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                        d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"/>
+                </svg>
+                Superficie disponible:
+                <strong>{{ getParcelaSuperficie(orden.parcelaId) }} ha</strong>
+              </small>
+            </div>
+
+            <!-- Receta -->
+            <div class="form-group">
+              <label class="form-label" for="receta">
+                Receta de Aplicación <span class="required">*</span>
+              </label>
+              <select
+                id="receta"
+                [(ngModel)]="orden.recetaId"
+                name="recetaId"
+                (change)="onRecetaChange()"
+                required
+                class="form-input">
+                <option [value]="0">Selecciona una receta</option>
+                <option *ngFor="let receta of recetas" [value]="receta.id">
+                  {{ receta.nombre }} <span *ngIf="receta.etapaCultivo">- {{ receta.etapaCultivo }}</span>
+                </option>
+              </select>
+            </div>
+          </div>
+
+          <div class="form-row-2">
+            <!-- Hectáreas -->
+            <div class="form-group">
+              <label class="form-label" for="hectareas">
+                Hectáreas a Aplicar <span class="required">*</span>
+              </label>
+              <div class="input-with-icon">
+                <svg class="input-icon" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                        d="M3 12l2-2m0 0l7-7 7 7M5 10v10a1 1 0 001 1h3m10-11l2 2m-2-2v10a1 1 0 01-1 1h-3m-6 0a1 1 0 001-1v-4a1 1 0 011-1h2a1 1 0 011 1v4a1 1 0 001 1m-6 0h6"/>
+                </svg>
+                <input
+                  type="number"
+                  id="hectareas"
+                  [(ngModel)]="orden.hectareasAplicadas"
+                  (ngModelChange)="onHectareasChange()"
+                  name="hectareas"
+                  min="0.01"
+                  step="0.01"
+                  required
+                  placeholder="0.00"
+                  class="form-input input-with-padding">
+                <span class="input-unit">ha</span>
+              </div>
+            </div>
+
+            <!-- Fecha -->
+            <div class="form-group">
+              <label class="form-label" for="fecha">
+                Fecha de Aplicación
+              </label>
+              <div class="input-with-icon">
+                <svg class="input-icon" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                        d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z"/>
+                </svg>
+                <input
+                  type="date"
+                  id="fecha"
+                  [(ngModel)]="orden.fechaAplicacion"
+                  name="fecha"
+                  class="form-input input-with-padding">
+              </div>
+            </div>
+          </div>
+
+          <!-- Observaciones -->
+          <div class="form-group">
+            <label class="form-label" for="observaciones">
+              Observaciones
+            </label>
+            <textarea
+              id="observaciones"
+              [(ngModel)]="orden.observaciones"
+              name="observaciones"
+              rows="4"
+              placeholder="Notas adicionales sobre la aplicación, condiciones especiales, etc..."
+              class="form-textarea"></textarea>
+          </div>
+
         </div>
       </div>
 
-      <div class="form-row">
-        <div class="form-group">
-          <label for="hectareas">Hectáreas a Aplicar *</label>
-          <input 
-            type="number" 
-            id="hectareas" 
-            [(ngModel)]="orden.hectareasAplicadas"
-            (ngModelChange)="onHectareasChange()"
-            name="hectareas"
-            min="0.01"
-            step="0.01"
-            required
-            class="form-control">
+      <!-- Sección: Insumos Calculados -->
+      <div class="form-card" *ngIf="detallesCalculados.length > 0">
+        <div class="card-header">
+          <h2 class="card-title">
+            <span class="step-badge">2</span>
+            Insumos Requeridos (Calculado Automáticamente)
+          </h2>
+          <button
+            type="button"
+            class="btn-validate"
+            (click)="validarStock()">
+            <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                    d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2m-6 9l2 2 4-4"/>
+            </svg>
+            <span>Validar Stock</span>
+          </button>
         </div>
-
-        <div class="form-group">
-          <label for="fecha">Fecha de Aplicación</label>
-          <input 
-            type="date" 
-            id="fecha" 
-            [(ngModel)]="orden.fechaAplicacion"
-            name="fecha"
-            class="form-control">
+        <div class="card-body">
+          <div class="table-container">
+            <table class="detalle-table">
+              <thead>
+              <tr>
+                <th class="th-producto">Producto</th>
+                <th class="th-cantidad">Cantidad</th>
+                <th class="th-unidad">Unidad</th>
+                <th class="th-costo-unit">Costo Unit.</th>
+                <th class="th-costo-total">Costo Total</th>
+              </tr>
+              </thead>
+              <tbody>
+              <tr *ngFor="let detalle of detallesCalculados" class="table-row">
+                <td class="td-producto">{{ detalle.insumo?.nombre }}</td>
+                <td class="td-cantidad">{{ detalle.cantidadCalculada.toFixed(2) }}</td>
+                <td class="td-unidad">{{ detalle.unidadMedida }}</td>
+                <td class="td-costo-unit">${{ detalle.costoUnitario.toFixed(2) }}</td>
+                <td class="td-costo-total">${{ detalle.costoTotal.toFixed(2) }}</td>
+              </tr>
+              </tbody>
+              <tfoot>
+              <tr class="total-row">
+                <td colspan="4" class="td-total-label">Costo Total:</td>
+                <td class="td-total-value">${{ costoTotal.toFixed(2) }}</td>
+              </tr>
+              </tfoot>
+            </table>
+          </div>
         </div>
       </div>
 
-      <div class="form-group">
-        <label for="observaciones">Observaciones</label>
-        <textarea 
-          id="observaciones" 
-          [(ngModel)]="orden.observaciones"
-          name="observaciones"
-          rows="3"
-          placeholder="Notas adicionales sobre la aplicación..."
-          class="form-control"></textarea>
-      </div>
     </div>
 
-    <!-- Sección: Detalles Calculados -->
-    <div class="form-section" *ngIf="detallesCalculados.length > 0">
-      <div class="section-header">
-        <h2>Insumos Requeridos (Calculado Automáticamente)</h2>
-        <button 
-          type="button" 
-          class="btn btn-secondary" 
-          (click)="validarStock()">
-          Validar Stock
+    <!-- Sidebar -->
+    <div class="form-sidebar">
+
+      <!-- Card de Resumen -->
+      <div class="summary-card" *ngIf="detallesCalculados.length > 0">
+        <div class="summary-header">
+          <h3 class="summary-title">
+            <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                    d="M9 7h6m0 10v-3m-3 3h.01M9 17h.01M9 14h.01M12 14h.01M15 11h.01M12 11h.01M9 11h.01M7 21h10a2 2 0 002-2V5a2 2 0 00-2-2H7a2 2 0 00-2 2v14a2 2 0 002 2z"/>
+            </svg>
+            Resumen
+          </h3>
+        </div>
+        <div class="summary-body">
+          <div class="summary-item">
+            <span class="summary-label">Total Insumos</span>
+            <span class="summary-value">{{ detallesCalculados.length }}</span>
+          </div>
+          <div class="summary-item">
+            <span class="summary-label">Hectáreas</span>
+            <span class="summary-value">{{ orden.hectareasAplicadas || 0 }} ha</span>
+          </div>
+          <div class="summary-divider"></div>
+          <div class="summary-item-total">
+            <span class="summary-total-label">Costo Total</span>
+            <span class="summary-total-value">${{ costoTotal.toFixed(2) }}</span>
+          </div>
+        </div>
+      </div>
+
+      <!-- Validación de Stock -->
+      <div class="validation-card" *ngIf="mostrandoValidacion && validacionStock">
+        <div class="validation-header"
+             [ngClass]="validacionStock.esValido ? 'validation-success' : 'validation-warning'">
+          <svg *ngIf="validacionStock.esValido" class="validation-icon" fill="currentColor" viewBox="0 0 20 20">
+            <path fill-rule="evenodd"
+                  d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z"
+                  clip-rule="evenodd"/>
+          </svg>
+          <svg *ngIf="!validacionStock.esValido" class="validation-icon" fill="currentColor" viewBox="0 0 20 20">
+            <path fill-rule="evenodd"
+                  d="M8.257 3.099c.765-1.36 2.722-1.36 3.486 0l5.58 9.92c.75 1.334-.213 2.98-1.742 2.98H4.42c-1.53 0-2.493-1.646-1.743-2.98l5.58-9.92zM11 13a1 1 0 11-2 0 1 1 0 012 0zm-1-8a1 1 0 00-1 1v3a1 1 0 002 0V6a1 1 0 00-1-1z"
+                  clip-rule="evenodd"/>
+          </svg>
+          <h3 class="validation-title">
+            {{ validacionStock.esValido ? 'Stock Disponible' : 'Stock Insuficiente' }}
+          </h3>
+        </div>
+
+        <div class="validation-body" *ngIf="!validacionStock.esValido">
+          <p class="validation-message">Los siguientes insumos no tienen stock suficiente:</p>
+
+          <div class="stock-errors">
+            <div *ngFor="let error of validacionStock.errores" class="stock-error-item">
+              <div class="error-name">{{ error.insumoNombre }}</div>
+              <div class="error-details">
+                <span class="error-detail">
+                  <span class="error-label">Requerido:</span>
+                  <span class="error-value">{{ error.cantidadRequerida }}</span>
+                </span>
+                <span class="error-detail">
+                  <span class="error-label">Disponible:</span>
+                  <span class="error-value">{{ error.stockDisponible }}</span>
+                </span>
+                <span class="error-detail faltante">
+                  <span class="error-label">Faltante:</span>
+                  <span class="error-value-danger">{{ error.faltante }}</span>
+                </span>
+              </div>
+            </div>
+          </div>
+
+          <p class="validation-note">
+            Puedes crear la orden de todas formas, pero quedará pendiente hasta que haya stock suficiente.
+          </p>
+        </div>
+      </div>
+
+      <!-- Botones de Acción -->
+      <div class="action-buttons">
+        <button
+          type="button"
+          class="btn-action btn-cancel"
+          (click)="onCancel()">
+          <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                  d="M6 18L18 6M6 6l12 12"/>
+          </svg>
+          <span>Cancelar</span>
+        </button>
+        <button
+          type="submit"
+          class="btn-action btn-submit"
+          [disabled]="detallesCalculados.length === 0 || loading">
+          <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                  d="M5 13l4 4L19 7"/>
+          </svg>
+          <span>Crear Orden</span>
         </button>
       </div>
 
-      <div class="detalle-table">
-        <table>
-          <thead>
-            <tr>
-              <th>Insumo</th>
-              <th>Cantidad Calculada</th>
-              <th>Unidad</th>
-              <th>Costo Unit.</th>
-              <th>Costo Total</th>
-            </tr>
-          </thead>
-          <tbody>
-            <tr *ngFor="let detalle of detallesCalculados">
-              <td>{{ detalle.insumo?.nombre }}</td>
-              <td class="text-right">{{ detalle.cantidadCalculada.toFixed(2) }}</td>
-              <td>{{ detalle.unidadMedida }}</td>
-              <td class="text-right">${{ detalle.costoUnitario.toFixed(2) }}</td>
-              <td class="text-right">${{ detalle.costoTotal.toFixed(2) }}</td>
-            </tr>
-          </tbody>
-          <tfoot>
-            <tr class="total">
-              <td colspan="4"><strong>Costo Total:</strong></td>
-              <td class="text-right"><strong>${{ costoTotal.toFixed(2) }}</strong></td>
-            </tr>
-          </tfoot>
-        </table>
-      </div>
     </div>
 
-    <!-- Validación de Stock -->
-    <div class="form-section" *ngIf="mostrandoValidacion && validacionStock">
-      <h2>Validación de Stock</h2>
-
-      <div *ngIf="validacionStock.esValido" class="alert alert-success">
-        ✓ Stock disponible para todos los insumos
-      </div>
-
-      <div *ngIf="!validacionStock.esValido" class="alert alert-warning">
-        <h3>⚠️ Stock Insuficiente</h3>
-        <p>Los siguientes insumos no tienen stock suficiente:</p>
-        
-        <div class="stock-errors">
-          <div *ngFor="let error of validacionStock.errores" class="stock-error-item">
-            <div class="error-header">
-              <strong>{{ error.insumoNombre }}</strong>
-            </div>
-            <div class="error-details">
-              <span>Requerido: {{ error.cantidadRequerida }}</span>
-              <span>Disponible: {{ error.stockDisponible }}</span>
-              <span class="faltante">Faltante: {{ error.faltante }}</span>
-            </div>
-          </div>
-        </div>
-
-        <p class="warning-note">
-          Puedes crear la orden, pero quedará pendiente hasta tener stock suficiente.
-        </p>
-      </div>
-    </div>
-
-    <!-- Botones de Acción -->
-    <div class="form-actions">
-      <button type="button" class="btn btn-secondary" (click)="onCancel()">
-        Cancelar
-      </button>
-      <button 
-        type="submit" 
-        class="btn btn-primary" 
-        [disabled]="detallesCalculados.length === 0 || loading">
-        Crear Orden
-      </button>
-    </div>
   </form>
 </div>

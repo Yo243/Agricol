@@ -1,0 +1,495 @@
+/* ============================================================
+   MODAL EDIT-ITEM – Estilo Corporativo AgriCol (Mejorado)
+   Versión profesional con mejor alineación y espaciado
+   ============================================================ */
+
+/* ---------- OVERLAY ---------- */
+
+:host ::ng-deep .modal-overlay {
+  background: rgba(0, 0, 0, 0.5);
+  backdrop-filter: blur(3px);
+}
+
+/* ---------- MODAL BASE ---------- */
+
+.modal-container {
+  border-radius: 16px;
+  overflow: hidden;
+  background: white;
+  box-shadow: 0 20px 50px rgba(0, 0, 0, 0.2);
+  transition: all 0.3s ease;
+}
+
+/* ---------- HEADER FIJO ---------- */
+
+.modal-header {
+  background: linear-gradient(135deg, #2563eb 0%, #1e40af 100%);
+  padding: 1.5rem 2rem;
+  position: sticky;
+  top: 0;
+  z-index: 30;
+  box-shadow: 0 4px 12px rgba(37, 99, 235, 0.2);
+}
+
+.modal-header h3 {
+  color: white;
+  font-size: 1.35rem;
+  font-weight: 700;
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  letter-spacing: -0.025em;
+}
+
+.modal-close-btn {
+  background: transparent;
+  border: none;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  padding: 0.35rem;
+  border-radius: 8px;
+}
+
+.modal-close-btn:hover {
+  background: rgba(255, 255, 255, 0.15);
+  transform: scale(1.1);
+}
+
+/* ---------- ALERTAS DE STATUS ---------- */
+
+.success-box,
+.error-box {
+  border-radius: 12px;
+  padding: 1.25rem 1.5rem;
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+  margin: 1.5rem 2rem;
+  font-size: 0.95rem;
+  font-weight: 500;
+  animation: slideDown 0.3s ease;
+}
+
+@keyframes slideDown {
+  from {
+    opacity: 0;
+    transform: translateY(-10px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.success-box {
+  background: linear-gradient(135deg, #e9f7ef 0%, #d5f0e1 100%);
+  color: #1b5e20;
+  border: 1px solid #2e7d32;
+  border-left: 5px solid #2e7d32;
+  box-shadow: 0 2px 8px rgba(46, 125, 50, 0.1);
+}
+
+.error-box {
+  background: linear-gradient(135deg, #fdecea 0%, #fbe4e0 100%);
+  color: #a52a2a;
+  border: 1px solid #c0392b;
+  border-left: 5px solid #c0392b;
+  box-shadow: 0 2px 8px rgba(192, 57, 43, 0.1);
+}
+
+/* ---------- FORMULARIO CON SCROLL ---------- */
+
+.form-section {
+  padding: 2rem;
+  overflow-y: auto;
+  flex: 1;
+}
+
+/* Scroll personalizado */
+.form-section::-webkit-scrollbar {
+  width: 10px;
+}
+
+.form-section::-webkit-scrollbar-track {
+  background: #f1f5f9;
+  border-radius: 10px;
+}
+
+.form-section::-webkit-scrollbar-thumb {
+  background: linear-gradient(180deg, #cbd5e1 0%, #94a3b8 100%);
+  border-radius: 10px;
+  border: 2px solid #f1f5f9;
+}
+
+.form-section::-webkit-scrollbar-thumb:hover {
+  background: linear-gradient(180deg, #94a3b8 0%, #64748b 100%);
+}
+
+/* ---------- GRUPOS DE FORMULARIO ---------- */
+
+.form-group {
+  margin-bottom: 2.5rem;
+  padding-bottom: 2rem;
+  border-bottom: 2px solid #f1f5f9;
+}
+
+.form-group:last-child {
+  border-bottom: none;
+  padding-bottom: 0;
+}
+
+/* ---------- TÍTULOS DE SECCIÓN ---------- */
+
+.section-title {
+  font-size: 1.15rem;
+  font-weight: 700;
+  color: #111827;
+  margin-bottom: 1.5rem;
+  display: flex;
+  align-items: center;
+  gap: 0.85rem;
+}
+
+.section-badge {
+  width: 36px;
+  height: 36px;
+  border-radius: 50%;
+  flex-shrink: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-weight: 800;
+  font-size: 1rem;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+}
+
+.section-1 { 
+  background: linear-gradient(135deg, #dbeafe 0%, #bfdbfe 100%); 
+  color: #1e40af; 
+}
+.section-2 { 
+  background: linear-gradient(135deg, #d1fae5 0%, #a7f3d0 100%); 
+  color: #047857; 
+}
+.section-3 { 
+  background: linear-gradient(135deg, #f3e8ff 0%, #e9d5ff 100%); 
+  color: #6b21a8; 
+}
+.section-4 { 
+  background: linear-gradient(135deg, #fef3c7 0%, #fde68a 100%); 
+  color: #92400e; 
+}
+.section-5 { 
+  background: linear-gradient(135deg, #fed7aa 0%, #fdba74 100%); 
+  color: #9a3412; 
+}
+.section-6 { 
+  background: linear-gradient(135deg, #f3f4f6 0%, #e5e7eb 100%); 
+  color: #374151; 
+}
+
+/* ---------- LABELS Y INPUTS ---------- */
+
+label {
+  font-size: 0.9rem;
+  color: #374151;
+  font-weight: 600;
+  margin-bottom: 0.5rem;
+  display: block;
+}
+
+label .text-red-500 {
+  color: #dc2626;
+  margin-left: 2px;
+}
+
+/* Inputs generales */
+input,
+select,
+textarea {
+  border-radius: 10px !important;
+  border: 1.5px solid #d1d5db !important;
+  background: white !important;
+  font-size: 0.95rem !important;
+  padding: 0.75rem 1rem !important;
+  transition: all 0.25s ease !important;
+  font-family: inherit;
+  width: 100%;
+}
+
+input:hover,
+select:hover,
+textarea:hover {
+  border-color: #9ca3af !important;
+}
+
+input:focus,
+select:focus,
+textarea:focus {
+  border-color: #2563eb !important;
+  box-shadow: 0 0 0 3px rgba(37, 99, 235, 0.12) !important;
+  outline: none !important;
+}
+
+input::placeholder,
+textarea::placeholder {
+  color: #9ca3af;
+  font-size: 0.9rem;
+}
+
+/* Textarea */
+textarea {
+  resize: none !important;
+  line-height: 1.6;
+}
+
+/* ---------- CAMPOS CON ICONO DE DINERO ---------- */
+
+.relative input[type="number"] {
+  padding-left: 2.5rem !important;
+}
+
+/* ---------- CAJA DE VALOR CALCULADO ---------- */
+
+.value-box {
+  background: linear-gradient(135deg, #fef3c7 0%, #fde68a 100%);
+  border: 2px solid #fbbf24;
+  border-radius: 12px;
+  padding: 1rem 1.25rem;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  min-height: 56px;
+  box-shadow: 0 2px 8px rgba(251, 191, 36, 0.15);
+  transition: all 0.3s ease;
+}
+
+.value-box:hover {
+  box-shadow: 0 4px 12px rgba(251, 191, 36, 0.25);
+  transform: translateY(-2px);
+}
+
+.value-box p {
+  font-size: 1.5rem;
+  font-weight: 800;
+  color: #92400e;
+  letter-spacing: -0.025em;
+}
+
+/* ---------- CHECKBOX "ACTIVO" ---------- */
+
+.checkbox-wrapper {
+  border-radius: 12px;
+  padding: 1.25rem;
+  border: 2px solid #d1d5db;
+  transition: all 0.25s ease;
+  display: flex;
+  align-items: start;
+  gap: 1rem;
+  background: linear-gradient(135deg, #ffffff 0%, #f9fafb 100%);
+}
+
+.checkbox-wrapper:hover {
+  background: linear-gradient(135deg, #f9fafb 0%, #f3f4f6 100%);
+  border-color: #10b981;
+  box-shadow: 0 2px 8px rgba(16, 185, 129, 0.1);
+}
+
+.checkbox-wrapper input[type="checkbox"] {
+  margin-top: 0.25rem;
+  cursor: pointer;
+  width: 20px !important;
+  height: 20px !important;
+  padding: 0 !important;
+}
+
+.checkbox-wrapper label {
+  margin: 0;
+  cursor: pointer;
+}
+
+/* ---------- FOOTER FIJO ---------- */
+
+.modal-footer {
+  position: sticky;
+  bottom: 0;
+  background: linear-gradient(180deg, #fafafa 0%, #ffffff 100%);
+  padding: 1.5rem 2rem;
+  border-top: 2px solid #e5e7eb;
+  z-index: 30;
+  box-shadow: 0 -4px 12px rgba(0, 0, 0, 0.05);
+}
+
+/* ---------- BOTONES ---------- */
+
+.btn-cancel,
+.btn-submit {
+  font-size: 0.95rem;
+  font-weight: 600;
+  padding: 0.95rem 1.5rem;
+  border-radius: 10px;
+  transition: all 0.2s ease;
+  border: none;
+  cursor: pointer;
+  text-align: center;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.5rem;
+}
+
+.btn-cancel {
+  background: #e5e7eb;
+  color: #374151;
+}
+
+.btn-cancel:hover {
+  background: #d1d5db;
+  transform: translateY(-1px);
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+}
+
+.btn-submit {
+  background: linear-gradient(135deg, #2563eb 0%, #1e40af 100%);
+  color: white;
+  box-shadow: 0 4px 12px rgba(37, 99, 235, 0.3);
+}
+
+.btn-submit:hover:not(:disabled) {
+  background: linear-gradient(135deg, #1e40af 0%, #1e3a8a 100%);
+  transform: translateY(-2px);
+  box-shadow: 0 6px 16px rgba(37, 99, 235, 0.4);
+}
+
+.btn-submit:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+  transform: none !important;
+  box-shadow: none !important;
+}
+
+.loading-spinner {
+  height: 20px;
+  width: 20px;
+}
+
+/* ---------- GRID SYSTEM ---------- */
+
+.grid {
+  display: grid;
+}
+
+.gap-5 {
+  gap: 1.25rem;
+}
+
+.space-y-5 > * + * {
+  margin-top: 1.25rem;
+}
+
+/* ---------- RESPONSIVE ---------- */
+
+@media (max-width: 768px) {
+  .modal-container {
+    border-radius: 0;
+    max-height: 100vh;
+    height: 100vh;
+  }
+
+  .modal-header {
+    padding: 1rem 1.25rem;
+  }
+
+  .modal-header h3 {
+    font-size: 1.15rem;
+  }
+
+  .form-section {
+    padding: 1.5rem;
+  }
+
+  .success-box,
+  .error-box {
+    margin: 1rem 1.25rem;
+    padding: 1rem;
+    font-size: 0.85rem;
+  }
+
+  .form-group {
+    margin-bottom: 2rem;
+    padding-bottom: 1.5rem;
+  }
+
+  .section-title {
+    font-size: 1rem;
+    margin-bottom: 1.25rem;
+  }
+
+  .section-badge {
+    width: 32px;
+    height: 32px;
+    font-size: 0.9rem;
+  }
+
+  .value-box {
+    padding: 0.85rem 1rem;
+  }
+
+  .value-box p {
+    font-size: 1.35rem;
+  }
+
+  .modal-footer {
+    padding: 1rem 1.25rem;
+  }
+
+  .btn-cancel,
+  .btn-submit {
+    padding: 0.85rem 1.25rem;
+    font-size: 0.9rem;
+  }
+}
+
+@media (min-width: 769px) {
+  .grid.md\\:grid-cols-2 {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+
+  .grid.md\\:grid-cols-3 {
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+  }
+
+  .grid.md\\:grid-cols-4 {
+    grid-template-columns: repeat(4, minmax(0, 1fr));
+  }
+
+  .md\\:col-span-2 {
+    grid-column: span 2 / span 2;
+  }
+
+  .md\\:col-span-3 {
+    grid-column: span 3 / span 3;
+  }
+}
+
+/* ---------- MEJORAS DE ACCESIBILIDAD ---------- */
+
+*:focus-visible {
+  outline: 2px solid #2563eb;
+  outline-offset: 2px;
+}
+
+/* ---------- ANIMACIONES ---------- */
+
+@keyframes fadeIn {
+  from {
+    opacity: 0;
+  }
+  to {
+    opacity: 1;
+  }
+}
+
+.modal-container {
+  animation: fadeIn 0.3s ease;
+}

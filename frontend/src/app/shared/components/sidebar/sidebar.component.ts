@@ -8,6 +8,7 @@ interface MenuItem {
   route: string;
   badge?: string;
   badgeColor?: string;
+  requiresAdmin?: boolean;
 }
 
 @Component({
@@ -20,57 +21,56 @@ interface MenuItem {
 export class SidebarComponent implements OnInit {
   userName: string = 'Usuario';
   userRole: string = 'Administrador';
+  isAdmin: boolean = true;
   isCollapsed: boolean = false;
+  isMobileMenuOpen: boolean = false;
 
   menuItems: MenuItem[] = [
     {
       label: 'Dashboard',
       icon: '📊',
-      route: '/dashboard'
+      route: '/dashboard',
+      requiresAdmin: false
     },
     {
       label: 'Inventario',
       icon: '📦',
       route: '/inventario',
       badge: '2',
-      badgeColor: 'warning'
+      badgeColor: 'warning',
+      requiresAdmin: false
     },
     {
       label: 'Recetas',
       icon: '📋',
-      route: '/receta'
+      route: '/receta',
+      requiresAdmin: false
     },
     {
       label: 'Órdenes',
       icon: '🎯',
       route: '/ordenes',
       badge: '3',
-      badgeColor: 'info'
+      badgeColor: 'info',
+      requiresAdmin: false
     },
     {
       label: 'Parcelas',
       icon: '🌾',
-      route: '/parcelas'
-    },
-    {
-      label: 'Trazabilidad',
-      icon: '🔍',
-      route: '/trazabilidad'
+      route: '/parcelas',
+      requiresAdmin: false
     },
     {
       label: 'Reportes',
       icon: '📈',
-      route: '/reportes'
+      route: '/reportes',
+      requiresAdmin: false
     },
     {
       label: 'Usuarios',
       icon: '👥',
-      route: '/usuarios'
-    },
-    {
-      label: 'Roles',
-      icon: '🔐',
-      route: '/roles'
+      route: '/usuarios',
+      requiresAdmin: true
     }
   ];
 
@@ -82,7 +82,17 @@ export class SidebarComponent implements OnInit {
     if (user.name) {
       this.userName = user.name;
       this.userRole = user.role === 'admin' ? 'Administrador' : 'Operador';
+      this.isAdmin = user.role === 'admin';
     }
+  }
+
+  get filteredMenuItems(): MenuItem[] {
+    return this.menuItems.filter(item => {
+      if (item.requiresAdmin && !this.isAdmin) {
+        return false;
+      }
+      return true;
+    });
   }
 
   isActive(route: string): boolean {
@@ -91,6 +101,14 @@ export class SidebarComponent implements OnInit {
 
   toggleSidebar(): void {
     this.isCollapsed = !this.isCollapsed;
+  }
+
+  toggleMobileMenu(): void {
+    this.isMobileMenuOpen = !this.isMobileMenuOpen;
+  }
+
+  closeMobileMenu(): void {
+    this.isMobileMenuOpen = false;
   }
 
   logout(): void {

@@ -1,0 +1,211 @@
+/* ============================================================
+   INVENTARIO AGRICOL – ESTILOS PROFESIONALES Y CONSISTENTES
+   Este CSS NO rompe tu Tailwind, NO cambia tu HTML,
+   solo refina y unifica tu estilo visual.
+   ============================================================ */
+
+/* ---------- LAYOUT GLOBAL ---------- */
+
+:host {
+  display: block;
+  width: 100%;
+}
+
+/* ---------- HEADER ---------- */
+
+header {
+  border-bottom: 1px solid #e5e7eb;
+  background: white;
+}
+
+header h1 {
+  letter-spacing: -0.5px;
+}
+
+/* ---------- TARJETAS DE ESTADÍSTICAS ---------- */
+
+.stat-card {
+  background: white;
+  border-radius: 14px;
+  padding: 1.25rem;
+  border: 1px solid #e5e7eb;
+  box-shadow: 0 4px 14px rgba(0, 0, 0, 0.04);
+  transition: 0.25s ease;
+}
+
+.stat-card:hover {
+  border-color: #d1d5db;
+}
+
+.stat-icon {
+  width: 44px;
+  height: 44px;
+  background: #f3f4f6;
+  border-radius: 12px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+/* ---------- FILTROS ---------- */
+
+.filtros-card {
+  background: white;
+  border-radius: 14px;
+  border: 1px solid #e5e7eb;
+  box-shadow: 0 4px 14px rgba(0, 0, 0, 0.04);
+}
+
+.filtros-card label {
+  font-weight: 500;
+  color: #374151;
+}
+
+/* Inputs refinados */
+.filtros-card input,
+.filtros-card select {
+  border-radius: 10px !important;
+  border: 1px solid #d1d5db !important;
+  transition: 0.25s ease !important;
+}
+
+.filtros-card input:focus,
+.filtros-card select:focus {
+  border-color: #1a7f5a !important;
+  box-shadow: 0 0 0 2px rgba(26, 127, 90, 0.15);
+}
+
+/* ---------- BOTONES DE VISTA ---------- */
+
+.vista-btn {
+  border-radius: 10px;
+  padding: 0.45rem 0.8rem;
+  transition: 0.25s ease;
+  font-size: 0.9rem;
+}
+
+/* ---------- TABLA ---------- */
+
+table th {
+  text-transform: uppercase;
+  font-size: 0.72rem !important;
+  letter-spacing: 0.6px;
+  background: #f9fafb !important;
+}
+
+table td {
+  font-size: 0.88rem;
+}
+
+/* Hover profesional */
+table tr:hover td {
+  background: #f5f7f8 !important;
+}
+
+/* ---------- BADGES DE ESTADO ---------- */
+
+.badge {
+  padding: 0.25rem 0.65rem;
+  border-radius: 6px;
+  font-size: 0.75rem;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.4px;
+}
+
+.badge-disponible {
+  background: #d1f0d0;
+  color: #2e7d32;
+}
+
+.badge-stock-bajo {
+  background: #fff4d8;
+  color: #b68a00;
+}
+
+.badge-agotado {
+  background: #fde4e4;
+  color: #c0392b;
+}
+
+/* ---------- TARJETAS (vista tarjetas) ---------- */
+
+.item-card {
+  background: white;
+  border-radius: 14px;
+  border: 1px solid #e5e7eb;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.04);
+  transition: 0.2s ease;
+}
+
+.item-card:hover {
+  box-shadow: 0 6px 14px rgba(0, 0, 0, 0.07);
+  border-color: #d1d5db;
+}
+
+/* Header degradado suave */
+.item-card-header {
+  background: linear-gradient(to right, #f1faf2, #e6f5ec);
+  border-bottom: 1px solid #e5e7eb;
+}
+
+/* Footer */
+.item-card-footer {
+  background: #f9fafb;
+  border-top: 1px solid #e5e7eb;
+}
+
+/* ---------- PROGRESO DE STOCK ---------- */
+
+.stock-bar {
+  height: 8px;
+  border-radius: 10px;
+  overflow: hidden;
+  background: #e5e7eb;
+}
+
+.stock-bar-fill {
+  height: 100%;
+  transition: 0.25s ease;
+  border-radius: 10px;
+}
+
+.stock-ok {
+  background: #10b981;
+}
+
+.stock-warning {
+  background: #fb923c;
+}
+
+.stock-danger {
+  background: #ef4444;
+}
+
+/* ---------- EMPTY STATE ---------- */
+
+.empty-state {
+  color: #6b7280;
+  text-align: center;
+}
+
+.empty-state h3 {
+  font-size: 0.95rem;
+  font-weight: 600;
+}
+
+.empty-state p {
+  font-size: 0.85rem;
+}
+
+/* ---------- ACCIONES (icon buttons) ---------- */
+
+.action-btn {
+  padding: 0.45rem;
+  border-radius: 10px;
+  transition: 0.2s ease;
+}
+
+.action-btn:hover {
+  background: #f3f4f6;
+}

@@ -1,141 +1,259 @@
-<!-- src/app/modules/orden-aplicacion/pages/orden-list/orden-list.component.html -->
+<!-- Órdenes de Aplicación - Lista -->
 
 <div class="page-container">
+  
+  <!-- Header -->
   <div class="page-header">
-    <h1>Órdenes de Aplicación</h1>
-    <button class="btn btn-primary" (click)="createOrden()">
-      + Nueva Orden
+    <div class="header-content">
+      <h1 class="page-title">
+        <svg class="title-icon" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2m-3 7h3m-3 4h3m-6-4h.01M9 16h.01"/>
+        </svg>
+        Órdenes de Aplicación
+      </h1>
+      <p class="page-subtitle">Gestiona las aplicaciones de insumos en parcelas</p>
+    </div>
+    <button class="btn-create" (click)="createOrden()">
+      <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"/>
+      </svg>
+      <span>Nueva Orden</span>
     </button>
   </div>
 
   <!-- Estadísticas Rápidas -->
-  <div class="stats-container">
-    <div class="stat-card">
-      <div class="stat-label">Total</div>
-      <div class="stat-value">{{ totalOrdenes }}</div>
+  <div class="stats-grid">
+    <div class="stat-card stat-total">
+      <div class="stat-icon"></div>
+      <div class="stat-content">
+        <span class="stat-label">Total Órdenes</span>
+        <span class="stat-value">{{ totalOrdenes }}</span>
+      </div>
     </div>
-    <div class="stat-card warning">
-      <div class="stat-label">Pendientes</div>
-      <div class="stat-value">{{ ordenesPendientes }}</div>
+
+    <div class="stat-card stat-pending">
+      <div class="stat-icon"></div>
+      <div class="stat-content">
+        <span class="stat-label">Pendientes</span>
+        <span class="stat-value">{{ ordenesPendientes }}</span>
+      </div>
     </div>
-    <div class="stat-card success">
-      <div class="stat-label">Aplicadas</div>
-      <div class="stat-value">{{ ordenesAplicadas }}</div>
+
+    <div class="stat-card stat-completed">
+      <div class="stat-icon"></div>
+      <div class="stat-content">
+        <span class="stat-label">Aplicadas</span>
+        <span class="stat-value">{{ ordenesAplicadas }}</span>
+      </div>
+    </div>
+
+    <div class="stat-card stat-cost">
+      <div class="stat-icon"></div>
+      <div class="stat-content">
+        <span class="stat-label">Costo Total</span>
+        <span class="stat-value">${{ totalOrdenes }}</span>
+      </div>
     </div>
   </div>
 
-  <!-- Filtros -->
-  <div class="filters-section">
-    <div class="filter-row">
-      <div class="filter-group">
-        <label>Buscar:</label>
-        <input 
-          type="text" 
-          [(ngModel)]="searchTerm" 
-          (keyup.enter)="onSearch()"
-          placeholder="Buscar por parcela, receta..."
-          class="form-control">
+  <!-- Sección de Filtros -->
+  <div class="filters-card">
+    <div class="filters-header">
+      <h3 class="filters-title">
+        <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 4a1 1 0 011-1h16a1 1 0 011 1v2.586a1 1 0 01-.293.707l-6.414 6.414a1 1 0 00-.293.707V17l-4 4v-6.586a1 1 0 00-.293-.707L3.293 7.293A1 1 0 013 6.586V4z"/>
+        </svg>
+        Filtros de Búsqueda
+      </h3>
+    </div>
+
+    <div class="filters-content">
+      <!-- Búsqueda general -->
+      <div class="filter-group filter-search">
+        <label class="filter-label">Búsqueda General</label>
+        <div class="search-input-wrapper">
+          <svg class="search-icon" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"/>
+          </svg>
+          <input 
+            type="text" 
+            [(ngModel)]="searchTerm" 
+            (keyup.enter)="onSearch()"
+            placeholder="Buscar por parcela, receta, operador..."
+            class="filter-input search-input"
+          />
+        </div>
       </div>
 
+      <!-- Filtro por parcela -->
       <div class="filter-group">
-        <label>Parcela:</label>
-        <select [(ngModel)]="filters.parcelaId" (change)="onFilterChange()" class="form-control">
-          <option [value]="undefined">Todas</option>
+        <label class="filter-label">Parcela</label>
+        <select [(ngModel)]="filters.parcelaId" (change)="onFilterChange()" class="filter-input">
+          <option [value]="undefined">Todas las parcelas</option>
           <option *ngFor="let parcela of parcelas" [value]="parcela.id">
-            {{ parcela.nombre }}
+            {{ parcela.nombre }} ({{ parcela.superficie }} ha)
           </option>
         </select>
       </div>
 
+      <!-- Filtro por estado -->
       <div class="filter-group">
-        <label>Estado:</label>
-        <select [(ngModel)]="filters.estado" (change)="onFilterChange()" class="form-control">
-          <option [value]="undefined">Todos</option>
+        <label class="filter-label">Estado</label>
+        <select [(ngModel)]="filters.estado" (change)="onFilterChange()" class="filter-input">
+          <option [value]="undefined">Todos los estados</option>
           <option value="pendiente">Pendiente</option>
           <option value="aplicada">Aplicada</option>
           <option value="cancelada">Cancelada</option>
         </select>
       </div>
 
+      <!-- Botones de acción -->
       <div class="filter-actions">
-        <button class="btn btn-secondary" (click)="clearFilters()">Limpiar</button>
-        <button class="btn btn-primary" (click)="onSearch()">Buscar</button>
+        <button class="btn-filter btn-clear" (click)="clearFilters()">
+          <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/>
+          </svg>
+          <span>Limpiar</span>
+        </button>
+        <button class="btn-filter btn-apply" (click)="onSearch()">
+          <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"/>
+          </svg>
+          <span>Buscar</span>
+        </button>
       </div>
     </div>
   </div>
 
   <!-- Mensajes -->
-  <div *ngIf="error" class="alert alert-danger">{{ error }}</div>
-  <div *ngIf="loading" class="loading-spinner">Cargando...</div>
+  <div *ngIf="error" class="alert alert-error">
+    <svg class="alert-icon" fill="currentColor" viewBox="0 0 20 20">
+      <path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zM8.707 7.293a1 1 0 00-1.414 1.414L8.586 10l-1.293 1.293a1 1 0 101.414 1.414L10 11.414l1.293 1.293a1 1 0 001.414-1.414L11.414 10l1.293-1.293a1 1 0 00-1.414-1.414L10 8.586 8.707 7.293z" clip-rule="evenodd"/>
+    </svg>
+    <span>{{ error }}</span>
+  </div>
+
+  <!-- Loading -->
+  <div *ngIf="loading" class="loading-card">
+    <svg class="loading-spinner" fill="none" viewBox="0 0 24 24">
+      <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
+      <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+    </svg>
+    <p class="loading-text">Cargando órdenes...</p>
+  </div>
 
   <!-- Tabla de Órdenes -->
-  <div *ngIf="!loading && ordenes.length > 0" class="table-container">
-    <table class="data-table">
-      <thead>
-        <tr>
-          <th>ID</th>
-          <th>Parcela</th>
-          <th>Receta</th>
-          <th>Hectáreas</th>
-          <th>Fecha</th>
-          <th>Costo Total</th>
-          <th>Estado</th>
-          <th>Acciones</th>
-        </tr>
-      </thead>
-      <tbody>
-        <tr *ngFor="let orden of ordenes">
-          <td>#{{ orden.id }}</td>
-          <td>{{ orden.parcela?.nombre }}</td>
-          <td>{{ orden.receta?.nombre }}</td>
-          <td>{{ orden.hectareasAplicadas }} ha</td>
-          <td>{{ orden.fechaAplicacion | date:'dd/MM/yyyy' }}</td>
-          <td>${{ orden.costoTotal?.toFixed(2) }}</td>
-          <td>
-            <span class="badge" [ngClass]="getEstadoBadgeClass(orden.estado)">
-              {{ orden.estado }}
-            </span>
-          </td>
-          <td class="actions">
-            <button 
-              class="btn-icon btn-info" 
-              (click)="viewOrden(orden.id!)" 
-              title="Ver detalle">
-              👁️
-            </button>
-            
-            <button 
-              *ngIf="orden.estado === 'pendiente'"
-              class="btn-icon btn-success" 
-              (click)="cerrarOrden(orden)" 
-              title="Cerrar orden y descontar inventario">
-              ✓
-            </button>
-            
-            <button 
-              *ngIf="orden.estado === 'pendiente'"
-              class="btn-icon btn-warning" 
-              (click)="cancelarOrden(orden)" 
-              title="Cancelar orden">
-              ✕
-            </button>
-            
-            <button 
-              *ngIf="orden.estado !== 'aplicada'"
-              class="btn-icon btn-danger" 
-              (click)="deleteOrden(orden)" 
-              title="Eliminar">
-              🗑️
-            </button>
-          </td>
-        </tr>
-      </tbody>
-    </table>
+  <div *ngIf="!loading && ordenes.length > 0" class="table-card">
+    <div class="table-wrapper">
+      <table class="data-table">
+        <thead>
+          <tr>
+            <th class="th-id">ID</th>
+            <th class="th-parcela">Parcela</th>
+            <th class="th-receta">Receta</th>
+            <th class="th-hectareas">Hectáreas</th>
+            <th class="th-fecha">Fecha</th>
+            <th class="th-costo">Costo Total</th>
+            <th class="th-estado">Estado</th>
+            <th class="th-actions">Acciones</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr *ngFor="let orden of ordenes" class="table-row">
+            <td class="td-id">
+              <span class="order-id">#{{ orden.id }}</span>
+            </td>
+            <td class="td-parcela">
+              <div class="parcela-info">
+                <svg class="parcela-icon" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 12l2-2m0 0l7-7 7 7M5 10v10a1 1 0 001 1h3m10-11l2 2m-2-2v10a1 1 0 01-1 1h-3m-6 0a1 1 0 001-1v-4a1 1 0 011-1h2a1 1 0 011 1v4a1 1 0 001 1m-6 0h6"/>
+                </svg>
+                <span class="parcela-name">{{ orden.parcela?.nombre }}</span>
+              </div>
+            </td>
+            <td class="td-receta">{{ orden.receta?.nombre }}</td>
+            <td class="td-hectareas">
+              <span class="hectareas-badge">{{ orden.hectareasAplicadas }} ha</span>
+            </td>
+            <td class="td-fecha">{{ orden.fechaAplicacion | date:'dd/MM/yyyy' }}</td>
+            <td class="td-costo">
+              <span class="costo-value">${{ orden.costoTotal?.toFixed(2) }}</span>
+            </td>
+            <td class="td-estado">
+              <span class="estado-badge" [ngClass]="getEstadoBadgeClass(orden.estado)">
+                {{  orden.estado  }}
+              </span>
+            </td>
+            <td class="td-actions">
+              <div class="action-buttons">
+                <!-- Ver detalle -->
+                <button 
+                  class="action-btn action-view" 
+                  (click)="viewOrden(orden.id!)" 
+                  title="Ver detalle">
+                  <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"/>
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z"/>
+                  </svg>
+                </button>
+                
+                <!-- Cerrar orden -->
+                <button 
+                  *ngIf="orden.estado === 'pendiente'"
+                  class="action-btn action-complete" 
+                  (click)="cerrarOrden(orden)" 
+                  title="Cerrar y descontar inventario">
+                  <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"/>
+                  </svg>
+                </button>
+                
+                <!-- Cancelar orden -->
+                <button 
+                  *ngIf="orden.estado === 'pendiente'"
+                  class="action-btn action-cancel" 
+                  (click)="cancelarOrden(orden)" 
+                  title="Cancelar orden">
+                  <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/>
+                  </svg>
+                </button>
+                
+                <!-- Eliminar -->
+                <button 
+                  *ngIf="orden.estado !== 'aplicada'"
+                  class="action-btn action-delete" 
+                  (click)="deleteOrden(orden)" 
+                  title="Eliminar orden">
+                  <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"/>
+                  </svg>
+                </button>
+              </div>
+            </td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
   </div>
 
-  <!-- Sin resultados -->
+  <!-- Estado Vacío -->
   <div *ngIf="!loading && ordenes.length === 0" class="empty-state">
-    <p>No se encontraron órdenes de aplicación</p>
-    <button class="btn btn-primary" (click)="createOrden()">Crear Primera Orden</button>
+    <div class="empty-icon">
+      <svg fill="none" stroke="currentColor" viewBox="0 0 24 24">
+        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"/>
+      </svg>
+    </div>
+    <h3 class="empty-title">No hay órdenes registradas</h3>
+    <p class="empty-description">
+      Comienza creando tu primera orden de aplicación para gestionar el uso de insumos en tus parcelas.
+    </p>
+    <button class="btn-empty-action" (click)="createOrden()">
+      <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"/>
+      </svg>
+      <span>Crear Primera Orden</span>
+    </button>
   </div>
+
 </div>

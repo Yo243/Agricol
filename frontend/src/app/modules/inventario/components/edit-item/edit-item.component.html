@@ -2,21 +2,26 @@
   <div class="flex items-center justify-center min-h-screen px-4 pt-4 pb-20 text-center sm:p-0">
     
     <!-- Overlay -->
-    <div class="fixed inset-0 bg-gray-500 bg-opacity-75 transition-opacity" (click)="close()"></div>
+    <div class="fixed inset-0 bg-gray-500 bg-opacity-75 transition-opacity modal-overlay" (click)="close()"></div>
 
     <!-- Modal -->
-    <div class="relative inline-block align-bottom bg-white rounded-lg text-left overflow-hidden shadow-xl transform transition-all sm:my-8 sm:align-middle sm:max-w-4xl sm:w-full max-h-[90vh] overflow-y-auto">
+    <div class="relative inline-block align-bottom bg-white rounded-lg text-left overflow-hidden shadow-xl transform transition-all sm:my-8 sm:align-middle sm:max-w-5xl sm:w-full max-h-[92vh] flex flex-col modal-container">
       
-      <!-- Header -->
-      <div class="bg-gradient-to-r from-blue-600 to-indigo-600 px-6 py-4 sticky top-0 z-10">
+      <!-- Header fijo -->
+      <div class="modal-header">
         <div class="flex items-center justify-between">
-          <h3 class="text-xl font-bold text-white flex items-center gap-2">
-            <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <h3 id="modal-title" class="text-xl font-bold text-white flex items-center gap-3">
+            <svg class="w-7 h-7" fill="none" stroke="currentColor" viewBox="0 0 24 24">
               <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z"/>
             </svg>
-            {{ item ? 'Editar Item' : 'Nuevo Item' }}
+            {{ item ? 'Editar Producto' : 'Nuevo Producto' }}
           </h3>
-          <button (click)="close()" class="text-white hover:text-gray-200 transition-colors">
+          <button 
+            type="button"
+            (click)="close()" 
+            class="modal-close-btn text-white hover:text-gray-200 transition-colors"
+            aria-label="Cerrar modal"
+          >
             <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
               <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/>
             </svg>
@@ -25,63 +30,68 @@
       </div>
 
       <!-- Mensaje de éxito -->
-      <div *ngIf="success" class="bg-green-50 border-l-4 border-green-500 p-4 m-6">
-        <div class="flex items-center gap-2">
-          <svg class="w-6 h-6 text-green-500" fill="currentColor" viewBox="0 0 20 20">
-            <path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clip-rule="evenodd"/>
-          </svg>
-          <p class="text-green-800 font-medium">¡Item guardado exitosamente!</p>
-        </div>
+      <div *ngIf="success" class="success-box">
+        <svg class="w-6 h-6 flex-shrink-0" fill="currentColor" viewBox="0 0 20 20">
+          <path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clip-rule="evenodd"/>
+        </svg>
+        <p class="font-medium">¡Producto {{ item ? 'actualizado' : 'creado' }} exitosamente!</p>
       </div>
 
       <!-- Mensaje de error -->
-      <div *ngIf="error" class="bg-red-50 border-l-4 border-red-500 p-4 m-6">
-        <div class="flex items-center gap-2">
-          <svg class="w-6 h-6 text-red-500" fill="currentColor" viewBox="0 0 20 20">
-            <path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zM8.707 7.293a1 1 0 00-1.414 1.414L8.586 10l-1.293 1.293a1 1 0 101.414 1.414L10 11.414l1.293 1.293a1 1 0 001.414-1.414L11.414 10l1.293-1.293a1 1 0 00-1.414-1.414L10 8.586 8.707 7.293z" clip-rule="evenodd"/>
-          </svg>
-          <p class="text-red-800 font-medium">{{ error }}</p>
-        </div>
+      <div *ngIf="error" class="error-box">
+        <svg class="w-6 h-6 flex-shrink-0" fill="currentColor" viewBox="0 0 20 20">
+          <path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zM8.707 7.293a1 1 0 00-1.414 1.414L8.586 10l-1.293 1.293a1 1 0 101.414 1.414L10 11.414l1.293 1.293a1 1 0 001.414-1.414L11.414 10l1.293-1.293a1 1 0 00-1.414-1.414L10 8.586 8.707 7.293z" clip-rule="evenodd"/>
+        </svg>
+        <p class="font-medium">{{ error }}</p>
       </div>
 
-      <!-- Formulario -->
-      <form [formGroup]="itemForm" (ngSubmit)="onSubmit()" class="p-6">
+      <!-- Formulario (con scroll) -->
+      <form [formGroup]="itemForm" (ngSubmit)="onSubmit()" class="form-section flex-1 overflow-y-auto">
         
-        <!-- Sección: Información General -->
-        <div class="mb-8">
-          <h4 class="text-lg font-semibold text-gray-900 mb-4 flex items-center gap-2">
-            <span class="w-8 h-8 bg-blue-100 rounded-full flex items-center justify-center text-blue-600 font-bold">1</span>
-            Información General
+        <!-- Sección 1: Información General -->
+        <div class="form-group">
+          <h4 class="section-title">
+            <span class="section-badge section-1">1</span>
+            <span>Información General</span>
           </h4>
-          <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
+          <div class="grid grid-cols-1 md:grid-cols-3 gap-5">
             
             <!-- Código -->
             <div>
-              <label class="block text-sm font-semibold text-gray-700 mb-2">Código *</label>
+              <label class="block text-sm font-semibold text-gray-700 mb-2">
+                Código <span class="text-red-500">*</span>
+              </label>
               <input 
                 type="text" 
                 formControlName="codigo" 
                 placeholder="Ej: FRT-001"
-                class="w-full px-4 py-2.5 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+                class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-all"
               />
             </div>
 
             <!-- Nombre -->
             <div class="md:col-span-2">
-              <label class="block text-sm font-semibold text-gray-700 mb-2">Nombre del Producto *</label>
+              <label class="block text-sm font-semibold text-gray-700 mb-2">
+                Nombre del Producto <span class="text-red-500">*</span>
+              </label>
               <input 
                 type="text" 
                 formControlName="nombre" 
                 placeholder="Ej: Fertilizante NPK 15-15-15"
-                class="w-full px-4 py-2.5 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+                class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-all"
               />
             </div>
 
             <!-- Categoría -->
             <div>
-              <label class="block text-sm font-semibold text-gray-700 mb-2">Categoría *</label>
-              <select formControlName="categoria" class="w-full px-4 py-2.5 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500">
-                <option value="">Seleccionar...</option>
+              <label class="block text-sm font-semibold text-gray-700 mb-2">
+                Categoría <span class="text-red-500">*</span>
+              </label>
+              <select 
+                formControlName="categoria" 
+                class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-all"
+              >
+                <option value="">Seleccionar categoría...</option>
                 <option *ngFor="let cat of categorias" [value]="cat">{{ cat }}</option>
               </select>
             </div>
@@ -93,7 +103,7 @@
                 type="text" 
                 formControlName="subcategoria" 
                 placeholder="Ej: Nitrogenado"
-                class="w-full px-4 py-2.5 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+                class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-all"
               />
             </div>
 
@@ -104,7 +114,7 @@
                 type="text" 
                 formControlName="marca" 
                 placeholder="Ej: Yara"
-                class="w-full px-4 py-2.5 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+                class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-all"
               />
             </div>
 
@@ -115,7 +125,7 @@
                 type="text" 
                 formControlName="presentacion" 
                 placeholder="Ej: Saco de 50kg"
-                class="w-full px-4 py-2.5 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+                class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-all"
               />
             </div>
 
@@ -126,7 +136,7 @@
                 type="text" 
                 formControlName="composicion" 
                 placeholder="Ej: NPK 15-15-15"
-                class="w-full px-4 py-2.5 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+                class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-all"
               />
             </div>
 
@@ -137,7 +147,7 @@
                 type="text" 
                 formControlName="concentracion" 
                 placeholder="Ej: 45%"
-                class="w-full px-4 py-2.5 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+                class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-all"
               />
             </div>
 
@@ -146,107 +156,90 @@
               <label class="block text-sm font-semibold text-gray-700 mb-2">Descripción</label>
               <textarea 
                 formControlName="descripcion" 
-                rows="2"
-                placeholder="Descripción detallada del producto..."
-                class="w-full px-4 py-2.5 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 resize-none"
+                rows="3"
+                placeholder="Descripción detallada del producto, usos recomendados, precauciones..."
+                class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 resize-none transition-all"
               ></textarea>
             </div>
 
           </div>
         </div>
 
-        <!-- Sección: Stock e Inventario -->
-        <div class="mb-8">
-          <h4 class="text-lg font-semibold text-gray-900 mb-4 flex items-center gap-2">
-            <span class="w-8 h-8 bg-green-100 rounded-full flex items-center justify-center text-green-600 font-bold">2</span>
-            Stock e Inventario
+        <!-- Sección 2: Stock e Inventario -->
+        <div class="form-group">
+          <h4 class="section-title">
+            <span class="section-badge section-2">2</span>
+            <span>Stock e Inventario</span>
           </h4>
-          <div class="grid grid-cols-1 md:grid-cols-4 gap-4">
+          <div class="grid grid-cols-1 md:grid-cols-4 gap-5">
             
             <!-- Stock Actual -->
             <div>
-              <label class="block text-sm font-semibold text-gray-700 mb-2">Stock Actual *</label>
+              <label class="block text-sm font-semibold text-gray-700 mb-2">
+                Stock Actual <span class="text-red-500">*</span>
+              </label>
               <input 
                 type="number" 
                 step="0.01"
                 formControlName="stockActual" 
                 placeholder="0.00"
-                class="w-full px-4 py-2.5 border border-gray-300 rounded-lg focus:ring-2 focus:ring-green-500 focus:border-green-500"
-              />
-            </div>
-
-            <!-- Stock Mínimo -->
-            <div>
-              <label class="block text-sm font-semibold text-gray-700 mb-2">Stock Mínimo *</label>
-              <input 
-                type="number" 
-                step="0.01"
-                formControlName="stockMinimo" 
-                placeholder="0.00"
-                class="w-full px-4 py-2.5 border border-gray-300 rounded-lg focus:ring-2 focus:ring-green-500 focus:border-green-500"
-              />
-            </div>
-
-            <!-- Stock Máximo -->
-            <div>
-              <label class="block text-sm font-semibold text-gray-700 mb-2">Stock Máximo *</label>
-              <input 
-                type="number" 
-                step="0.01"
-                formControlName="stockMaximo" 
-                placeholder="0.00"
-                class="w-full px-4 py-2.5 border border-gray-300 rounded-lg focus:ring-2 focus:ring-green-500 focus:border-green-500"
+                class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-green-500 focus:border-green-500 transition-all"
               />
             </div>
 
             <!-- Unidad de Medida -->
             <div>
-              <label class="block text-sm font-semibold text-gray-700 mb-2">Unidad de Medida *</label>
-              <select formControlName="unidadMedida" class="w-full px-4 py-2.5 border border-gray-300 rounded-lg focus:ring-2 focus:ring-green-500 focus:border-green-500">
-                <option value="">Seleccionar...</option>
-                <option *ngFor="let unidad of unidades" [value]="unidad">{{ unidad }}</option>
-              </select>
-            </div>
-
-            <!-- Estado -->
-            <div>
-              <label class="block text-sm font-semibold text-gray-700 mb-2">Estado *</label>
-              <select formControlName="estado" class="w-full px-4 py-2.5 border border-gray-300 rounded-lg focus:ring-2 focus:ring-green-500 focus:border-green-500">
-                <option value="">Seleccionar...</option>
-                <option *ngFor="let est of estados" [value]="est">{{ est }}</option>
-              </select>
-            </div>
-
-            <!-- Activo -->
-            <div class="flex items-end">
-              <label class="flex items-center gap-2 cursor-pointer px-4 py-2.5 border border-gray-300 rounded-lg hover:bg-gray-50 transition-colors w-full">
-                <input type="checkbox" formControlName="activo" class="w-5 h-5 text-green-600 border-gray-300 rounded focus:ring-green-500">
-                <span class="text-sm font-semibold text-gray-700">Activo</span>
+              <label class="block text-sm font-semibold text-gray-700 mb-2">
+                Unidad de Medida <span class="text-red-500">*</span>
               </label>
+              <select 
+                formControlName="unidadMedida" 
+                class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-green-500 focus:border-green-500 transition-all"
+              >
+                <option value="">Seleccionar...</option>
+                <option value="kg">Kilogramos (kg)</option>
+                <option value="L">Litros (L)</option>
+                <option value="unidades">Unidades</option>
+                <option value="sacos">Sacos</option>
+                <option value="cajas">Cajas</option>
+              </select>
+            </div>
+
+            <!-- Stock Mínimo -->
+            <div>
+              <label class="block text-sm font-semibold text-gray-700 mb-2">Stock Mínimo</label>
+              <input 
+                type="number" 
+                step="0.01"
+                formControlName="stockMinimo" 
+                placeholder="0.00"
+                class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-green-500 focus:border-green-500 transition-all"
+              />
+            </div>
+
+            <!-- Stock Máximo -->
+            <div>
+              <label class="block text-sm font-semibold text-gray-700 mb-2">Stock Máximo</label>
+              <input 
+                type="number" 
+                step="0.01"
+                formControlName="stockMaximo" 
+                placeholder="0.00"
+                class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-green-500 focus:border-green-500 transition-all"
+              />
             </div>
 
           </div>
         </div>
 
-        <!-- Sección: Ubicación -->
-        <div class="mb-8">
-          <h4 class="text-lg font-semibold text-gray-900 mb-4 flex items-center gap-2">
-            <span class="w-8 h-8 bg-purple-100 rounded-full flex items-center justify-center text-purple-600 font-bold">3</span>
-            Ubicación
+        <!-- Sección 3: Ubicación -->
+        <div class="form-group">
+          <h4 class="section-title">
+            <span class="section-badge section-3">3</span>
+            <span>Ubicación</span>
           </h4>
-          <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
+          <div class="grid grid-cols-1 md:grid-cols-2 gap-5">
             
-            <!-- Ubicación -->
-            <div>
-              <label class="block text-sm font-semibold text-gray-700 mb-2">Ubicación *</label>
-              <input 
-                type="text" 
-                formControlName="ubicacion" 
-                placeholder="Ej: A-01"
-                class="w-full px-4 py-2.5 border border-gray-300 rounded-lg focus:ring-2 focus:ring-purple-500 focus:border-purple-500"
-              />
-            </div>
-
             <!-- Almacén -->
             <div>
               <label class="block text-sm font-semibold text-gray-700 mb-2">Almacén</label>
@@ -254,7 +247,7 @@
                 type="text" 
                 formControlName="almacen" 
                 placeholder="Ej: Almacén Principal"
-                class="w-full px-4 py-2.5 border border-gray-300 rounded-lg focus:ring-2 focus:ring-purple-500 focus:border-purple-500"
+                class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-purple-500 focus:border-purple-500 transition-all"
               />
             </div>
 
@@ -264,33 +257,35 @@
               <input 
                 type="text" 
                 formControlName="seccion" 
-                placeholder="Ej: Fertilizantes"
-                class="w-full px-4 py-2.5 border border-gray-300 rounded-lg focus:ring-2 focus:ring-purple-500 focus:border-purple-500"
+                placeholder="Ej: Pasillo A - Estante 3"
+                class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-purple-500 focus:border-purple-500 transition-all"
               />
             </div>
 
           </div>
         </div>
 
-        <!-- Sección: Precios y Costos -->
-        <div class="mb-8">
-          <h4 class="text-lg font-semibold text-gray-900 mb-4 flex items-center gap-2">
-            <span class="w-8 h-8 bg-yellow-100 rounded-full flex items-center justify-center text-yellow-600 font-bold">4</span>
-            Precios y Costos
+        <!-- Sección 4: Precios y Costos -->
+        <div class="form-group">
+          <h4 class="section-title">
+            <span class="section-badge section-4">4</span>
+            <span>Precios y Costos</span>
           </h4>
-          <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
+          <div class="grid grid-cols-1 md:grid-cols-3 gap-5">
             
             <!-- Costo Unitario -->
             <div>
-              <label class="block text-sm font-semibold text-gray-700 mb-2">Costo Unitario *</label>
+              <label class="block text-sm font-semibold text-gray-700 mb-2">
+                Costo Unitario <span class="text-red-500">*</span>
+              </label>
               <div class="relative">
-                <span class="absolute left-3 top-1/2 -translate-y-1/2 text-gray-500">$</span>
+                <span class="absolute left-4 top-1/2 -translate-y-1/2 text-gray-500 font-medium">$</span>
                 <input 
                   type="number" 
                   step="0.01"
                   formControlName="costoUnitario" 
                   placeholder="0.00"
-                  class="w-full pl-8 pr-4 py-2.5 border border-gray-300 rounded-lg focus:ring-2 focus:ring-yellow-500 focus:border-yellow-500"
+                  class="w-full pl-9 pr-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-yellow-500 focus:border-yellow-500 transition-all"
                 />
               </div>
             </div>
@@ -299,13 +294,13 @@
             <div>
               <label class="block text-sm font-semibold text-gray-700 mb-2">Precio de Venta</label>
               <div class="relative">
-                <span class="absolute left-3 top-1/2 -translate-y-1/2 text-gray-500">$</span>
+                <span class="absolute left-4 top-1/2 -translate-y-1/2 text-gray-500 font-medium">$</span>
                 <input 
                   type="number" 
                   step="0.01"
                   formControlName="precioVenta" 
                   placeholder="0.00"
-                  class="w-full pl-8 pr-4 py-2.5 border border-gray-300 rounded-lg focus:ring-2 focus:ring-yellow-500 focus:border-yellow-500"
+                  class="w-full pl-9 pr-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-yellow-500 focus:border-yellow-500 transition-all"
                 />
               </div>
             </div>
@@ -313,108 +308,137 @@
             <!-- Valor Total (calculado) -->
             <div>
               <label class="block text-sm font-semibold text-gray-700 mb-2">Valor Total Inventario</label>
-              <div class="bg-yellow-50 border border-yellow-200 rounded-lg px-4 py-2.5">
-                <p class="text-lg font-bold text-yellow-700">${{ valorTotal | number:'1.2-2' }}</p>
+              <div class="value-box">
+                <div class="flex items-center gap-2">
+                  <svg class="w-5 h-5 text-yellow-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8c-1.657 0-3 .895-3 2s1.343 2 3 2 3 .895 3 2-1.343 2-3 2m0-8c1.11 0 2.08.402 2.599 1M12 8V7m0 1v8m0 0v1m0-1c-1.11 0-2.08-.402-2.599-1M21 12a9 9 0 11-18 0 9 9 0 0118 0z"/>
+                  </svg>
+                  <p class="text-2xl font-bold text-yellow-700">${{ valorTotal | number:'1.2-2' }}</p>
+                </div>
               </div>
             </div>
 
           </div>
         </div>
 
-        <!-- Sección: Proveedor y Lote -->
-        <div class="mb-8">
-          <h4 class="text-lg font-semibold text-gray-900 mb-4 flex items-center gap-2">
-            <span class="w-8 h-8 bg-orange-100 rounded-full flex items-center justify-center text-orange-600 font-bold">5</span>
-            Proveedor y Lote
+        <!-- Sección 5: Proveedor y Lote -->
+        <div class="form-group">
+          <h4 class="section-title">
+            <span class="section-badge section-5">5</span>
+            <span>Proveedor y Trazabilidad</span>
           </h4>
-          <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
+          <div class="grid grid-cols-1 md:grid-cols-4 gap-5">
             
             <!-- Proveedor -->
-            <div>
+            <div class="md:col-span-2">
               <label class="block text-sm font-semibold text-gray-700 mb-2">Proveedor</label>
               <input 
                 type="text" 
                 formControlName="proveedor" 
                 placeholder="Ej: AgroInsumos S.A."
-                class="w-full px-4 py-2.5 border border-gray-300 rounded-lg focus:ring-2 focus:ring-orange-500 focus:border-orange-500"
+                class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-orange-500 focus:border-orange-500 transition-all"
               />
             </div>
 
             <!-- Número de Lote -->
-            <div>
+            <div class="md:col-span-2">
               <label class="block text-sm font-semibold text-gray-700 mb-2">Número de Lote</label>
               <input 
                 type="text" 
                 formControlName="numeroLote" 
                 placeholder="Ej: LOTE-2024-001"
-                class="w-full px-4 py-2.5 border border-gray-300 rounded-lg focus:ring-2 focus:ring-orange-500 focus:border-orange-500"
+                class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-orange-500 focus:border-orange-500 transition-all"
               />
             </div>
 
             <!-- Fecha de Adquisición -->
-            <div>
+            <div class="md:col-span-2">
               <label class="block text-sm font-semibold text-gray-700 mb-2">Fecha de Adquisición</label>
               <input 
                 type="date" 
                 formControlName="fechaAdquisicion" 
-                class="w-full px-4 py-2.5 border border-gray-300 rounded-lg focus:ring-2 focus:ring-orange-500 focus:border-orange-500"
+                class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-orange-500 focus:border-orange-500 transition-all"
               />
             </div>
 
             <!-- Fecha de Vencimiento -->
-            <div>
+            <div class="md:col-span-2">
               <label class="block text-sm font-semibold text-gray-700 mb-2">Fecha de Vencimiento</label>
               <input 
                 type="date" 
                 formControlName="fechaVencimiento" 
-                class="w-full px-4 py-2.5 border border-gray-300 rounded-lg focus:ring-2 focus:ring-orange-500 focus:border-orange-500"
+                class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-orange-500 focus:border-orange-500 transition-all"
               />
             </div>
 
           </div>
         </div>
 
-        <!-- Sección: Observaciones -->
-        <div class="mb-8">
-          <h4 class="text-lg font-semibold text-gray-900 mb-4 flex items-center gap-2">
-            <span class="w-8 h-8 bg-gray-100 rounded-full flex items-center justify-center text-gray-600 font-bold">6</span>
-            Observaciones
+        <!-- Sección 6: Observaciones y Estado -->
+        <div class="form-group">
+          <h4 class="section-title">
+            <span class="section-badge section-6">6</span>
+            <span>Observaciones y Estado</span>
           </h4>
-          <div>
-            <textarea 
-              formControlName="observaciones" 
-              rows="4"
-              placeholder="Notas adicionales, instrucciones de uso, precauciones, etc..."
-              class="w-full px-4 py-2.5 border border-gray-300 rounded-lg focus:ring-2 focus:ring-gray-500 focus:border-gray-500 resize-none"
-            ></textarea>
+          <div class="space-y-5">
+            
+            <!-- Observaciones -->
+            <div>
+              <label class="block text-sm font-semibold text-gray-700 mb-2">Observaciones</label>
+              <textarea 
+                formControlName="observaciones" 
+                rows="4"
+                placeholder="Notas adicionales, instrucciones de uso, precauciones, condiciones de almacenamiento..."
+                class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-gray-500 focus:border-gray-500 resize-none transition-all"
+              ></textarea>
+            </div>
+
+            <!-- Estado Activo -->
+            <div class="checkbox-wrapper">
+              <input 
+                type="checkbox" 
+                id="activo" 
+                formControlName="activo"
+                class="w-5 h-5 text-green-600 border-gray-300 rounded focus:ring-2 focus:ring-green-500"
+              />
+              <label for="activo" class="flex-1 cursor-pointer">
+                <span class="font-semibold text-gray-900">Producto Activo</span>
+                <p class="text-sm text-gray-600 mt-0.5">El producto aparecerá en el inventario y estará disponible para movimientos</p>
+              </label>
+            </div>
+
           </div>
         </div>
 
-        <!-- Botones -->
-        <div class="flex gap-3 pt-6 border-t border-gray-200 sticky bottom-0 bg-white">
+      </form>
+
+      <!-- Footer fijo con botones -->
+      <div class="modal-footer">
+        <div class="flex flex-col sm:flex-row gap-3">
           <button
             type="button"
             (click)="close()"
-            class="flex-1 bg-gray-200 hover:bg-gray-300 text-gray-800 font-semibold py-3 rounded-lg transition-colors"
+            class="btn-cancel flex-1 text-center"
           >
             Cancelar
           </button>
           <button
             type="submit"
             [disabled]="loading || itemForm.invalid"
-            class="flex-1 bg-blue-600 hover:bg-blue-700 text-white font-semibold py-3 rounded-lg transition-colors disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-2"
+            (click)="onSubmit()"
+            class="btn-submit flex-1 flex items-center justify-center gap-2"
           >
             <svg *ngIf="!loading" class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
               <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"/>
             </svg>
-            <svg *ngIf="loading" class="animate-spin h-5 w-5" fill="none" viewBox="0 0 24 24">
+            <svg *ngIf="loading" class="animate-spin loading-spinner" fill="none" viewBox="0 0 24 24">
               <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
               <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
             </svg>
-            <span>{{ loading ? 'Guardando...' : (item ? 'Actualizar Item' : 'Crear Item') }}</span>
+            <span>{{ loading ? 'Guardando...' : (item ? 'Actualizar Producto' : 'Crear Producto') }}</span>
           </button>
         </div>
-      </form>
+      </div>
 
     </div>
   </div>

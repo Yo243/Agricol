@@ -1,4 +1,12 @@
-<aside class="sidebar" [class.collapsed]="isCollapsed">
+<!-- Overlay para mobile -->
+<div 
+  class="mobile-overlay" 
+  [class.active]="isMobileMenuOpen"
+  (click)="closeMobileMenu()">
+</div>
+
+<!-- Sidebar -->
+<aside class="sidebar" [class.collapsed]="isCollapsed" [class.mobile-open]="isMobileMenuOpen">
   <!-- Header del Sidebar -->
   <div class="sidebar-header">
     <div class="logo-container">
@@ -12,15 +20,21 @@
     </div>
   </div>
 
+  <!-- Botón para colapsar/expandir (Desktop) - FLECHA A LA IZQUIERDA -->
+  <button class="toggle-btn" (click)="toggleSidebar()" [class.collapsed]="isCollapsed">
+    <span class="arrow" [class.rotated]="isCollapsed">◀</span>
+  </button>
+
   <!-- Navegación Principal -->
   <nav class="sidebar-nav">
     <ul class="nav-list">
-      <li *ngFor="let item of menuItems" class="nav-item">
+      <li *ngFor="let item of filteredMenuItems" class="nav-item">
         <a 
           [routerLink]="item.route" 
           class="nav-link"
           [class.active]="isActive(item.route)"
-          [title]="item.label">
+          [title]="item.label"
+          (click)="closeMobileMenu()">
           <span class="nav-icon">{{ item.icon }}</span>
           <span class="nav-label" *ngIf="!isCollapsed">{{ item.label }}</span>
           <span 
@@ -54,10 +68,9 @@
       <span *ngIf="!isCollapsed">Cerrar Sesión</span>
     </button>
   </div>
-
-  <!-- Botón para colapsar/expandir -->
-  <button class="toggle-btn" (click)="toggleSidebar()">
-    <span *ngIf="!isCollapsed">◀</span>
-    <span *ngIf="isCollapsed">▶</span>
-  </button>
 </aside>
+
+<!-- Botón de menú mobile (Hamburguesa) -->
+<button class="mobile-menu-btn" (click)="toggleMobileMenu()">
+  <span class="hamburger">☰</span>
+</button>
