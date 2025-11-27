@@ -5,24 +5,24 @@
   "main": "server.js",
   "type": "commonjs",
   "scripts": {
-    "dev": "nodemon server.js",
-    "start": "node src/server.js",
+  "dev": "nodemon server.js",
+  "start": "node src/server.js",
 
-    "build": "npm run render-build",
+  "build": "npm run render-build",
 
-    "build:frontend": "cd ../frontend && npm install && npm run build --configuration production",
-    
-    "copy:frontend": "rm -rf ./public && mkdir public && cp -r ../frontend/dist/frontend/* ./public/",
+  "build:frontend": "cd ../frontend && npm install && npm run build --configuration production",
+  
+  "copy:frontend": "rm -rf ./public && mkdir public && cp -r ../frontend/dist/frontend/browser/* ./public/",
 
-    "render-build": "npx prisma generate && npm run build:frontend && npm run copy:frontend",
+  "render-build": "npx prisma generate && npm run build:frontend && npm run copy:frontend",
 
-    "prisma:generate": "prisma generate",
-    "prisma:migrate": "prisma migrate dev",
-    "prisma:seed": "node prisma/seed.js",
-    "prisma:studio": "prisma studio",
-    "db:reset": "prisma migrate reset",
-    "db:setup": "prisma generate && prisma migrate dev && prisma db seed"
-  },
+  "prisma:generate": "prisma generate",
+  "prisma:migrate": "prisma migrate dev",
+  "prisma:seed": "node prisma/seed.js",
+  "prisma:studio": "prisma studio",
+  "db:reset": "prisma migrate reset",
+  "db:setup": "prisma generate && prisma migrate dev && prisma db seed"
+},
   "dependencies": {
     "@prisma/client": "^5.22.0",
     "bcryptjs": "^2.4.3",
