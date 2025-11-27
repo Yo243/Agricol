@@ -20,11 +20,17 @@ export class CrearUsuarioComponent implements OnInit {
   private auth = inject(AuthService);
 
   // Datos del formulario
-  formData = {
+  formData: {
+    name: string;
+    email: string;
+    password: string;
+    role: RolUsuario;
+    activo: boolean;
+  } = {
     name: '',
     email: '',
     password: '',
-    role: 'user' as RolUsuario,
+    role: RolUsuario.USER,  // ✅ Usar el enum
     activo: true
   };
 
@@ -40,6 +46,9 @@ export class CrearUsuarioComponent implements OnInit {
     }
   }
 
+  /**
+   * Crea un nuevo usuario
+   */
   crear() {
     // Limpiar mensaje de error previo
     this.errorMessage = '';
@@ -61,8 +70,7 @@ export class CrearUsuarioComponent implements OnInit {
     }
 
     // Validar formato de email
-    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
-    if (!emailRegex.test(this.formData.email)) {
+    if (!this.validateEmail(this.formData.email)) {
       this.errorMessage = 'El formato del correo electrónico no es válido';
       return;
     }
@@ -75,14 +83,18 @@ export class CrearUsuarioComponent implements OnInit {
       email: this.formData.email.trim().toLowerCase(),
       password: this.formData.password,
       role: this.formData.role
+      // ✅ NOTA: activo no está en CreateUsuarioDto, se maneja en el backend con valor por defecto
     };
 
+    console.log('Creando usuario:', payload);
+
     this.userService.crearUsuario(payload).subscribe({
-      next: () => {
+      next: (response) => {
+        console.log('Usuario creado exitosamente:', response);
         this.loading = false;
         this.router.navigate(['/usuarios']);
       },
-      error: err => {
+      error: (err) => {
         this.loading = false;
         
         // Manejo de errores específicos
@@ -103,7 +115,36 @@ export class CrearUsuarioComponent implements OnInit {
     });
   }
 
+  /**
+   * Cancela la creación y vuelve a la lista
+   */
   cancelar() {
-    this.router.navigate(['/usuarios']);
+    // Si hay datos en el formulario, confirmar antes de cancelar
+    if (this.hasUnsavedChanges()) {
+      if (confirm('¿Estás seguro de cancelar? Los datos ingresados se perderán.')) {
+        this.router.navigate(['/usuarios']);
+      }
+    } else {
+      this.router.navigate(['/usuarios']);
+    }
+  }
+
+  /**
+   * Verifica si hay cambios sin guardar
+   */
+  private hasUnsavedChanges(): boolean {
+    return !!(
+      this.formData.name.trim() || 
+      this.formData.email.trim() || 
+      this.formData.password
+    );
+  }
+
+  /**
+   * Valida formato de email
+   */
+  private validateEmail(email: string): boolean {
+    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+    return emailRegex.test(email);
   }
 }
