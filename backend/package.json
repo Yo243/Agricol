@@ -9,8 +9,9 @@
     "start": "node server.js",
 
     "build:frontend": "cd ../frontend && npm install && npm run build --configuration production",
-    "copy:frontend": "rm -rf ./public && mkdir public && cp -r ../frontend/dist/* ./public/",
-    
+
+    "copy:frontend": "rm -rf ./public && mkdir public && cp -r ../frontend/dist/frontend/browser/* ./public/",
+
     "postinstall": "npx prisma generate && npm run build:frontend && npm run copy:frontend",
 
     "prisma:generate": "prisma generate",
