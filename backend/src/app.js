@@ -19,7 +19,8 @@ app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
 
 // ======== SERVIR FRONTEND ANGULAR ========
-const publicPath = path.join(__dirname, 'public');
+// Construcción final de Angular está en backend/public (NO en backend/src/public)
+const publicPath = path.join(__dirname, '../public');
 app.use(express.static(publicPath));
 
 // ======== RUTAS DE API ========
@@ -53,6 +54,3 @@ app.use((err, req, res, next) => {
 });
 
 module.exports = app;
-
-
-
