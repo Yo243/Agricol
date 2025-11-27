@@ -6,7 +6,7 @@
   "type": "commonjs",
   "scripts": {
     "dev": "nodemon server.js",
-    "start": "node server.js",
+    "start": "node src/server.js",
 
     "build:frontend": "cd ../frontend && npm install && npm run build --configuration production",
 
