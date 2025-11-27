@@ -12,7 +12,7 @@
 
     "copy:frontend": "rm -rf ./public && mkdir public && cp -r ../frontend/dist/frontend/browser/* ./public/",
 
-    "postinstall": "npx prisma generate && npm run build:frontend && npm run copy:frontend",
+    "render-build": "npx prisma generate && npm run build:frontend && npm run copy:frontend",
 
     "prisma:generate": "prisma generate",
     "prisma:migrate": "prisma migrate dev",
