@@ -4,7 +4,13 @@ import { RouterModule } from '@angular/router';
 import { FormsModule } from '@angular/forms';
 import { NgApexchartsModule, ChartComponent } from 'ng-apexcharts';
 import { ReportesService } from '../../services/reportes.service';
-import { NgIf, NgFor } from '@angular/common';
+import { 
+  DashboardResponse,
+  ConsumoCultivoItem,
+  CostoMesItem,
+  AlertaItem,
+  PeriodoActivoItem
+} from '../../../../models/reportes.model';
 
 import {
   ApexAxisChartSeries,
@@ -37,23 +43,10 @@ export type ChartOptions = {
   responsive?: ApexResponsive[];
 };
 
-interface DashboardData {
-  resumenGeneral: {
-    totalParcelas: number;
-    hectareasTotales: number;
-    cultivosActivos: number;
-    costoTotalAcumulado: number;
-  };
-  consumoPorCultivo: any[];
-  costosPorMes: any[];
-  alertas: any[];
-  periodosActivos: any[];
-}
-
 @Component({
   selector: 'app-reportes-dashboard',
   standalone: true,
-  imports: [CommonModule, RouterModule, FormsModule, NgApexchartsModule, NgIf, NgIf, ],
+  imports: [CommonModule, RouterModule, FormsModule, NgApexchartsModule],
   templateUrl: './reportes-dashboard.component.html',
   styleUrls: ['./reportes-dashboard.component.css']
 })
@@ -65,8 +58,9 @@ export class ReportesDashboardComponent implements OnInit {
   private reportesService = inject(ReportesService);
 
   // Data
-  dashboardData: DashboardData | null = null;
+  dashboardData: DashboardResponse | null = null;
   loading: boolean = true;
+  errorMessage: string = '';
 
   // Filtros
   fechaInicio: string = '';
@@ -75,7 +69,6 @@ export class ReportesDashboardComponent implements OnInit {
   // Opciones de gráficas
   chartConsumoOptions: Partial<ChartOptions> = {};
   chartCostosOptions: Partial<ChartOptions> = {};
-  chartRendimientoOptions: Partial<ChartOptions> = {};
 
   constructor() {
     this.initDateFilters();
@@ -85,6 +78,9 @@ export class ReportesDashboardComponent implements OnInit {
     this.loadDashboardData();
   }
 
+  /**
+   * Inicializa los filtros de fecha por defecto (últimos 3 meses)
+   */
   initDateFilters(): void {
     const hoy = new Date();
     const tresMesesAtras = new Date();
@@ -94,40 +90,79 @@ export class ReportesDashboardComponent implements OnInit {
     this.fechaFin = hoy.toISOString().split('T')[0];
   }
 
+  /**
+   * Carga los datos del dashboard desde el servicio
+   */
   loadDashboardData(): void {
     this.loading = true;
+    this.errorMessage = '';
     
     this.reportesService.getDashboard(this.fechaInicio, this.fechaFin).subscribe({
-      next: (data) => {
+      next: (data: DashboardResponse) => {
         this.dashboardData = data;
         this.initCharts();
         this.loading = false;
       },
       error: (error) => {
         console.error('Error al cargar dashboard:', error);
+        this.errorMessage = 'Error al cargar los datos del dashboard. Por favor, intente nuevamente.';
         this.loading = false;
       }
     });
   }
 
+  /**
+   * Inicializa las configuraciones de las gráficas ApexCharts
+   */
   initCharts(): void {
     if (!this.dashboardData) return;
 
-    // Gráfica de Consumo por Cultivo
+    this.initConsumoChart();
+    this.initCostosChart();
+  }
+
+  /**
+   * Configura la gráfica de consumo por cultivo (Barras)
+   */
+  private initConsumoChart(): void {
+    if (!this.dashboardData || this.dashboardData.consumoPorCultivo.length === 0) {
+      return;
+    }
+
+    const cultivos = this.dashboardData.consumoPorCultivo.map((c: ConsumoCultivoItem) => c.cultivo);
+    const cantidades = this.dashboardData.consumoPorCultivo.map((c: ConsumoCultivoItem) => c.cantidad);
+
     this.chartConsumoOptions = {
       series: [{
-        name: 'Cantidad (kg/L)',
-        data: this.dashboardData.consumoPorCultivo.map(c => c.cantidad)
+        name: 'Cantidad Consumida',
+        data: cantidades
       }],
       chart: {
         type: 'bar',
         height: 350,
         toolbar: {
-          show: true
+          show: true,
+          tools: {
+            download: true,
+            selection: false,
+            zoom: false,
+            zoomin: false,
+            zoomout: false,
+            pan: false,
+            reset: false
+          }
         },
         animations: {
           enabled: true,
-          speed: 800
+          speed: 800,
+          animateGradually: {
+            enabled: true,
+            delay: 150
+          },
+          dynamicAnimation: {
+            enabled: true,
+            speed: 350
+          }
         }
       },
       plotOptions: {
@@ -142,63 +177,139 @@ export class ReportesDashboardComponent implements OnInit {
       dataLabels: {
         enabled: true,
         formatter: function (val: any) {
-          return val.toFixed(0);
+          return val.toFixed(1);
         },
         offsetY: -20,
         style: {
-          fontSize: '12px',
-          colors: ['#304758']
+          fontSize: '11px',
+          fontWeight: '600',
+          colors: ['#374151']
         }
       },
       xaxis: {
-        categories: this.dashboardData.consumoPorCultivo.map(c => c.cultivo),
+        categories: cultivos,
         position: 'bottom',
         axisBorder: {
           show: false
         },
         axisTicks: {
           show: false
+        },
+        labels: {
+          style: {
+            fontSize: '12px',
+            fontWeight: '500'
+          }
         }
       },
       yaxis: {
         title: {
-          text: 'Cantidad Total'
+          text: 'Cantidad Total',
+          style: {
+            fontSize: '12px',
+            fontWeight: '600',
+            color: '#6b7280'
+          }
+        },
+        labels: {
+          formatter: function (val: any) {
+            return val.toFixed(0);
+          },
+          style: {
+            fontSize: '11px'
+          }
         }
       },
       title: {
-        text: 'Consumo de Insumos por Cultivo',
-        align: 'center',
+        text: '',
+        align: 'left',
         style: {
-          fontSize: '18px',
-          fontWeight: 'bold',
-          color: '#0f766e'
+          fontSize: '14px',
+          fontWeight: '600',
+          color: '#111827'
         }
       },
-      colors: ['#0f766e'],
+      colors: ['#1a7f5a'],
       tooltip: {
         y: {
           formatter: function (val: any) {
-            return val.toFixed(2) + ' kg/L';
+            return val.toFixed(2);
+          }
+        },
+        theme: 'light',
+        style: {
+          fontSize: '12px'
+        }
+      },
+      legend: {
+        show: false
+      },
+      stroke: {
+        show: true,
+        width: 2,
+        colors: ['transparent']
+      },
+      fill: {
+        opacity: 1
+      },
+      responsive: [{
+        breakpoint: 768,
+        options: {
+          chart: {
+            height: 300
+          },
+          plotOptions: {
+            bar: {
+              columnWidth: '80%'
+            }
           }
         }
-      }
+      }]
     };
+  }
 
-    // Gráfica de Costos por Mes
+  /**
+   * Configura la gráfica de evolución de costos (Línea/Área)
+   */
+  private initCostosChart(): void {
+    if (!this.dashboardData || this.dashboardData.costosPorMes.length === 0) {
+      return;
+    }
+
+    const meses = this.dashboardData.costosPorMes.map((c: CostoMesItem) => c.mes);
+    const costos = this.dashboardData.costosPorMes.map((c: CostoMesItem) => c.costo);
+
     this.chartCostosOptions = {
       series: [{
-        name: 'Costos',
-        data: this.dashboardData.costosPorMes.map(c => c.costo)
+        name: 'Costos Mensuales',
+        data: costos
       }],
       chart: {
-        type: 'line',
+        type: 'area',
         height: 350,
         toolbar: {
-          show: true
+          show: true,
+          tools: {
+            download: true,
+            selection: false,
+            zoom: false,
+            zoomin: false,
+            zoomout: false,
+            pan: false,
+            reset: false
+          }
         },
         animations: {
           enabled: true,
-          speed: 800
+          speed: 800,
+          animateGradually: {
+            enabled: true,
+            delay: 150
+          },
+          dynamicAnimation: {
+            enabled: true,
+            speed: 350
+          }
         }
       },
       stroke: {
@@ -206,69 +317,292 @@ export class ReportesDashboardComponent implements OnInit {
         width: 3
       },
       dataLabels: {
-        enabled: false
+        enabled: false,
+        style: {
+          fontSize: '12px',
+          fontWeight: '600'
+        }
       },
       xaxis: {
-        categories: this.dashboardData.costosPorMes.map(c => c.mes),
+        categories: meses,
         title: {
-          text: 'Mes'
+          text: 'Período',
+          style: {
+            fontSize: '12px',
+            fontWeight: '600',
+            color: '#6b7280'
+          }
+        },
+        labels: {
+          style: {
+            fontSize: '11px',
+            fontWeight: '500'
+          }
         }
       },
       yaxis: {
         title: {
-          text: 'Costo ($)'
+          text: 'Costo ($)',
+          style: {
+            fontSize: '12px',
+            fontWeight: '600',
+            color: '#6b7280'
+          }
         },
         labels: {
           formatter: function (val: any) {
-            return '$' + val.toLocaleString();
+            return '$' + val.toLocaleString('es-MX', { maximumFractionDigits: 0 });
+          },
+          style: {
+            fontSize: '11px'
           }
         }
       },
       title: {
-        text: 'Evolución de Costos Mensuales',
-        align: 'center',
+        text: '',
+        align: 'left',
         style: {
-          fontSize: '18px',
-          fontWeight: 'bold',
-          color: '#0f766e'
+          fontSize: '14px',
+          fontWeight: '600',
+          color: '#111827'
         }
       },
-      colors: ['#14b8a6'],
+      colors: ['#10b981'],
       fill: {
         type: 'gradient',
         gradient: {
           shadeIntensity: 1,
-          opacityFrom: 0.7,
-          opacityTo: 0.3,
+          opacityFrom: 0.5,
+          opacityTo: 0.1,
           stops: [0, 90, 100]
         }
       },
       tooltip: {
         y: {
           formatter: function (val: any) {
-            return '$' + val.toLocaleString('es-MX', { minimumFractionDigits: 2 });
+            return '$' + val.toLocaleString('es-MX', { 
+              minimumFractionDigits: 2,
+              maximumFractionDigits: 2 
+            });
+          }
+        },
+        theme: 'light',
+        style: {
+          fontSize: '12px'
+        }
+      },
+      legend: {
+        show: false
+      },
+      plotOptions: {},
+      responsive: [{
+        breakpoint: 768,
+        options: {
+          chart: {
+            height: 300
           }
         }
-      }
+      }]
     };
   }
 
+  /**
+   * Aplica los filtros de fecha y recarga los datos
+   */
   aplicarFiltros(): void {
+    if (!this.fechaInicio || !this.fechaFin) {
+      alert('Por favor seleccione ambas fechas');
+      return;
+    }
+
+    const inicio = new Date(this.fechaInicio);
+    const fin = new Date(this.fechaFin);
+
+    if (inicio > fin) {
+      alert('La fecha de inicio debe ser anterior a la fecha de fin');
+      return;
+    }
+
     this.loadDashboardData();
   }
 
+  /**
+   * Limpia los filtros y restaura los valores por defecto
+   */
   limpiarFiltros(): void {
     this.initDateFilters();
     this.loadDashboardData();
   }
 
-  exportarPDF(): void {
-    // TODO: Implementar exportación a PDF
-    alert('Exportando a PDF...');
+  /**
+   * Exporta el dashboard a PDF
+   * NOTA: Requiere instalar: npm install jspdf html2canvas
+   */
+  async exportarPDF(): Promise<void> {
+    try {
+      // Importación dinámica
+      const jsPDFModule = await import('jspdf');
+      const html2canvasModule = await import('html2canvas');
+      
+      const jsPDF = jsPDFModule.default;
+      const html2canvas = html2canvasModule.default;
+
+      const element = document.querySelector('.dashboard-container');
+      if (!element) {
+        alert('No se pudo encontrar el contenido para exportar');
+        return;
+      }
+
+      // Mostrar mensaje de carga
+      const originalCursor = document.body.style.cursor;
+      document.body.style.cursor = 'wait';
+
+      const canvas = await html2canvas(element as HTMLElement, {
+        scale: 2,
+        useCORS: true,
+        logging: false,
+        backgroundColor: '#fafafa'
+      });
+
+      const imgData = canvas.toDataURL('image/png');
+      const pdf = new jsPDF({
+        orientation: 'p',
+        unit: 'mm',
+        format: 'a4'
+      });
+      
+      const imgWidth = 210; // A4 width in mm
+      const pageHeight = 297; // A4 height in mm
+      const imgHeight = (canvas.height * imgWidth) / canvas.width;
+      let heightLeft = imgHeight;
+      let position = 0;
+
+      // Primera página
+      pdf.addImage(imgData, 'PNG', 0, position, imgWidth, imgHeight);
+      heightLeft -= pageHeight;
+
+      // Páginas adicionales si es necesario
+      while (heightLeft >= 0) {
+        position = heightLeft - imgHeight;
+        pdf.addPage();
+        pdf.addImage(imgData, 'PNG', 0, position, imgWidth, imgHeight);
+        heightLeft -= pageHeight;
+      }
+
+      const fecha = new Date().toISOString().split('T')[0];
+      pdf.save(`dashboard-agricol-${fecha}.pdf`);
+
+      // Restaurar cursor
+      document.body.style.cursor = originalCursor;
+
+    } catch (error) {
+      console.error('Error al generar PDF:', error);
+      alert('Error al generar el PDF. Asegúrese de tener instalados jspdf y html2canvas: npm install jspdf html2canvas');
+    }
   }
 
-  exportarExcel(): void {
-    // TODO: Implementar exportación a Excel
-    alert('Exportando a Excel...');
+  /**
+   * Exporta el dashboard a Excel
+   * NOTA: Requiere instalar: npm install xlsx
+   */
+  async exportarExcel(): Promise<void> {
+    try {
+      // Importación dinámica
+      const XLSX = await import('xlsx');
+
+      if (!this.dashboardData) {
+        alert('No hay datos para exportar');
+        return;
+      }
+
+      // Crear workbook
+      const wb = XLSX.utils.book_new();
+
+      // Hoja 1: Resumen General
+      const resumenData = [
+        ['DASHBOARD AGRICOL - RESUMEN GENERAL'],
+        [],
+        ['Período', `${this.fechaInicio} hasta ${this.fechaFin}`],
+        [],
+        ['Métrica', 'Valor'],
+        ['Total Parcelas', this.dashboardData.resumenGeneral.totalParcelas],
+        ['Hectáreas Totales', this.dashboardData.resumenGeneral.hectareasTotales],
+        ['Cultivos Activos', this.dashboardData.resumenGeneral.cultivosActivos],
+        ['Costo Total Acumulado', this.dashboardData.resumenGeneral.costoTotalAcumulado]
+      ];
+      const wsResumen = XLSX.utils.aoa_to_sheet(resumenData);
+      XLSX.utils.book_append_sheet(wb, wsResumen, 'Resumen');
+
+      // Hoja 2: Consumo por Cultivo
+      if (this.dashboardData.consumoPorCultivo.length > 0) {
+        const consumoHeaders = [['Cultivo', 'Cantidad', 'Unidad', 'Costo']];
+        const consumoData = this.dashboardData.consumoPorCultivo.map((c: ConsumoCultivoItem) => [
+          c.cultivo,
+          c.cantidad,
+          c.unidad,
+          c.costo
+        ]);
+        const wsConsumo = XLSX.utils.aoa_to_sheet([...consumoHeaders, ...consumoData]);
+        XLSX.utils.book_append_sheet(wb, wsConsumo, 'Consumo por Cultivo');
+      }
+
+      // Hoja 3: Costos por Mes
+      if (this.dashboardData.costosPorMes.length > 0) {
+        const costosHeaders = [['Mes', 'Costo', 'Aplicaciones']];
+        const costosData = this.dashboardData.costosPorMes.map((c: CostoMesItem) => [
+          c.mes,
+          c.costo,
+          c.aplicaciones
+        ]);
+        const wsCostos = XLSX.utils.aoa_to_sheet([...costosHeaders, ...costosData]);
+        XLSX.utils.book_append_sheet(wb, wsCostos, 'Costos Mensuales');
+      }
+
+      // Hoja 4: Períodos Activos
+      if (this.dashboardData.periodosActivos.length > 0) {
+        const periodosHeaders = [['Código', 'Cultivo', 'Parcela', 'Hectáreas', 'Fecha Inicio', 'Cosecha Esperada', 'Estado', 'Progreso', 'Costo Total']];
+        const periodosData = this.dashboardData.periodosActivos.map((p: PeriodoActivoItem) => [
+          p.codigo,
+          p.cultivo,
+          p.parcela,
+          p.hectareas,
+          p.fechaInicio,
+          p.fechaCosechaEsperada,
+          p.estado,
+          `${p.progreso}%`,
+          p.costoTotal
+        ]);
+        const wsPeriodos = XLSX.utils.aoa_to_sheet([...periodosHeaders, ...periodosData]);
+        XLSX.utils.book_append_sheet(wb, wsPeriodos, 'Períodos Activos');
+      }
+
+      // Hoja 5: Alertas
+      if (this.dashboardData.alertas.length > 0) {
+        const alertasHeaders = [['Tipo', 'Prioridad', 'Mensaje', 'Fecha']];
+        const alertasData = this.dashboardData.alertas.map((a: AlertaItem) => [
+          a.tipo,
+          a.prioridad,
+          a.mensaje,
+          a.fecha
+        ]);
+        const wsAlertas = XLSX.utils.aoa_to_sheet([...alertasHeaders, ...alertasData]);
+        XLSX.utils.book_append_sheet(wb, wsAlertas, 'Alertas');
+      }
+
+      // Generar archivo
+      const fecha = new Date().toISOString().split('T')[0];
+      XLSX.writeFile(wb, `dashboard-agricol-${fecha}.xlsx`);
+
+    } catch (error) {
+      console.error('Error al generar Excel:', error);
+      alert('Error al generar el archivo Excel. Asegúrese de tener instalado xlsx: npm install xlsx');
+    }
+  }
+
+  /**
+   * Recarga los datos del dashboard
+   */
+  recargarDatos(): void {
+    this.loadDashboardData();
   }
 }

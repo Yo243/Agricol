@@ -50,7 +50,6 @@ exports.getDashboard = async (req, res) => {
       }
     });
 
-    // Obtener nombres de cultivos
     const consumoConNombres = await Promise.all(
       consumoPorCultivo.map(async (item) => {
         const insumo = await prisma.inventarioItem.findUnique({
@@ -78,7 +77,6 @@ exports.getDashboard = async (req, res) => {
       orderBy: { fecha: 'asc' }
     });
 
-    // Agrupar por mes
     const costosPorMes = aplicaciones.reduce((acc, app) => {
       const mes = app.fecha.toLocaleDateString('es-MX', { year: 'numeric', month: 'short' });
       if (!acc[mes]) {
@@ -89,7 +87,7 @@ exports.getDashboard = async (req, res) => {
       return acc;
     }, {});
 
-    // 4. Períodos Activos
+    // 4. Períodos Activos, progreso
     const periodosActivos = await prisma.periodoSiembra.findMany({
       where: { estado: 'En Curso' },
       include: {
@@ -126,7 +124,7 @@ exports.getDashboard = async (req, res) => {
     const alertas = await prisma.alertaInventario.findMany({
       where: {
         leida: false,
-        fecha: { gte: new Date(Date.now() - 7 * 24 * 60 * 60 * 1000) } // Últimos 7 días
+        fecha: { gte: new Date(Date.now() - 7 * 24 * 60 * 60 * 1000) }
       },
       orderBy: { fecha: 'desc' },
       take: 5
@@ -265,17 +263,11 @@ exports.getCostos = async (req, res) => {
       orderBy: { fecha: 'asc' }
     });
 
-    // Agrupar según el parámetro
     const agrupado = aplicaciones.reduce((acc, app) => {
       let clave;
-      
-      if (agruparPor === 'dia') {
-        clave = app.fecha.toLocaleDateString('es-MX');
-      } else if (agruparPor === 'mes') {
-        clave = app.fecha.toLocaleDateString('es-MX', { year: 'numeric', month: 'long' });
-      } else {
-        clave = app.fecha.getFullYear().toString();
-      }
+      if (agruparPor === 'dia') clave = app.fecha.toLocaleDateString('es-MX');
+      else if (agruparPor === 'mes') clave = app.fecha.toLocaleDateString('es-MX', { year: 'numeric', month: 'long' });
+      else clave = app.fecha.getFullYear().toString();
 
       if (!acc[clave]) {
         acc[clave] = { periodo: clave, costo: 0, aplicaciones: 0 };
@@ -361,5 +353,93 @@ exports.getTrazabilidadParcela = async (req, res) => {
   } catch (error) {
     console.error('Error en getTrazabilidadParcela:', error);
     res.status(500).json({ message: 'Error al obtener trazabilidad', error: error.message });
+  }
+};
+
+/**
+ * Costos por hectárea
+ * GET /api/reportes/costos-hectarea
+ */
+exports.getCostosPorHectarea = async (req, res) => {
+  try {
+    const { periodoId } = req.query;
+
+    if (!periodoId) {
+      return res.status(400).json({ message: "periodoId es requerido" });
+    }
+
+    const periodo = await prisma.periodoSiembra.findUnique({
+      where: { id: Number(periodoId) },
+      include: {
+        parcela: { select: { nombre: true } },
+        cultivo: { select: { nombre: true } },
+        aplicaciones: {
+          include: {
+            insumos: true
+          }
+        }
+      }
+    });
+
+    if (!periodo) {
+      return res.status(404).json({ message: "Período no encontrado" });
+    }
+
+    let costoTotal = 0;
+    periodo.aplicaciones.forEach(app => {
+      app.insumos.forEach(i => {
+        costoTotal += i.costoTotal;
+      });
+    });
+
+    const costoPorHa = costoTotal / periodo.hectareasSembradas;
+
+    res.json({
+      periodoId: periodo.id,
+      cultivo: periodo.cultivo.nombre,
+      parcela: periodo.parcela.nombre,
+      hectareas: periodo.hectareasSembradas,
+      costoTotal,
+      costoPorHectarea: costoPorHa
+    });
+
+  } catch (error) {
+    console.error("Error en getCostosPorHectarea:", error);
+    res.status(500).json({ message: "Error calculando costos por hectárea", error: error.message });
+  }
+};
+
+/**
+ * Alertas de inventario
+ * GET /api/reportes/alertas
+ */
+exports.getAlertasInventario = async (req, res) => {
+  try {
+    const alertas = await prisma.alertaInventario.findMany({
+      include: {
+        item: {
+          select: { nombre: true, unidadMedida: true }
+        }
+      },
+      orderBy: { fecha: "desc" },
+      take: 50
+    });
+
+    const resultado = alertas.map(a => ({
+      id: a.id,
+      tipo: a.tipo,
+      prioridad: a.prioridad,
+      titulo: `${a.tipoAlerta || a.tipo} - ${a.itemNombre || a.item?.nombre}`,
+      mensaje: a.mensaje,
+      fecha: a.fecha,
+      insumo: a.item?.nombre || "Insumo desconocido",
+      unidad: a.item?.unidadMedida || ""
+    }));
+
+    res.json(resultado);
+
+  } catch (error) {
+    console.error("Error en getAlertasInventario:", error);
+    res.status(500).json({ message: "Error al obtener alertas", error: error.message });
   }
 };

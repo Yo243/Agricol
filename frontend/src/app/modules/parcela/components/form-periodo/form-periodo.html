@@ -1,163 +1,255 @@
-<div class="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center p-4 z-50">
-  <div class="bg-white rounded-lg max-w-2xl w-full max-h-[90vh] overflow-y-auto">
+<!-- Formulario de Período de Siembra - Mejorado y Minimalista -->
+
+<div class="modal-overlay">
+  <div class="modal-container">
+    
     <!-- Header -->
-    <div class="sticky top-0 bg-white border-b border-gray-200 px-6 py-4">
-      <div class="flex items-center justify-between">
-        <h2 class="text-xl font-bold text-gray-800">🌱 Iniciar Período de Siembra</h2>
-        <button (click)="cerrar()" type="button" class="text-gray-500 hover:text-gray-700 text-2xl">
-          ✕
-        </button>
+    <div class="modal-header">
+      <div class="header-content">
+        <svg class="header-icon" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 21a4 4 0 01-4-4V5a2 2 0 012-2h4a2 2 0 012 2v12a4 4 0 01-4 4zm0 0h12a2 2 0 002-2v-4a2 2 0 00-2-2h-2.343M11 7.343l1.657-1.657a2 2 0 012.828 0l2.829 2.829a2 2 0 010 2.828l-8.486 8.485M7 17h.01"/>
+        </svg>
+        <h2 class="header-title">Iniciar Período de Siembra</h2>
       </div>
+      <button (click)="cerrar()" type="button" class="btn-close">
+        <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/>
+        </svg>
+      </button>
     </div>
 
     <!-- Loading -->
-    <div *ngIf="loadingData" class="p-12 text-center">
-      <div class="inline-block animate-spin rounded-full h-12 w-12 border-4 border-green-500 border-t-transparent"></div>
-      <p class="text-gray-600 mt-4">Cargando datos...</p>
+    <div *ngIf="loadingData" class="loading-container">
+      <svg class="loading-spinner" fill="none" viewBox="0 0 24 24">
+        <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
+        <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+      </svg>
+      <p class="loading-text">Cargando datos...</p>
     </div>
 
-    <!-- Formulario -->
-    <form *ngIf="!loadingData" (ngSubmit)="guardar()" class="p-6 space-y-6">
-      <!-- Selección de Parcela y Cultivo -->
-      <div class="space-y-4">
-        <h3 class="text-lg font-semibold text-gray-700 border-b pb-2">📋 Información General</h3>
-        
-        <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+    <!-- Body -->
+    <form *ngIf="!loadingData" (ngSubmit)="guardar()" class="modal-body">
+      
+      <!-- Sección 1: Información General -->
+      <div class="form-section">
+        <div class="section-header">
+          <div class="section-badge">1</div>
+          <h3 class="section-title">Información General</h3>
+        </div>
+
+        <div class="form-grid">
+          
           <!-- Parcela -->
-          <div>
-            <label class="block text-sm font-medium text-gray-700 mb-1">
-              Parcela <span class="text-red-500">*</span>
+          <div class="form-group">
+            <label class="form-label">
+              <svg class="label-icon" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 20l-5.447-2.724A1 1 0 013 16.382V5.618a1 1 0 011.447-.894L9 7m0 13l6-3m-6 3V7m6 10l4.553 2.276A1 1 0 0021 18.382V7.618a1 1 0 00-.553-.894L15 4m0 13V4m0 0L9 7"/>
+              </svg>
+              Seleccionar Parcela
+              <span class="required">*</span>
             </label>
-            <select
-              [(ngModel)]="formData.parcelaId"
-              name="parcelaId"
-              (ngModelChange)="onParcelaChange()"
-              [disabled]="!!parcelaId"
-              required
-              class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-green-500 focus:border-transparent">
-              <option value="0">Seleccionar parcela...</option>
-              <option *ngFor="let parcela of parcelas" [value]="parcela.id">
-                {{ parcela.nombre }} ({{ parcela.superficieHa }} ha)
-              </option>
-            </select>
+            <div class="select-wrapper">
+              <select
+                [(ngModel)]="formData.parcelaId"
+                name="parcelaId"
+                (ngModelChange)="onParcelaChange()"
+                [disabled]="!!parcelaId"
+                required
+                class="form-select"
+                [class.form-input-disabled]="!!parcelaId">
+                <option value="0">Seleccionar parcela...</option>
+                <option *ngFor="let parcela of parcelas" [value]="parcela.id">
+                  {{ parcela.nombre }} ({{ parcela.superficieHa }} ha)
+                </option>
+              </select>
+              <svg class="select-icon" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"/>
+              </svg>
+            </div>
           </div>
 
           <!-- Cultivo -->
-          <div>
-            <label class="block text-sm font-medium text-gray-700 mb-1">
-              Cultivo <span class="text-red-500">*</span>
+          <div class="form-group">
+            <label class="form-label">
+              <svg class="label-icon" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 21a4 4 0 01-4-4V5a2 2 0 012-2h4a2 2 0 012 2v12a4 4 0 01-4 4zm0 0h12a2 2 0 002-2v-4a2 2 0 00-2-2h-2.343M11 7.343l1.657-1.657a2 2 0 012.828 0l2.829 2.829a2 2 0 010 2.828l-8.486 8.485M7 17h.01"/>
+              </svg>
+              Tipo de Cultivo
+              <span class="required">*</span>
             </label>
-            <select
-              [(ngModel)]="formData.cultivoId"
-              name="cultivoId"
-              (ngModelChange)="onCultivoChange()"
-              required
-              class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-green-500 focus:border-transparent">
-              <option value="0">Seleccionar cultivo...</option>
-              <option *ngFor="let cultivo of cultivos" [value]="cultivo.id">
-                {{ cultivo.nombre }}
-              </option>
-            </select>
+            <div class="select-wrapper">
+              <select
+                [(ngModel)]="formData.cultivoId"
+                name="cultivoId"
+                (ngModelChange)="onCultivoChange()"
+                required
+                class="form-select">
+                <option value="0">Seleccionar cultivo...</option>
+                <option *ngFor="let cultivo of cultivos" [value]="cultivo.id">
+                  {{ cultivo.nombre }}
+                </option>
+              </select>
+              <svg class="select-icon" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"/>
+              </svg>
+            </div>
           </div>
+
         </div>
       </div>
 
-      <!-- Fechas y Hectáreas -->
-      <div class="space-y-4">
-        <h3 class="text-lg font-semibold text-gray-700 border-b pb-2">📅 Fechas y Superficie</h3>
-        
-        <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
-          <!-- Fecha Inicio -->
-          <div>
-            <label class="block text-sm font-medium text-gray-700 mb-1">
-              Fecha de Inicio <span class="text-red-500">*</span>
+      <!-- Sección 2: Fechas y Superficie -->
+      <div class="form-section">
+        <div class="section-header">
+          <div class="section-badge">2</div>
+          <h3 class="section-title">Fechas y Superficie</h3>
+        </div>
+
+        <div class="form-grid form-grid-3">
+          
+          <!-- Fecha de Inicio -->
+          <div class="form-group">
+            <label class="form-label">
+              <svg class="label-icon" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z"/>
+              </svg>
+              Fecha de Inicio
+              <span class="required">*</span>
             </label>
             <input
               type="date"
               [(ngModel)]="formData.fechaInicio"
               name="fechaInicio"
               required
-              class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-green-500 focus:border-transparent">
+              class="form-input">
           </div>
 
           <!-- Fecha Cosecha Esperada -->
-          <div>
-            <label class="block text-sm font-medium text-gray-700 mb-1">
-              Fecha Cosecha Esperada
+          <div class="form-group">
+            <label class="form-label">
+              <svg class="label-icon" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z"/>
+              </svg>
+              Cosecha Esperada
             </label>
             <input
               type="date"
               [(ngModel)]="formData.fechaCosechaEsperada"
               name="fechaCosechaEsperada"
-              class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-green-500 focus:border-transparent">
+              class="form-input">
           </div>
 
           <!-- Hectáreas Sembradas -->
-          <div>
-            <label class="block text-sm font-medium text-gray-700 mb-1">
-              Hectáreas Sembradas <span class="text-red-500">*</span>
+          <div class="form-group">
+            <label class="form-label">
+              <svg class="label-icon" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 5a1 1 0 011-1h14a1 1 0 011 1v2a1 1 0 01-1 1H5a1 1 0 01-1-1V5zM4 13a1 1 0 011-1h6a1 1 0 011 1v6a1 1 0 01-1 1H5a1 1 0 01-1-1v-6zM16 13a1 1 0 011-1h2a1 1 0 011 1v6a1 1 0 01-1 1h-2a1 1 0 01-1-1v-6z"/>
+              </svg>
+              Hectáreas a Sembrar
+              <span class="required">*</span>
             </label>
+            <div class="input-with-unit">
+              <input
+                type="number"
+                [(ngModel)]="formData.hectareasSembradas"
+                name="hectareasSembradas"
+                required
+                min="0.01"
+                step="0.01"
+                placeholder="0.00"
+                class="form-input">
+              <span class="input-unit">ha</span>
+            </div>
+          </div>
+
+        </div>
+      </div>
+
+      <!-- Sección 3: Rendimiento -->
+      <div class="form-section">
+        <div class="section-header">
+          <div class="section-badge">3</div>
+          <h3 class="section-title">Rendimiento Esperado</h3>
+        </div>
+
+        <div class="form-group">
+          <label class="form-label">
+            <svg class="label-icon" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 6l3 1m0 0l-3 9a5.002 5.002 0 006.001 0M6 7l3 9M6 7l6-2m6 2l3-1m-3 1l-3 9a5.002 5.002 0 006.001 0M18 7l3 9m-3-9l-6-2m0-2v2m0 16V5m0 16H9m3 0h3"/>
+            </svg>
+            Rendimiento Esperado (toneladas)
+          </label>
+          <div class="input-with-unit">
             <input
               type="number"
-              [(ngModel)]="formData.hectareasSembradas"
-              name="hectareasSembradas"
-              required
-              min="0.01"
+              [(ngModel)]="formData.rendimientoEsperado"
+              name="rendimientoEsperado"
+              min="0"
               step="0.01"
               placeholder="0.00"
-              class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-green-500 focus:border-transparent">
+              class="form-input">
+            <span class="input-unit">ton</span>
+          </div>
+          <div class="info-box">
+            <svg class="info-icon" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"/>
+            </svg>
+            <p class="info-text">Este valor se calcula automáticamente según el cultivo seleccionado. Puedes ajustarlo manualmente.</p>
           </div>
         </div>
       </div>
 
-      <!-- Rendimiento -->
-      <div class="space-y-4">
-        <h3 class="text-lg font-semibold text-gray-700 border-b pb-2">📊 Rendimiento</h3>
-        
-        <div>
-          <label class="block text-sm font-medium text-gray-700 mb-1">
-            Rendimiento Esperado (ton)
+      <!-- Sección 4: Observaciones -->
+      <div class="form-section">
+        <div class="section-header">
+          <div class="section-badge">4</div>
+          <h3 class="section-title">Notas y Observaciones</h3>
+        </div>
+
+        <div class="form-group">
+          <label class="form-label">
+            <svg class="label-icon" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"/>
+            </svg>
+            Observaciones del Período
           </label>
-          <input
-            type="number"
-            [(ngModel)]="formData.rendimientoEsperado"
-            name="rendimientoEsperado"
-            min="0"
-            step="0.01"
-            placeholder="0.00"
-            class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-green-500 focus:border-transparent">
-          <p class="text-xs text-gray-500 mt-1">
-            Este valor se calcula automáticamente al seleccionar el cultivo
-          </p>
+          <textarea
+            [(ngModel)]="formData.observaciones"
+            name="observaciones"
+            rows="4"
+            placeholder="Añade notas sobre condiciones especiales, planificación, objetivos o cualquier información relevante de este período de siembra..."
+            class="form-textarea"></textarea>
+          <p class="form-hint">Opcional - Información adicional sobre el período de siembra</p>
         </div>
       </div>
 
-      <!-- Observaciones -->
-      <div>
-        <label class="block text-sm font-medium text-gray-700 mb-1">Observaciones</label>
-        <textarea
-          [(ngModel)]="formData.observaciones"
-          name="observaciones"
-          rows="3"
-          placeholder="Notas adicionales sobre este período..."
-          class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-green-500 focus:border-transparent resize-none"></textarea>
-      </div>
-
-      <!-- Botones -->
-      <div class="flex gap-3 pt-4 border-t">
+      <!-- Footer con Botones -->
+      <div class="modal-footer">
         <button
           type="button"
           (click)="cerrar()"
-          class="flex-1 px-4 py-2 border border-gray-300 text-gray-700 rounded-lg hover:bg-gray-50 transition-colors">
-          Cancelar
+          class="btn-secondary">
+          <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/>
+          </svg>
+          <span>Cancelar</span>
         </button>
         <button
           type="submit"
           [disabled]="loading"
-          class="flex-1 px-4 py-2 bg-green-600 text-white rounded-lg hover:bg-green-700 transition-colors disabled:opacity-50 disabled:cursor-not-allowed">
-          {{ loading ? 'Guardando...' : 'Iniciar Período' }}
+          class="btn-primary">
+          <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24" *ngIf="!loading">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"/>
+          </svg>
+          <svg class="w-4 h-4 animate-spin" fill="none" viewBox="0 0 24 24" *ngIf="loading">
+            <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
+            <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+          </svg>
+          <span>{{ loading ? 'Guardando...' : 'Iniciar Período' }}</span>
         </button>
       </div>
+
     </form>
+
   </div>
 </div>

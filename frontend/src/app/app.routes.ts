@@ -131,6 +131,20 @@ export const routes: Routes = [
           import('./modules/usuarios/pages/usuarios-list.component').then(
             (m) => m.UsuariosListComponent
           )
+      },
+      {
+        path: 'usuarios/nuevo',
+        loadComponent: () =>
+          import('./modules/usuarios/components/crear-usuario/crear-usuario.component').then(
+            (m) => m.CrearUsuarioComponent
+          )
+      },
+      {
+        path: 'usuarios/editar/:id',
+        loadComponent: () =>
+          import('./modules/usuarios/components/editar-usuario/editar-usuario.component').then(
+            (m) => m.EditarUsuarioComponent
+          )
       }
       // =========================================================
     ]

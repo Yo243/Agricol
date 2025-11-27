@@ -8,12 +8,16 @@ exports.register = async (req, res) => {
   try {
     const { email, password, name, role } = req.body;
 
+    console.log('=== REGISTER ATTEMPT ===');
+    console.log('Email:', email);
+
     // Verificar si el usuario ya existe
     const existingUser = await prisma.user.findUnique({
       where: { email }
     });
 
     if (existingUser) {
+      console.log('Email ya registrado');
       return res.status(400).json({ 
         error: 'El email ya está registrado' 
       });
@@ -22,19 +26,27 @@ exports.register = async (req, res) => {
     // Hash de la contraseña
     const hashedPassword = await bcrypt.hash(password, 10);
 
-    // Crear usuario
+    // Crear usuario (por defecto activo)
     const user = await prisma.user.create({
       data: {
         email,
         password: hashedPassword,
         name,
-        role: role || 'user'
+        role: role || 'user',
+        activo: true  // ✅ AGREGADO - Por defecto activo
       }
     });
 
+    console.log('Usuario creado:', { id: user.id, email: user.email, activo: user.activo });
+
     // Generar token
     const token = jwt.sign(
-      { userId: user.id, email: user.email, role: user.role },
+      { 
+        userId: user.id, 
+        email: user.email, 
+        role: user.role,
+        activo: user.activo  // ✅ AGREGADO - Incluir en token
+      },
       process.env.JWT_SECRET,
       { expiresIn: process.env.JWT_EXPIRES_IN || '7d' }
     );
@@ -46,7 +58,8 @@ exports.register = async (req, res) => {
         id: user.id,
         email: user.email,
         name: user.name,
-        role: user.role
+        role: user.role,
+        activo: user.activo  // ✅ AGREGADO - Devolver en respuesta
       }
     });
   } catch (error) {
@@ -61,14 +74,33 @@ exports.login = async (req, res) => {
   try {
     const { email, password } = req.body;
 
+    console.log('=== LOGIN ATTEMPT ===');
+    console.log('Email:', email);
+
     // Buscar usuario
     const user = await prisma.user.findUnique({
       where: { email }
     });
 
     if (!user) {
+      console.log('Usuario no encontrado');
       return res.status(401).json({ 
         error: 'Credenciales inválidas' 
+      });
+    }
+
+    console.log('Usuario encontrado:', { 
+      id: user.id, 
+      email: user.email, 
+      role: user.role,
+      activo: user.activo 
+    });
+
+    // ✅ VERIFICAR QUE EL USUARIO ESTÉ ACTIVO
+    if (user.activo === false) {
+      console.log('⛔ Login bloqueado - Usuario inactivo');
+      return res.status(403).json({ 
+        error: 'Tu cuenta ha sido desactivada. Contacta al administrador para más información.' 
       });
     }
 
@@ -76,14 +108,22 @@ exports.login = async (req, res) => {
     const validPassword = await bcrypt.compare(password, user.password);
 
     if (!validPassword) {
+      console.log('Contraseña inválida');
       return res.status(401).json({ 
         error: 'Credenciales inválidas' 
       });
     }
 
+    console.log('✅ Login exitoso');
+
     // Generar token
     const token = jwt.sign(
-      { userId: user.id, email: user.email, role: user.role },
+      { 
+        userId: user.id, 
+        email: user.email, 
+        role: user.role,
+        activo: user.activo  // ✅ AGREGADO - Incluir en token
+      },
       process.env.JWT_SECRET,
       { expiresIn: process.env.JWT_EXPIRES_IN || '7d' }
     );
@@ -95,7 +135,8 @@ exports.login = async (req, res) => {
         id: user.id,
         email: user.email,
         name: user.name,
-        role: user.role
+        role: user.role,
+        activo: user.activo  // ✅ AGREGADO - Devolver en respuesta
       }
     });
   } catch (error) {

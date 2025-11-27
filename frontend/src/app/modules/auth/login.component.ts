@@ -1,82 +1,115 @@
-import { Component, OnInit } from '@angular/core';
-import { FormBuilder, FormGroup, Validators, ReactiveFormsModule } from '@angular/forms';
-import { Router, ActivatedRoute } from '@angular/router';
+import { Component, inject } from '@angular/core';
 import { CommonModule } from '@angular/common';
+import { FormsModule } from '@angular/forms';
+import { Router, RouterModule } from '@angular/router';
 import { AuthService } from '../../core/services/auth.service';
 
 @Component({
   selector: 'app-login',
   standalone: true,
-  imports: [CommonModule, ReactiveFormsModule],
+  imports: [CommonModule, FormsModule, RouterModule],
   templateUrl: './login.component.html',
   styleUrls: ['./login.component.css']
 })
-export class LoginComponent implements OnInit {
-  loginForm: FormGroup;
-  showPassword = false;
-  loading = false;
-  error = '';
-  returnUrl = '';
+export class LoginComponent {
+  private authService = inject(AuthService);
+  private router = inject(Router);
 
-  constructor(
-    private fb: FormBuilder,
-    private authService: AuthService,
-    private router: Router,
-    private route: ActivatedRoute
-  ) {
-    this.loginForm = this.fb.group({
-      email: ['', [Validators.required, Validators.email]],
-      password: ['', [Validators.required, Validators.minLength(6)]]
-    });
-  }
+  // Credenciales
+  email: string = '';
+  password: string = '';
 
-  ngOnInit(): void {
-    // Obtener la URL de retorno
-    this.returnUrl = this.route.snapshot.queryParams['returnUrl'] || '/dashboard';
-  }
+  // Estados
+  loading: boolean = false;
+  showPassword: boolean = false;
+  
+  // Mensajes de error
+  errorMessage: string = '';
+  errorType: 'inactive' | 'credentials' | 'server' | '' = '';
 
-  togglePassword(): void {
-    this.showPassword = !this.showPassword;
-  }
-
+  /**
+   * Maneja el submit del formulario
+   */
   onSubmit(): void {
-    if (this.loginForm.invalid) {
-      this.markFormGroupTouched(this.loginForm);
+    // Limpiar errores previos
+    this.errorMessage = '';
+    this.errorType = '';
+
+    // Validaciones básicas
+    if (!this.email || !this.password) {
+      this.showError('Por favor completa todos los campos', 'credentials');
       return;
     }
 
-    this.loading = true;
-    this.error = '';
+    if (!this.isValidEmail(this.email)) {
+      this.showError('Por favor ingresa un email válido', 'credentials');
+      return;
+    }
 
-    this.authService.login(this.loginForm.value).subscribe({
+    this.login();
+  }
+
+  /**
+   * Realiza el login
+   */
+  private login(): void {
+    this.loading = true;
+
+    this.authService.login({ email: this.email, password: this.password }).subscribe({
       next: (response) => {
-        console.log('Login exitoso:', response.message);
-        this.router.navigate([this.returnUrl]);
+        console.log('Login exitoso:', response);
+        this.loading = false;
+        
+        // Redirigir al dashboard
+        this.router.navigate(['/dashboard']);
       },
       error: (error) => {
-        this.error = error.message || 'Error al iniciar sesión. Verifica tus credenciales.';
+        console.error('Error en login:', error);
         this.loading = false;
-      },
-      complete: () => {
-        this.loading = false;
+
+        // Determinar tipo de error
+        if (error.statusCode === 403) {
+          // ✅ CUENTA INACTIVA
+          this.showError(error.message, 'inactive');
+        } else if (error.statusCode === 401) {
+          // Credenciales incorrectas
+          this.showError(error.message, 'credentials');
+        } else {
+          // Otros errores
+          this.showError(error.message, 'server');
+        }
       }
     });
   }
 
-  // Marcar todos los campos como tocados para mostrar errores
-  private markFormGroupTouched(formGroup: FormGroup): void {
-    Object.keys(formGroup.controls).forEach(key => {
-      const control = formGroup.get(key);
-      control?.markAsTouched();
-    });
+  /**
+   * Muestra un mensaje de error
+   */
+  private showError(message: string, type: 'inactive' | 'credentials' | 'server'): void {
+    this.errorMessage = message;
+    this.errorType = type;
   }
 
-  // Getters para fácil acceso en el template
-  get email() {
-    return this.loginForm.get('email');
+  /**
+   * Toggle para mostrar/ocultar contraseña
+   */
+  togglePasswordVisibility(): void {
+    this.showPassword = !this.showPassword;
   }
 
-  get password() {
-    return this.loginForm.get('password');
+  /**
+   * Valida formato de email
+   */
+  private isValidEmail(email: string): boolean {
+    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+    return emailRegex.test(email);
+  }
+
+  /**
+   * Limpia el mensaje de error
+   */
+  clearError(): void {
+    this.errorMessage = '';
+    this.errorType = '';
   }
 }

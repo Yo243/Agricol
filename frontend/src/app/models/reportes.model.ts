@@ -1,152 +1,162 @@
-// Modelo principal del Dashboard
-export interface DashboardData {
-  resumenGeneral: ResumenGeneral;
-  consumoPorCultivo: ConsumoPorCultivo[];
-  costosPorMes: CostosPorMes[];
-  alertas: Alerta[];
-  periodosActivos: PeriodoSiembraResumen[];
+// ===============================
+// MODELOS DE REPORTES AGRICOL
+// ===============================
+
+// ===============================
+// DASHBOARD
+// ===============================
+export interface DashboardResponse {
+  resumenGeneral: {
+    totalParcelas: number;
+    hectareasTotales: number;
+    cultivosActivos: number;
+    costoTotalAcumulado: number;
+  };
+
+  consumoPorCultivo: ConsumoCultivoItem[];
+  costosPorMes: CostoMesItem[];
+  periodosActivos: PeriodoActivoItem[];
+  alertas: AlertaItem[];
 }
 
-export interface ResumenGeneral {
-  totalParcelas: number;
-  hectareasTotales: number;
-  cultivosActivos: number;
-  costoTotalAcumulado: number;
-}
-
-export interface ConsumoPorCultivo {
+// ===============================
+// CONSUMO POR CULTIVO
+// ===============================
+export interface ConsumoCultivoItem {
   cultivo: string;
   cantidad: number;
   unidad: string;
   costo: number;
 }
 
-export interface CostosPorMes {
+// ===============================
+// COSTOS POR MES
+// ===============================
+export interface CostoMesItem {
   mes: string;
   costo: number;
   aplicaciones: number;
 }
 
-export interface Alerta {
-  id: number;
-  tipo: 'stock' | 'vencimiento' | 'aplicacion' | 'cosecha';
-  titulo: string;
-  mensaje: string;
-  prioridad: 'alta' | 'media' | 'baja';
-  fecha: Date;
-  itemId?: number;
-  leida: boolean;
-}
-
-export interface PeriodoSiembraResumen {
+// ===============================
+// PERÍODOS ACTIVOS
+// ===============================
+export interface PeriodoActivoItem {
   id: number;
   codigo: string;
   cultivo: string;
   parcela: string;
   hectareas: number;
-  fechaInicio: Date;
-  fechaCosechaEsperada: Date;
+  fechaInicio: string;
+  fechaCosechaEsperada: string;
   estado: string;
   progreso: number;
   costoTotal: number;
 }
 
-// Reportes específicos
-
-export interface ReporteConsumo {
-  titulo: string;
-  periodo: string;
-  items: ItemConsumo[];
-  totalCantidad: number;
-  totalCosto: number;
+// ===============================
+// ALERTAS DE INVENTARIO
+// ===============================
+export interface AlertaItem {
+  id: number;
+  tipo: string;
+  prioridad: string;
+  mensaje: string;
+  fecha: string;
 }
 
-export interface ItemConsumo {
+// ===============================
+// CONSUMO POR PARCELA
+// ===============================
+export interface ConsumoParcelaItem {
+  id: number;
+  parcela: string;
+  codigoParcela: string;
+  fecha: string;
+  hectareasAplicadas: number;
+  tipoAplicacion: string;
+  costoTotal: number;
+  insumos: ConsumoInsumoItem[];
+}
+
+export interface ConsumoInsumoItem {
   nombre: string;
-  categoria: string;
   cantidad: number;
   unidad: string;
-  costoUnitario: number;
-  costoTotal: number;
-  cultivo?: string;
-  parcela?: string;
 }
 
-export interface ReporteCostos {
-  titulo: string;
+// ===============================
+// COSTOS POR FECHA
+// ===============================
+export interface CostosResponseItem {
   periodo: string;
+  costo: number;
+  aplicaciones: number;
+}
+
+// ===============================
+// COSTOS POR HECTÁREA
+// ===============================
+export interface CostosHectareaResponse {
+  periodoId: number;
+  cultivo: string;
+  parcela: string;
+  hectareas: number;
   costoTotal: number;
   costoPorHectarea: number;
-  desglosePorCategoria: DesgloseCosto[];
-  desglosePorCultivo: DesgloseCosto[];
-  tendencia: TendenciaCosto[];
 }
 
-export interface DesgloseCosto {
-  nombre: string;
-  costo: number;
-  porcentaje: number;
+// ===============================
+// TRAZABILIDAD DE PARCELA
+// ===============================
+export interface TrazabilidadResponse {
+  parcela: {
+    id: number;
+    nombre: string;
+    codigo: string;
+    superficie: number;
+  };
+  historial: TrazabilidadPeriodoItem[];
 }
 
-export interface TendenciaCosto {
-  periodo: string;
-  costo: number;
-  variacion: number;
-}
-
-export interface ReporteProduccion {
-  titulo: string;
-  periodo: string;
-  rendimientos: RendimientoParcela[];
-  promedioRendimiento: number;
-  totalProduccion: number;
-}
-
-export interface RendimientoParcela {
-  parcela: string;
+export interface TrazabilidadPeriodoItem {
+  id: number;
+  codigo: string;
   cultivo: string;
+  fechaInicio: string;
+  fechaFin: string | null;
+  estado: string;
   hectareas: number;
-  rendimientoEsperado: number;
-  rendimientoReal?: number;
-  diferencia?: number;
-  porcentajeCumplimiento?: number;
-}
-
-export interface Trazabilidad {
-  parcela: string;
-  historial: EventoTrazabilidad[];
-  resumen: ResumenTrazabilidad;
-}
-
-export interface EventoTrazabilidad {
-  fecha: Date;
-  tipo: 'siembra' | 'aplicacion' | 'cosecha' | 'actividad';
-  descripcion: string;
-  detalles: any;
-  responsable?: string;
-  costo?: number;
-}
-
-export interface ResumenTrazabilidad {
-  totalAplicaciones: number;
-  totalInsumos: number;
+  rendimiento: number | null;
   costoTotal: number;
-  rendimientoPromedio: number;
-  periodos: number;
+  aplicaciones: number;
+  detalleAplicaciones: DetalleAplicacionItem[];
 }
 
-// Filtros para reportes
-
-export interface FiltrosReporte {
-  fechaInicio?: string;
-  fechaFin?: string;
-  parcelaId?: number;
-  cultivoId?: number;
-  tipo?: string;
+export interface DetalleAplicacionItem {
+  fecha: string;
+  tipo: string;
+  hectareas: number;
+  costo: number;
+  insumos: DetalleInsumoItem[];
 }
 
-export interface OpcionesExportacion {
-  tipo: 'pdf' | 'excel';
-  incluirGraficas: boolean;
-  orientacion?: 'portrait' | 'landscape';
+export interface DetalleInsumoItem {
+  nombre: string;
+  cantidad: number;
+  unidad: string;
+}
+
+// ===============================
+// ALERTAS (LISTADO COMPLETO)
+// ===============================
+export interface AlertaInventario {
+  id: number;
+  tipo: string;
+  prioridad: string;
+  titulo: string;
+  mensaje: string;
+  fecha: string;
+  insumo: string;
+  unidad: string;
 }

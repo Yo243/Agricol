@@ -1,134 +1,207 @@
+<!-- Gestión de Usuarios - Mejorado y Responsive -->
+
 <div class="usuarios-container">
+
   <!-- Header -->
   <div class="page-header">
     <div class="header-content">
-      <h1>Gestión de Usuarios</h1>
-      <p class="subtitle">Administra los usuarios del sistema y sus permisos</p>
+      <svg class="header-icon" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4.354a4 4 0 110 5.292M15 21H3v-1a6 6 0 0112 0v1zm0 0h6v-1a6 6 0 00-9-5.197M13 7a4 4 0 11-8 0 4 4 0 018 0z"/>
+      </svg>
+      <div class="header-text">
+        <h1 class="page-title">Gestión de Usuarios</h1>
+        <p class="page-subtitle">Administra los usuarios del sistema y sus permisos</p>
+      </div>
     </div>
-    <div class="header-actions">
-      <button class="btn btn-primary" (click)="nuevoUsuario()">
-        <span class="icon">+</span>
-        Nuevo Usuario
-      </button>
-    </div>
+    <button class="btn-create" (click)="nuevoUsuario()">
+      <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"/>
+      </svg>
+      <span>Nuevo Usuario</span>
+    </button>
   </div>
 
   <!-- Loading -->
   <div *ngIf="loading" class="loading-container">
-    <div class="spinner"></div>
-    <p>Cargando usuarios...</p>
+    <svg class="loading-spinner" fill="none" viewBox="0 0 24 24">
+      <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
+      <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+    </svg>
+    <p class="loading-text">Cargando usuarios...</p>
   </div>
 
   <!-- Error -->
   <div *ngIf="errorMessage && !loading" class="error-card">
-    <p>{{ errorMessage }}</p>
-    <button class="btn btn-secondary" (click)="loadUsuarios()">Reintentar</button>
+    <svg class="error-icon" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+      <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"/>
+    </svg>
+    <p class="error-message">{{ errorMessage }}</p>
+    <button class="btn-error-retry" (click)="loadUsuarios()">
+      <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15"/>
+      </svg>
+      <span>Reintentar</span>
+    </button>
   </div>
 
   <!-- Content -->
   <div *ngIf="!loading && !errorMessage" class="content">
+    
     <!-- Estadísticas -->
     <div class="stats-grid">
-      <div class="stat-card">
-        <div class="stat-icon user-icon">
-          <span>👥</span>
+      
+      <div class="stat-card stat-blue">
+        <div class="stat-icon-wrapper">
+          <svg class="stat-icon" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4.354a4 4 0 110 5.292M15 21H3v-1a6 6 0 0112 0v1zm0 0h6v-1a6 6 0 00-9-5.197M13 7a4 4 0 11-8 0 4 4 0 018 0z"/>
+          </svg>
         </div>
         <div class="stat-content">
-          <p class="stat-label">Total Usuarios</p>
-          <p class="stat-value">{{ totalUsuarios }}</p>
+          <span class="stat-label">Total Usuarios</span>
+          <span class="stat-value">{{ totalUsuarios }}</span>
         </div>
       </div>
 
-      <div class="stat-card">
-        <div class="stat-icon admin-icon">
-          <span>🛡️</span>
+      <div class="stat-card stat-green">
+        <div class="stat-icon-wrapper">
+          <svg class="stat-icon" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m5.618-4.016A11.955 11.955 0 0112 2.944a11.955 11.955 0 01-8.618 3.04A12.02 12.02 0 003 9c0 5.591 3.824 10.29 9 11.622 5.176-1.332 9-6.03 9-11.622 0-1.042-.133-2.052-.382-3.016z"/>
+          </svg>
         </div>
         <div class="stat-content">
-          <p class="stat-label">Administradores</p>
-          <p class="stat-value admin-value">{{ totalAdministradores }}</p>
+          <span class="stat-label">Administradores</span>
+          <span class="stat-value stat-value-green">{{ totalAdministradores }}</span>
         </div>
       </div>
 
-      <div class="stat-card">
-        <div class="stat-icon operador-icon">
-          <span>👤</span>
+      <div class="stat-card stat-purple">
+        <div class="stat-icon-wrapper">
+          <svg class="stat-icon" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z"/>
+          </svg>
         </div>
         <div class="stat-content">
-          <p class="stat-label">Operadores</p>
-          <p class="stat-value">{{ totalOperadores }}</p>
+          <span class="stat-label">Operadores</span>
+          <span class="stat-value">{{ totalOperadores }}</span>
         </div>
       </div>
 
-      <div class="stat-card">
-        <div class="stat-icon active-icon">
-          <span>✓</span>
+      <div class="stat-card stat-yellow">
+        <div class="stat-icon-wrapper">
+          <svg class="stat-icon" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"/>
+          </svg>
         </div>
         <div class="stat-content">
-          <p class="stat-label">Usuarios Activos</p>
-          <p class="stat-value active-value">{{ usuariosActivos }}</p>
+          <span class="stat-label">Usuarios Activos</span>
+          <span class="stat-value stat-value-yellow">{{ usuariosActivos }}</span>
         </div>
       </div>
+
     </div>
 
     <!-- Filtros -->
-    <div class="filters-section">
-      <h2 class="section-title">Filtros</h2>
+    <div class="filters-card">
+      <div class="filters-header">
+        <svg class="filters-icon" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 4a1 1 0 011-1h16a1 1 0 011 1v2.586a1 1 0 01-.293.707l-6.414 6.414a1 1 0 00-.293.707V17l-4 4v-6.586a1 1 0 00-.293-.707L3.293 7.293A1 1 0 013 6.586V4z"/>
+        </svg>
+        <span class="filters-title">Filtros de Búsqueda</span>
+      </div>
+
       <div class="filters-grid">
+        
         <div class="form-group">
-          <label>Buscar por nombre o email</label>
+          <label class="form-label">
+            <svg class="label-icon" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"/>
+            </svg>
+            Buscar por nombre o email
+          </label>
           <input 
             type="text" 
-            class="form-control" 
+            class="form-input" 
             [(ngModel)]="filtroNombre"
             placeholder="Buscar usuario...">
         </div>
 
         <div class="form-group">
-          <label>Rol</label>
-          <select class="form-control" [(ngModel)]="filtroRol">
-            <option value="">Todos</option>
-            <option value="admin">Administrador</option>
-            <option value="user">Operador</option>
-          </select>
+          <label class="form-label">
+            <svg class="label-icon" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m5.618-4.016A11.955 11.955 0 0112 2.944a11.955 11.955 0 01-8.618 3.04A12.02 12.02 0 003 9c0 5.591 3.824 10.29 9 11.622 5.176-1.332 9-6.03 9-11.622 0-1.042-.133-2.052-.382-3.016z"/>
+            </svg>
+            Rol
+          </label>
+          <div class="select-wrapper">
+            <select class="form-select" [(ngModel)]="filtroRol">
+              <option value="">Todos los roles</option>
+              <option value="admin">Administrador</option>
+              <option value="user">Operador</option>
+            </select>
+            <svg class="select-icon" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"/>
+            </svg>
+          </div>
         </div>
 
         <div class="form-group">
-          <label>Estado</label>
-          <select class="form-control" [(ngModel)]="filtroEstado">
-            <option value="">Todos</option>
-            <option value="activo">Activo</option>
-            <option value="inactivo">Inactivo</option>
-          </select>
+          <label class="form-label">
+            <svg class="label-icon" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"/>
+            </svg>
+            Estado
+          </label>
+          <div class="select-wrapper">
+            <select class="form-select" [(ngModel)]="filtroEstado">
+              <option value="">Todos los estados</option>
+              <option value="activo">Activo</option>
+              <option value="inactivo">Inactivo</option>
+            </select>
+            <svg class="select-icon" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"/>
+            </svg>
+          </div>
         </div>
 
-        <div class="form-group">
-          <label>&nbsp;</label>
-          <button class="btn btn-secondary btn-block" (click)="limpiarFiltros()">
-            Limpiar Filtros
+        <div class="form-group form-group-button">
+          <label class="form-label">&nbsp;</label>
+          <button class="btn-clear-filters" (click)="limpiarFiltros()">
+            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/>
+            </svg>
+            <span>Limpiar Filtros</span>
           </button>
         </div>
+
       </div>
     </div>
 
     <!-- Tabla de Usuarios -->
-    <div class="table-section">
-      <div class="section-header">
-        <h2 class="section-title">Lista de Usuarios</h2>
-        <p class="section-subtitle">Usuarios registrados en el sistema con sus roles y permisos</p>
+    <div class="table-card">
+      <div class="table-header">
+        <div class="table-header-content">
+          <h2 class="table-title">Lista de Usuarios</h2>
+          <p class="table-subtitle">{{ usuariosFiltrados.length }} usuario(s) encontrado(s)</p>
+        </div>
       </div>
 
       <!-- Empty State -->
       <div *ngIf="usuariosFiltrados.length === 0" class="empty-state">
-        <span class="empty-icon">👥</span>
-        <h3>No se encontraron usuarios</h3>
-        <p>No hay usuarios que coincidan con los filtros seleccionados</p>
-        <button class="btn btn-primary" (click)="limpiarFiltros()">
-          Limpiar Filtros
+        <svg class="empty-icon" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4.354a4 4 0 110 5.292M15 21H3v-1a6 6 0 0112 0v1zm0 0h6v-1a6 6 0 00-9-5.197M13 7a4 4 0 11-8 0 4 4 0 018 0z"/>
+        </svg>
+        <h3 class="empty-title">No se encontraron usuarios</h3>
+        <p class="empty-description">No hay usuarios que coincidan con los filtros seleccionados</p>
+        <button class="btn-empty-action" (click)="limpiarFiltros()">
+          <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15"/>
+          </svg>
+          <span>Limpiar Filtros</span>
         </button>
       </div>
 
-      <!-- Tabla -->
-      <div *ngIf="usuariosFiltrados.length > 0" class="table-container">
+      <!-- Tabla Desktop -->
+      <div *ngIf="usuariosFiltrados.length > 0" class="table-wrapper">
         <table class="usuarios-table">
           <thead>
             <tr>
@@ -137,11 +210,11 @@
               <th>Rol</th>
               <th>Estado</th>
               <th>Último Acceso</th>
-              <th>Acciones</th>
+              <th class="th-actions">Acciones</th>
             </tr>
           </thead>
           <tbody>
-            <tr *ngFor="let usuario of usuariosFiltrados" class="table-row">
+            <tr *ngFor="let usuario of usuariosFiltrados">
               <td>
                 <div class="user-cell">
                   <div class="user-avatar">
@@ -154,12 +227,12 @@
                 <span class="email-text">{{ usuario.email }}</span>
               </td>
               <td>
-                <span class="badge" [ngClass]="getRolClass(usuario.role)">
+                <span class="badge-rol" [ngClass]="getRolClass(usuario.role)">
                   {{ getRolLabel(usuario.role) }}
                 </span>
               </td>
               <td>
-                <span class="badge" [ngClass]="getEstadoClass(usuario)">
+                <span class="badge-estado" [ngClass]="getEstadoClass(usuario)">
                   {{ getEstadoLabel(usuario) }}
                 </span>
               </td>
@@ -169,22 +242,31 @@
               <td>
                 <div class="actions-cell">
                   <button 
-                    class="btn-icon btn-edit" 
+                    class="btn-action btn-edit" 
                     (click)="editarUsuario(usuario.id)"
                     title="Editar usuario">
-                    <span>✏️</span>
+                    <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z"/>
+                    </svg>
                   </button>
                   <button 
-                    class="btn-icon btn-toggle" 
+                    class="btn-action btn-toggle" 
                     (click)="toggleEstado(usuario)"
                     [title]="usuario.activo !== false ? 'Desactivar' : 'Activar'">
-                    <span>{{ usuario.activo !== false ? '🔒' : '🔓' }}</span>
+                    <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24" *ngIf="usuario.activo !== false">
+                      <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z"/>
+                    </svg>
+                    <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24" *ngIf="usuario.activo === false">
+                      <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 11V7a4 4 0 118 0m-4 8v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2z"/>
+                    </svg>
                   </button>
                   <button 
-                    class="btn-icon btn-delete" 
+                    class="btn-action btn-delete" 
                     (click)="eliminarUsuario(usuario)"
                     title="Eliminar usuario">
-                    <span>🗑️</span>
+                    <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"/>
+                    </svg>
                   </button>
                 </div>
               </td>
@@ -192,6 +274,68 @@
           </tbody>
         </table>
       </div>
+
+      <!-- Cards Mobile -->
+      <div *ngIf="usuariosFiltrados.length > 0" class="users-cards">
+        <div *ngFor="let usuario of usuariosFiltrados" class="user-card">
+          
+          <div class="user-card-header">
+            <div class="user-cell">
+              <div class="user-avatar">
+                <span>{{ usuario.name.charAt(0).toUpperCase() }}</span>
+              </div>
+              <div class="user-info">
+                <span class="user-name">{{ usuario.name }}</span>
+                <span class="email-text">{{ usuario.email }}</span>
+              </div>
+            </div>
+            <span class="badge-estado" [ngClass]="getEstadoClass(usuario)">
+              {{ getEstadoLabel(usuario) }}
+            </span>
+          </div>
+
+          <div class="user-card-body">
+            <div class="card-row">
+              <span class="card-label">Rol:</span>
+              <span class="badge-rol" [ngClass]="getRolClass(usuario.role)">
+                {{ getRolLabel(usuario.role) }}
+              </span>
+            </div>
+            <div class="card-row">
+              <span class="card-label">Último acceso:</span>
+              <span class="date-text">{{ formatearFecha(usuario.updatedAt) }}</span>
+            </div>
+          </div>
+
+          <div class="user-card-actions">
+            <button class="btn-action btn-edit" (click)="editarUsuario(usuario.id)">
+              <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z"/>
+              </svg>
+              <span>Editar</span>
+            </button>
+            <button class="btn-action btn-toggle" (click)="toggleEstado(usuario)">
+              <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24" *ngIf="usuario.activo !== false">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z"/>
+              </svg>
+              <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24" *ngIf="usuario.activo === false">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 11V7a4 4 0 118 0m-4 8v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2z"/>
+              </svg>
+              <span>{{ usuario.activo !== false ? 'Desactivar' : 'Activar' }}</span>
+            </button>
+            <button class="btn-action btn-delete" (click)="eliminarUsuario(usuario)">
+              <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"/>
+              </svg>
+              <span>Eliminar</span>
+            </button>
+          </div>
+
+        </div>
+      </div>
+
     </div>
+
   </div>
+
 </div>

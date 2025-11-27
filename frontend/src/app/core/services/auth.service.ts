@@ -1,53 +1,101 @@
-import { Injectable } from '@angular/core';
-import { HttpClient } from '@angular/common/http';
-import { BehaviorSubject, Observable, tap } from 'rxjs';
+import { Injectable, inject } from '@angular/core';
+import { HttpClient, HttpErrorResponse } from '@angular/common/http';
 import { Router } from '@angular/router';
-// import { environment } from '../../../environments/environment'; // ← Comentar temporalmente
-import { LoginRequest, LoginResponse, RegisterRequest, User } from '../../models/user.model';
+import { Observable, throwError, BehaviorSubject } from 'rxjs';
+import { catchError, tap } from 'rxjs/operators';
+import { environment } from '../../environments/environment';
+
+export interface LoginResponse {
+  message: string;
+  token: string;
+  user: {
+    id: number;
+    email: string;
+    name: string;
+    role: string;
+    activo: boolean;
+  };
+}
+
+export interface LoginCredentials {
+  email: string;
+  password: string;
+}
 
 @Injectable({
   providedIn: 'root'
 })
 export class AuthService {
-  // private apiUrl = `${environment.apiUrl}/auth`; // ← Comentar
-  private apiUrl = 'http://localhost:3000/api/auth'; // ← Usar URL directa temporalmente
+  private http = inject(HttpClient);
+  private router = inject(Router);
   
-  private currentUserSubject = new BehaviorSubject<User | null>(null);
+  private apiUrl = `${environment.apiUrl}/auth`;
+  private currentUserSubject = new BehaviorSubject<any>(null);
   public currentUser$ = this.currentUserSubject.asObservable();
 
-  constructor(
-    private http: HttpClient,
-    private router: Router
-  ) {
-    this.loadUserFromStorage();
+  constructor() {
+    // Cargar usuario del localStorage si existe
+    const user = this.getUserFromStorage();
+    if (user) {
+      this.currentUserSubject.next(user);
+    }
   }
 
   /**
-   * Login de usuario
+   * Login con manejo de errores mejorado
    */
-  login(credentials: LoginRequest): Observable<LoginResponse> {
+  login(credentials: LoginCredentials): Observable<LoginResponse> {
     return this.http.post<LoginResponse>(`${this.apiUrl}/login`, credentials)
       .pipe(
-        tap(response => {
-          this.setSession(response);
+        tap((response) => {
+          // Guardar token y usuario
+          this.saveAuthData(response);
+        }),
+        catchError((error: HttpErrorResponse) => {
+          return throwError(() => this.handleLoginError(error));
         })
       );
   }
 
   /**
-   * Registro de usuario
+   * Maneja errores de login con mensajes amigables
    */
-  register(userData: RegisterRequest): Observable<LoginResponse> {
-    return this.http.post<LoginResponse>(`${this.apiUrl}/register`, userData)
-      .pipe(
-        tap(response => {
-          this.setSession(response);
-        })
-      );
+  private handleLoginError(error: HttpErrorResponse): { message: string; statusCode: number } {
+    console.error('Error en login:', error);
+
+    let message = 'Error al iniciar sesión. Intenta nuevamente.';
+    const statusCode = error.status;
+
+    if (error.status === 403) {
+      // ✅ CUENTA DESACTIVADA
+      message = error.error?.error || 
+                error.error?.message || 
+                'Tu cuenta ha sido desactivada. Contacta al administrador para más información.';
+    } else if (error.status === 401) {
+      // Credenciales incorrectas
+      message = 'Email o contraseña incorrectos. Verifica tus datos.';
+    } else if (error.status === 500) {
+      // Error del servidor
+      message = 'Error en el servidor. Intenta más tarde.';
+    } else if (error.status === 0) {
+      // Sin conexión
+      message = 'No se pudo conectar con el servidor. Verifica tu conexión.';
+    }
+
+    return { message, statusCode };
   }
 
   /**
-   * Logout de usuario
+   * Guarda datos de autenticación
+   */
+  private saveAuthData(response: LoginResponse): void {
+    localStorage.setItem('token', response.token);
+    localStorage.setItem('user', JSON.stringify(response.user));
+    this.currentUserSubject.next(response.user);
+  }
+
+  /**
+   * Logout
    */
   logout(): void {
     localStorage.removeItem('token');
@@ -57,64 +105,46 @@ export class AuthService {
   }
 
   /**
-   * Verificar si el usuario está autenticado
-   */
-  isAuthenticated(): boolean {
-    const token = this.getToken();
-    if (!token) return false;
-
-    // Verificar si el token ha expirado
-    return !this.isTokenExpired(token);
-  }
-
-  /**
-   * Obtener el token del localStorage
+   * Obtiene el token
    */
   getToken(): string | null {
     return localStorage.getItem('token');
   }
 
   /**
-   * Obtener el usuario actual
+   * Obtiene el usuario actual
    */
-  getCurrentUser(): User | null {
+  getCurrentUser(): any {
     return this.currentUserSubject.value;
   }
 
   /**
-   * Guardar sesión
+   * Obtiene usuario del localStorage
    */
-  private setSession(authResult: LoginResponse): void {
-    localStorage.setItem('token', authResult.token);
-    localStorage.setItem('user', JSON.stringify(authResult.user));
-    this.currentUserSubject.next(authResult.user);
-  }
-
-  /**
-   * Cargar usuario desde localStorage
-   */
-  private loadUserFromStorage(): void {
+  private getUserFromStorage(): any {
     const userStr = localStorage.getItem('user');
     if (userStr) {
       try {
-        const user = JSON.parse(userStr);
-        this.currentUserSubject.next(user);
-      } catch (error) {
-        console.error('Error al parsear usuario:', error);
+        return JSON.parse(userStr);
+      } catch {
+        return null;
       }
     }
+    return null;
   }
 
   /**
-   * Verificar si el token ha expirado
+   * Verifica si está autenticado
    */
-  private isTokenExpired(token: string): boolean {
-    try {
-      const payload = JSON.parse(atob(token.split('.')[1]));
-      const expiry = payload.exp * 1000; // Convertir a milisegundos
-      return Date.now() > expiry;
-    } catch (error) {
-      return true;
-    }
+  isAuthenticated(): boolean {
+    return !!this.getToken();
+  }
+
+  /**
+   * Verifica si es admin
+   */
+  isAdmin(): boolean {
+    const user = this.getCurrentUser();
+    return user?.role === 'admin';
   }
 }

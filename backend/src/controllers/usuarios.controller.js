@@ -14,6 +14,7 @@ exports.getAll = async (req, res) => {
         email: true,
         name: true,
         role: true,
+        activo: true,  // ✅ AGREGADO
         createdAt: true,
         updatedAt: true
         // NO devolver password
@@ -43,6 +44,7 @@ exports.getById = async (req, res) => {
         email: true,
         name: true,
         role: true,
+        activo: true,  // ✅ AGREGADO
         createdAt: true,
         updatedAt: true
       }
@@ -65,7 +67,7 @@ exports.getById = async (req, res) => {
  */
 exports.create = async (req, res) => {
   try {
-    const { email, password, name, role } = req.body;
+    const { email, password, name, role, activo } = req.body;  // ✅ AGREGADO activo
 
     // Validaciones
     if (!email || !password || !name) {
@@ -90,13 +92,15 @@ exports.create = async (req, res) => {
         email,
         password: hashedPassword,
         name,
-        role: role || 'user'
+        role: role || 'user',
+        activo: activo !== undefined ? activo : true  // ✅ AGREGADO (por defecto true)
       },
       select: {
         id: true,
         email: true,
         name: true,
         role: true,
+        activo: true,  // ✅ AGREGADO
         createdAt: true,
         updatedAt: true
       }
@@ -115,11 +119,16 @@ exports.create = async (req, res) => {
 /**
  * Actualizar un usuario
  * PUT /api/users/:id
+ * ✅ CORREGIDO - Ahora incluye activo y password
  */
 exports.update = async (req, res) => {
   try {
     const { id } = req.params;
-    const { email, name, role } = req.body;
+    const { email, name, role, activo, password } = req.body;  // ✅ AGREGADO activo y password
+
+    console.log('=== UPDATE USER ===');
+    console.log('ID:', id);
+    console.log('Body recibido:', { email, name, role, activo, password: password ? '[PRESENTE]' : '[NO PRESENTE]' });
 
     // Verificar que el usuario existe
     const usuarioExiste = await prisma.user.findUnique({
@@ -141,23 +150,38 @@ exports.update = async (req, res) => {
       }
     }
 
+    // Preparar datos para actualizar
+    const dataToUpdate = {};
+    
+    if (email !== undefined) dataToUpdate.email = email;
+    if (name !== undefined) dataToUpdate.name = name;
+    if (role !== undefined) dataToUpdate.role = role;
+    if (activo !== undefined) dataToUpdate.activo = activo;  // ✅ AGREGADO
+    
+    // Si se proporciona password, hashearlo
+    if (password && password.trim() !== '') {
+      const hashedPassword = await bcrypt.hash(password, 10);
+      dataToUpdate.password = hashedPassword;
+    }
+
+    console.log('Datos a actualizar:', dataToUpdate);
+
     // Actualizar usuario
     const usuarioActualizado = await prisma.user.update({
       where: { id: parseInt(id) },
-      data: {
-        email: email || undefined,
-        name: name || undefined,
-        role: role || undefined
-      },
+      data: dataToUpdate,
       select: {
         id: true,
         email: true,
         name: true,
         role: true,
+        activo: true,  // ✅ AGREGADO
         createdAt: true,
         updatedAt: true
       }
     });
+
+    console.log('Usuario actualizado:', usuarioActualizado);
 
     res.json({
       message: 'Usuario actualizado exitosamente',
@@ -213,6 +237,11 @@ exports.toggleEstado = async (req, res) => {
     const { id } = req.params;
     const { activo } = req.body;
 
+    console.log('=== TOGGLE ESTADO ===');
+    console.log('ID:', id);
+    console.log('Activo recibido:', activo);
+    console.log('Tipo de activo:', typeof activo);
+
     // Verificar que el usuario existe
     const usuario = await prisma.user.findUnique({
       where: { id: parseInt(id) }
@@ -222,22 +251,27 @@ exports.toggleEstado = async (req, res) => {
       return res.status(404).json({ message: 'Usuario no encontrado' });
     }
 
-    // Actualizar estado
+    // Actualizar estado - Convertir explícitamente a boolean
+    const activoBoolean = activo === true || activo === 'true' || activo === 1;
+
     const usuarioActualizado = await prisma.user.update({
       where: { id: parseInt(id) },
-      data: { activo: activo },
+      data: { activo: activoBoolean },
       select: {
         id: true,
         email: true,
         name: true,
         role: true,
+        activo: true,  // ✅ AGREGADO
         createdAt: true,
         updatedAt: true
       }
     });
 
+    console.log('Usuario actualizado:', usuarioActualizado);
+
     res.json({
-      message: `Usuario ${activo ? 'activado' : 'desactivado'} exitosamente`,
+      message: `Usuario ${activoBoolean ? 'activado' : 'desactivado'} exitosamente`,
       usuario: usuarioActualizado
     });
   } catch (error) {

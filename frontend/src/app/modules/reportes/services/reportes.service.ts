@@ -2,6 +2,15 @@ import { Injectable } from '@angular/core';
 import { HttpClient, HttpParams } from '@angular/common/http';
 import { Observable } from 'rxjs';
 import { environment } from '../../../environments/environment';
+import { 
+  DashboardResponse,
+  ConsumoCultivoItem,
+  ConsumoParcelaItem,
+  CostosResponseItem,
+  CostosHectareaResponse,
+  TrazabilidadResponse,
+  AlertaInventario
+} from '../../../models/reportes.model';
 
 @Injectable({
   providedIn: 'root'
@@ -11,78 +20,55 @@ export class ReportesService {
 
   constructor(private http: HttpClient) {}
 
-  // Dashboard principal
-  getDashboard(fechaInicio: string, fechaFin: string): Observable<any> {
-    const params = new HttpParams()
-      .set('fechaInicio', fechaInicio)
-      .set('fechaFin', fechaFin);
-
-    return this.http.get(`${this.apiUrl}/dashboard`, { params });
-  }
-
-  // Reporte de consumo por cultivo
-  getConsumoPorCultivo(fechaInicio?: string, fechaFin?: string): Observable<any> {
+  // Dashboard
+  getDashboard(fechaInicio?: string, fechaFin?: string): Observable<DashboardResponse> {
     let params = new HttpParams();
     if (fechaInicio) params = params.set('fechaInicio', fechaInicio);
     if (fechaFin) params = params.set('fechaFin', fechaFin);
 
-    return this.http.get(`${this.apiUrl}/consumo-cultivo`, { params });
+    return this.http.get<DashboardResponse>(`${this.apiUrl}/dashboard`, { params });
   }
 
-  // Reporte de consumo por parcela
-  getConsumoPorParcela(parcelaId?: number): Observable<any> {
+  // Consumo por cultivo
+  getConsumoPorCultivo(fechaInicio?: string, fechaFin?: string): Observable<ConsumoCultivoItem[]> {
+    let params = new HttpParams();
+    if (fechaInicio) params = params.set('fechaInicio', fechaInicio);
+    if (fechaFin) params = params.set('fechaFin', fechaFin);
+
+    return this.http.get<ConsumoCultivoItem[]>(`${this.apiUrl}/consumo-cultivo`, { params });
+  }
+
+  // Consumo por parcela
+  getConsumoPorParcela(parcelaId?: number): Observable<ConsumoParcelaItem[]> {
     let params = new HttpParams();
     if (parcelaId) params = params.set('parcelaId', parcelaId.toString());
 
-    return this.http.get(`${this.apiUrl}/consumo-parcela`, { params });
+    return this.http.get<ConsumoParcelaItem[]>(`${this.apiUrl}/consumo-parcela`, { params });
   }
 
-  // Reporte de costos
-  getCostos(fechaInicio: string, fechaFin: string, agruparPor: string = 'mes'): Observable<any> {
+  // Costos por fecha
+  getCostos(fechaInicio: string, fechaFin: string, agruparPor: string = 'mes'): Observable<CostosResponseItem[]> {
     const params = new HttpParams()
       .set('fechaInicio', fechaInicio)
       .set('fechaFin', fechaFin)
       .set('agruparPor', agruparPor);
 
-    return this.http.get(`${this.apiUrl}/costos`, { params });
+    return this.http.get<CostosResponseItem[]>(`${this.apiUrl}/costos`, { params });
   }
 
-  // Reporte de producción y rendimiento
-  getProduccion(fechaInicio?: string, fechaFin?: string): Observable<any> {
-    let params = new HttpParams();
-    if (fechaInicio) params = params.set('fechaInicio', fechaInicio);
-    if (fechaFin) params = params.set('fechaFin', fechaFin);
-
-    return this.http.get(`${this.apiUrl}/produccion`, { params });
+  // Costos por hectárea
+  getCostosPorHectarea(periodoId: number): Observable<CostosHectareaResponse> {
+    const params = new HttpParams().set('periodoId', periodoId.toString());
+    return this.http.get<CostosHectareaResponse>(`${this.apiUrl}/costos-hectarea`, { params });
   }
 
-  // Trazabilidad de parcela
-  getTrazabilidadParcela(parcelaId: number): Observable<any> {
-    return this.http.get(`${this.apiUrl}/trazabilidad/${parcelaId}`);
+  // Trazabilidad
+  getTrazabilidadParcela(parcelaId: number): Observable<TrazabilidadResponse> {
+    return this.http.get<TrazabilidadResponse>(`${this.apiUrl}/trazabilidad/${parcelaId}`);
   }
 
-  // Estadísticas generales
-  getEstadisticasGenerales(): Observable<any> {
-    return this.http.get(`${this.apiUrl}/estadisticas-generales`);
-  }
-
-  // Exportar a PDF
-  exportarPDF(tipo: string, filtros: any): Observable<Blob> {
-    return this.http.post(`${this.apiUrl}/exportar-pdf`, {
-      tipo,
-      filtros
-    }, {
-      responseType: 'blob'
-    });
-  }
-
-  // Exportar a Excel
-  exportarExcel(tipo: string, filtros: any): Observable<Blob> {
-    return this.http.post(`${this.apiUrl}/exportar-excel`, {
-      tipo,
-      filtros
-    }, {
-      responseType: 'blob'
-    });
+  // Alertas
+  getAlertas(): Observable<AlertaInventario[]> {
+    return this.http.get<AlertaInventario[]>(`${this.apiUrl}/alertas`);
   }
 }

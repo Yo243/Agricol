@@ -1,102 +1,140 @@
-<div class="periodos-list">
+<!-- Períodos de Siembra - Lista Mejorada y Responsive -->
+
+<div class="periodos-container">
+
   <!-- Header -->
   <div class="page-header">
     <div class="header-content">
-      <h1>🌱 Períodos de Siembra</h1>
-      <p>Gestiona los ciclos de cultivo en tus parcelas</p>
+      <svg class="header-icon" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 21a4 4 0 01-4-4V5a2 2 0 012-2h4a2 2 0 012 2v12a4 4 0 01-4 4zm0 0h12a2 2 0 002-2v-4a2 2 0 00-2-2h-2.343M11 7.343l1.657-1.657a2 2 0 012.828 0l2.829 2.829a2 2 0 010 2.828l-8.486 8.485M7 17h.01"/>
+      </svg>
+      <div class="header-text">
+        <h1 class="page-title">Períodos de Siembra</h1>
+        <p class="page-subtitle">Gestiona los ciclos de cultivo en tus parcelas</p>
+      </div>
     </div>
-    <button class="btn btn-primary" routerLink="/periodos-siembra/nuevo">
-      + Nuevo Período
+    <button class="btn-create" routerLink="/periodos-siembra/nuevo">
+      <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"/>
+      </svg>
+      <span>Nuevo Período</span>
     </button>
   </div>
 
-  <!-- Filtros -->
-  <div class="filters-card">
-    <div class="filter-tabs">
-      <button 
-        class="filter-tab"
-        [class.active]="filtroEstado === 'todos'"
-        (click)="cambiarFiltro('todos')">
-        Todos
-      </button>
-      <button 
-        class="filter-tab"
-        [class.active]="filtroEstado === 'activos'"
-        (click)="cambiarFiltro('activos')">
-        Activos
-      </button>
-      <button 
-        class="filter-tab"
-        [class.active]="filtroEstado === 'finalizados'"
-        (click)="cambiarFiltro('finalizados')">
-        Finalizados
-      </button>
-    </div>
+  <!-- Filtros Tabs -->
+  <div class="filters-tabs-card">
+    <button 
+      class="filter-tab"
+      [class.tab-active]="filtroEstado === 'todos'"
+      (click)="cambiarFiltro('todos')">
+      <svg class="tab-icon" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16M4 18h16"/>
+      </svg>
+      <span>Todos</span>
+    </button>
+    <button 
+      class="filter-tab"
+      [class.tab-active]="filtroEstado === 'activos'"
+      (click)="cambiarFiltro('activos')">
+      <svg class="tab-icon" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 10V3L4 14h7v7l9-11h-7z"/>
+      </svg>
+      <span>Activos</span>
+    </button>
+    <button 
+      class="filter-tab"
+      [class.tab-active]="filtroEstado === 'finalizados'"
+      (click)="cambiarFiltro('finalizados')">
+      <svg class="tab-icon" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"/>
+      </svg>
+      <span>Finalizados</span>
+    </button>
   </div>
 
   <!-- Loading -->
   <div *ngIf="loading" class="loading-container">
-    <div class="spinner"></div>
-    <p>Cargando períodos...</p>
+    <svg class="loading-spinner" fill="none" viewBox="0 0 24 24">
+      <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
+      <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+    </svg>
+    <p class="loading-text">Cargando períodos...</p>
   </div>
 
   <!-- Empty State -->
   <div *ngIf="!loading && periodos.length === 0" class="empty-state">
-    <div class="empty-icon">🌱</div>
-    <h3>No hay períodos de siembra</h3>
-    <p>Crea tu primer período de siembra para comenzar a dar seguimiento</p>
-    <button class="btn btn-primary" routerLink="/periodos-siembra/nuevo">
-      Crear Primer Período
+    <svg class="empty-icon" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+      <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 21a4 4 0 01-4-4V5a2 2 0 012-2h4a2 2 0 012 2v12a4 4 0 01-4 4zm0 0h12a2 2 0 002-2v-4a2 2 0 00-2-2h-2.343M11 7.343l1.657-1.657a2 2 0 012.828 0l2.829 2.829a2 2 0 010 2.828l-8.486 8.485M7 17h.01"/>
+    </svg>
+    <h3 class="empty-title">No hay períodos de siembra</h3>
+    <p class="empty-description">Crea tu primer período de siembra para comenzar a dar seguimiento a tus cultivos</p>
+    <button class="btn-empty-action" routerLink="/periodos-siembra/nuevo">
+      <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"/>
+      </svg>
+      <span>Crear Primer Período</span>
     </button>
   </div>
 
   <!-- Grid de Períodos -->
   <div *ngIf="!loading && periodos.length > 0" class="periodos-grid">
+    
     <div *ngFor="let periodo of periodos" class="periodo-card">
+      
       <!-- Header -->
       <div class="periodo-header">
-        <div class="header-info">
-          <h3>{{ periodo.cultivo?.nombre }}</h3>
+        <div class="header-left">
+          <h3 class="periodo-title">{{ periodo.cultivo?.nombre }}</h3>
           <span class="periodo-codigo">{{ periodo.codigo }}</span>
         </div>
-        <span class="badge" [ngClass]="getEstadoBadgeClass(periodo.estado)">
+        <span class="periodo-badge" [ngClass]="getEstadoBadgeClass(periodo.estado)">
           {{ periodo.estado }}
         </span>
       </div>
 
-      <!-- Info Principal -->
+      <!-- Body -->
       <div class="periodo-body">
+        
         <div class="info-item">
-          <span class="icon">📍</span>
+          <svg class="info-icon" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 20l-5.447-2.724A1 1 0 013 16.382V5.618a1 1 0 011.447-.894L9 7m0 13l6-3m-6 3V7m6 10l4.553 2.276A1 1 0 0021 18.382V7.618a1 1 0 00-.553-.894L15 4m0 13V4m0 0L9 7"/>
+          </svg>
           <div class="info-content">
-            <span class="label">Parcela</span>
-            <span class="value">{{ periodo.parcela?.nombre }}</span>
+            <span class="info-label">Parcela</span>
+            <span class="info-value">{{ periodo.parcela?.nombre }}</span>
           </div>
         </div>
 
         <div class="info-item">
-          <span class="icon">📏</span>
+          <svg class="info-icon" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 5a1 1 0 011-1h14a1 1 0 011 1v2a1 1 0 01-1 1H5a1 1 0 01-1-1V5zM4 13a1 1 0 011-1h6a1 1 0 011 1v6a1 1 0 01-1 1H5a1 1 0 01-1-1v-6zM16 13a1 1 0 011-1h2a1 1 0 011 1v6a1 1 0 01-1 1h-2a1 1 0 01-1-1v-6z"/>
+          </svg>
           <div class="info-content">
-            <span class="label">Hectáreas</span>
-            <span class="value">{{ periodo.hectareasSembradas }} ha</span>
+            <span class="info-label">Hectáreas</span>
+            <span class="info-value">{{ periodo.hectareasSembradas }} ha</span>
           </div>
         </div>
 
         <div class="info-item">
-          <span class="icon">📅</span>
+          <svg class="info-icon" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z"/>
+          </svg>
           <div class="info-content">
-            <span class="label">Fecha Siembra</span>
-            <span class="value">{{ periodo.fechaInicio | date: 'dd/MM/yyyy' }}</span>
+            <span class="info-label">Fecha Siembra</span>
+            <span class="info-value">{{ periodo.fechaInicio | date: 'dd/MM/yyyy' }}</span>
           </div>
         </div>
 
         <div class="info-item">
-          <span class="icon">🎯</span>
+          <svg class="info-icon" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2m-6 9l2 2 4-4"/>
+          </svg>
           <div class="info-content">
-            <span class="label">Cosecha Esperada</span>
-            <span class="value">{{ periodo.fechaCosechaEsperada | date: 'dd/MM/yyyy' }}</span>
+            <span class="info-label">Cosecha Esperada</span>
+            <span class="info-value">{{ periodo.fechaCosechaEsperada | date: 'dd/MM/yyyy' }}</span>
           </div>
         </div>
+
       </div>
 
       <!-- Progreso -->
@@ -110,24 +148,29 @@
         </div>
       </div>
 
-      <!-- Rendimiento (si está finalizado) -->
+      <!-- Rendimiento -->
       <div class="periodo-rendimiento" *ngIf="periodo.estado === 'Finalizado' && periodo.rendimientoReal">
-        <div class="rendimiento-item">
-          <span class="label">Rendimiento Real:</span>
-          <span class="value success">{{ periodo.rendimientoReal }} ton/ha</span>
+        <div class="rendimiento-row">
+          <span class="rendimiento-label">Rendimiento Real:</span>
+          <span class="rendimiento-value rendimiento-success">{{ periodo.rendimientoReal }} ton/ha</span>
         </div>
-        <div class="rendimiento-item" *ngIf="periodo.rendimientoEsperado">
-          <span class="label">Rendimiento Esperado:</span>
-          <span class="value">{{ periodo.rendimientoEsperado }} ton/ha</span>
+        <div class="rendimiento-row" *ngIf="periodo.rendimientoEsperado">
+          <span class="rendimiento-label">Rendimiento Esperado:</span>
+          <span class="rendimiento-value">{{ periodo.rendimientoEsperado }} ton/ha</span>
         </div>
       </div>
 
-      <!-- Acciones -->
-      <div class="periodo-actions">
-        <button class="btn btn-sm btn-outline" [routerLink]="['/periodos-siembra', periodo.id]">
-          Ver Detalle
-        </button>
-      </div>
+      <!-- Actions -->
+      <button class="btn-detail" [routerLink]="['/periodos-siembra', periodo.id]">
+        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"/>
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z"/>
+        </svg>
+        <span>Ver Detalle</span>
+      </button>
+
     </div>
+
   </div>
+
 </div>
