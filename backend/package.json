@@ -2,11 +2,17 @@
   "name": "agricol-backend",
   "version": "1.0.0",
   "description": "Backend para el sistema de gestión agrícola AgriCol",
-  "main": "src/server.js",
+  "main": "server.js",
   "type": "commonjs",
   "scripts": {
-    "dev": "nodemon src/server.js",
-    "start": "node src/server.js",
+    "dev": "nodemon server.js",
+    "start": "node server.js",
+
+    "build:frontend": "cd ../frontend && npm install && npm run build --configuration production",
+    "copy:frontend": "rm -rf ./public && mkdir public && cp -r ../frontend/dist/* ./public/",
+    
+    "postinstall": "npx prisma generate && npm run build:frontend && npm run copy:frontend",
+
     "prisma:generate": "prisma generate",
     "prisma:migrate": "prisma migrate dev",
     "prisma:seed": "node prisma/seed.js",
@@ -14,15 +20,6 @@
     "db:reset": "prisma migrate reset",
     "db:setup": "prisma generate && prisma migrate dev && prisma db seed"
   },
-  "keywords": [
-    "agricola",
-    "backend",
-    "nodejs",
-    "express",
-    "prisma"
-  ],
-  "author": "",
-  "license": "ISC",
   "dependencies": {
     "@prisma/client": "^5.22.0",
     "bcryptjs": "^2.4.3",

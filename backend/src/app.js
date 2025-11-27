@@ -2,6 +2,8 @@ const express = require('express');
 const cors = require('cors');
 const helmet = require('helmet');
 const morgan = require('morgan');
+const path = require('path');
+
 const routes = require('./routes');
 
 const app = express();
@@ -9,19 +11,23 @@ const app = express();
 // Middlewares
 app.use(helmet());
 app.use(cors({
-  origin: process.env.FRONTEND_URL || 'http://localhost:4200',
+  origin: process.env.FRONTEND_URL || '*',
   credentials: true
 }));
 app.use(morgan('dev'));
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
 
-// Rutas
+// ======== SERVIR FRONTEND ANGULAR ========
+const publicPath = path.join(__dirname, 'public');
+app.use(express.static(publicPath));
+
+// ======== RUTAS DE API ========
 app.use('/api', routes);
 
-// Ruta de prueba
-app.get('/', (req, res) => {
-  res.json({ 
+// ======== RUTA DE PRUEBA (SOLO API) ========
+app.get('/api', (req, res) => {
+  res.json({
     message: '✅ API AgriCol funcionando correctamente',
     version: '1.0.0',
     endpoints: {
@@ -33,15 +39,12 @@ app.get('/', (req, res) => {
   });
 });
 
-// Manejo de errores 404
-app.use((req, res) => {
-  res.status(404).json({ 
-    error: 'Ruta no encontrada',
-    path: req.path 
-  });
+// ======== SERVIR ANGULAR PARA TODAS LAS DEMÁS RUTAS ========
+app.get('*', (req, res) => {
+  res.sendFile(path.join(publicPath, 'index.html'));
 });
 
-// Manejo de errores generales
+// Manejo de errores generales API
 app.use((err, req, res, next) => {
   console.error('❌ Error:', err);
   res.status(err.status || 500).json({
