@@ -1,13 +1,20 @@
-import { Component, EventEmitter, Input, OnInit, Output, inject } from '@angular/core';
+import {
+  Component,
+  EventEmitter,
+  Input,
+  OnInit,
+  Output,
+  inject,
+} from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { HttpClient } from '@angular/common/http';
 import { ParcelasService } from '../../services/parcela.service';
-import { 
-  PeriodoSiembra, 
-  CreateAplicacionDto, 
-  TIPOS_APLICACION, 
-  TipoAplicacion 
+import {
+  PeriodoSiembra,
+  CreateAplicacionDto,
+  TIPOS_APLICACION,
+  TipoAplicacion,
 } from '../../../../models/parcela.model';
 
 interface Insumo {
@@ -33,7 +40,7 @@ interface InsumoAplicacion {
   standalone: true,
   imports: [CommonModule, FormsModule],
   templateUrl: './form-aplicacion.html',
-  styleUrls: ['./form-aplicacion.css']
+  styleUrls: ['./form-aplicacion.css'],
 })
 export class FormAplicacionComponent implements OnInit {
   private parcelasService = inject(ParcelasService);
@@ -47,7 +54,7 @@ export class FormAplicacionComponent implements OnInit {
   periodos: PeriodoSiembra[] = [];
   insumos: Insumo[] = [];
   insumosSeleccionados: InsumoAplicacion[] = [];
-  
+
   TIPOS_APLICACION = TIPOS_APLICACION;
   loading = false;
   loadingData = false;
@@ -60,13 +67,15 @@ export class FormAplicacionComponent implements OnInit {
     tipoAplicacion: 'Fertilización' as TipoAplicacion,
     insumos: [],
     responsable: '',
-    observaciones: ''
+    observaciones: '',
   };
 
-  insumoSeleccionado: number = 0;
+  // ahora trabajamos con number | null
+  insumoSeleccionado: number | null = null;
 
   ngOnInit() {
     this.cargarDatos();
+
     if (this.periodoId) {
       this.formData.periodoSiembraId = this.periodoId;
     }
@@ -75,88 +84,127 @@ export class FormAplicacionComponent implements OnInit {
     }
   }
 
+  // ================= CARGA INICIAL =================
+
   cargarDatos() {
     this.loadingData = true;
 
-    // Cargar períodos activos
+    // Períodos activos
     this.parcelasService.getPeriodosSiembra(undefined, 'En Curso').subscribe({
       next: (periodos) => {
         this.periodos = periodos;
+        console.log('Períodos recibidos:', periodos);
+
         if (this.periodoId) {
+          this.formData.periodoSiembraId = this.periodoId;
           this.onPeriodoChange();
         }
       },
-      error: (error) => console.error('Error al cargar períodos:', error)
+      error: (error) => {
+        console.error('Error al cargar períodos:', error);
+      },
     });
 
-    // Cargar insumos disponibles
-    this.http.get<Insumo[]>('http://localhost:3000/api/inventario').subscribe({
-      next: (insumos) => {
-        this.insumos = insumos.filter(i => i.stockActual > 0);
+    // Insumos
+    this.http.get<any>('http://localhost:3000/api/inventario').subscribe({
+      next: (resp) => {
+        console.log('Insumos respuesta cruda:', resp);
+        const items: Insumo[] = Array.isArray(resp) ? resp : resp?.data ?? [];
+        console.log('Insumos procesados:', items);
+
+        this.insumos = items.filter((i) => i.stockActual > 0);
         this.loadingData = false;
       },
       error: (error) => {
         console.error('Error al cargar insumos:', error);
         this.loadingData = false;
-      }
+      },
     });
   }
 
   onPeriodoChange() {
-    const periodo = this.periodos.find(p => p.id === this.formData.periodoSiembraId);
+    const periodo = this.periodos.find(
+      (p) => p.id === this.formData.periodoSiembraId
+    );
     if (periodo) {
       this.formData.parcelaId = periodo.parcelaId;
-      if (this.formData.hectareasAplicadas === 0) {
+      if (!this.formData.hectareasAplicadas) {
         this.formData.hectareasAplicadas = periodo.hectareasSembradas;
       }
     }
   }
 
+  // ================= INSUMOS =================
+
   agregarInsumo() {
-    if (!this.insumoSeleccionado) {
+    console.log('👉 agregarInsumo(), seleccionado:', this.insumoSeleccionado);
+
+    const selectedId =
+      this.insumoSeleccionado != null ? Number(this.insumoSeleccionado) : 0;
+
+    if (!selectedId) {
       alert('Selecciona un insumo');
       return;
     }
 
-    if (this.insumosSeleccionados.find(i => i.insumoId === this.insumoSeleccionado)) {
+    const insumo = this.insumos.find((i) => i.id === selectedId);
+    if (!insumo) {
+      console.error('No se encontró el insumo con id', selectedId);
+      return;
+    }
+
+    const yaExiste = this.insumosSeleccionados.find(
+      (i) => i.insumoId === selectedId
+    );
+    if (yaExiste) {
       alert('Este insumo ya fue agregado');
       return;
     }
 
-    const insumo = this.insumos.find(i => i.id === this.insumoSeleccionado);
-    if (insumo) {
-      this.insumosSeleccionados.push({
-        insumoId: insumo.id,
-        cantidad: 0,
-        dosisPorHectarea: 0,
-        nombre: insumo.nombre,
-        unidadMedida: insumo.unidadMedida,
-        stockDisponible: insumo.stockActual
-      });
-    }
+    const nuevo: InsumoAplicacion = {
+      insumoId: insumo.id,
+      cantidad: 0,
+      dosisPorHectarea: 0,
+      nombre: insumo.nombre,
+      unidadMedida: insumo.unidadMedida,
+      stockDisponible: insumo.stockActual,
+    };
 
-    this.insumoSeleccionado = 0;
+    this.insumosSeleccionados = [...this.insumosSeleccionados, nuevo];
+
+    console.log('✅ insumosSeleccionados:', this.insumosSeleccionados);
+
+    // reset del select
+    this.insumoSeleccionado = null;
   }
 
   calcularCantidad(insumo: InsumoAplicacion) {
-    if (insumo.dosisPorHectarea > 0 && this.formData.hectareasAplicadas > 0) {
-      insumo.cantidad = insumo.dosisPorHectarea * this.formData.hectareasAplicadas;
+    if (
+      insumo.dosisPorHectarea > 0 &&
+      this.formData.hectareasAplicadas > 0
+    ) {
+      insumo.cantidad =
+        insumo.dosisPorHectarea * this.formData.hectareasAplicadas;
+    } else {
+      insumo.cantidad = 0;
     }
   }
 
   eliminarInsumo(index: number) {
-    this.insumosSeleccionados.splice(index, 1);
+    this.insumosSeleccionados = this.insumosSeleccionados.filter(
+      (_, i) => i !== index
+    );
   }
 
-  guardar() {
-    if (!this.validarFormulario()) {
-      return;
-    }
+  // ================= GUARDAR =================
 
-    this.formData.insumos = this.insumosSeleccionados.map(i => ({
+  guardar() {
+    if (!this.validarFormulario()) return;
+
+    this.formData.insumos = this.insumosSeleccionados.map((i) => ({
       insumoId: i.insumoId,
       cantidad: i.cantidad,
-      dosisPorHectarea: i.dosisPorHectarea
+      dosisPorHectarea: i.dosisPorHectarea,
     }));
 
     this.loading = true;
@@ -171,7 +219,7 @@ export class FormAplicacionComponent implements OnInit {
         console.error('Error al registrar aplicación:', error);
         alert(error.error?.message || 'Error al registrar la aplicación');
         this.loading = false;
-      }
+      },
     });
   }
 
@@ -191,7 +239,6 @@ export class FormAplicacionComponent implements OnInit {
       return false;
     }
 
-    // Validar stock
     for (const insumo of this.insumosSeleccionados) {
       if (insumo.cantidad <= 0) {
         alert(`La cantidad de ${insumo.nombre} debe ser mayor a 0`);
@@ -199,7 +246,9 @@ export class FormAplicacionComponent implements OnInit {
       }
 
       if (insumo.cantidad > (insumo.stockDisponible || 0)) {
-        alert(`No hay suficiente stock de ${insumo.nombre} (disponible: ${insumo.stockDisponible})`);
+        alert(
+          `No hay suficiente stock de ${insumo.nombre} (disponible: ${insumo.stockDisponible})`
+        );
         return false;
       }
     }

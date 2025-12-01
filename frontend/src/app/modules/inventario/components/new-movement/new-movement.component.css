@@ -51,6 +51,26 @@
   transform: scale(1.1);
 }
 
+/* ---------- BOTÓN "NUEVO PRODUCTO" ---------- */
+
+.new-product-btn {
+  font-size: 0.8rem;
+  font-weight: 600;
+  color: #1a7f5a;
+  background: transparent;
+  border: none;
+  padding: 0.25rem 0.6rem;
+  border-radius: 999px;
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.new-product-btn:hover {
+  background: rgba(26, 127, 90, 0.08);
+  color: #0f5c41;
+  transform: translateY(-1px);
+}
+
 /* ---------- MENSAJES DE ESTADO ---------- */
 
 .success-box,

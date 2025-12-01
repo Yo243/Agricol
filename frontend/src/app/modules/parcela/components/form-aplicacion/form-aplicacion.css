@@ -1,6 +1,6 @@
 /* ============================================================
    FORMULARIO DE APLICACIÓN - Estilo Minimalista AgriCol
-   Paleta de Colores Optimizada
+   Versión con fondos sólidos (sin transparencias)
    ============================================================ */
 
 /* ---------- VARIABLES DE COLOR ---------- */
@@ -10,21 +10,12 @@
   --primary-hover: #156648;
   --primary-light: #e8f5f0;
   
-  /* Colores Secundarios */
-  --secondary: #3b82f6;
-  --secondary-hover: #2563eb;
-  --secondary-light: #eff6ff;
-  
   /* Colores de Estado */
   --success: #10b981;
   --success-light: #d1fae5;
-  --warning: #f59e0b;
-  --warning-light: #fef3c7;
   --danger: #ef4444;
   --danger-hover: #dc2626;
   --danger-light: #fee2e2;
-  --info: #0ea5e9;
-  --info-light: #e0f2fe;
   
   /* Escala de Grises */
   --gray-50: #f9fafb;
@@ -35,7 +26,6 @@
   --gray-500: #6b7280;
   --gray-600: #4b5563;
   --gray-700: #374151;
-  --gray-800: #1f2937;
   --gray-900: #111827;
   
   /* Colores Funcionales */
@@ -43,7 +33,6 @@
   --background: #ffffff;
   --text-primary: #111827;
   --text-secondary: #6b7280;
-  --text-muted: #9ca3af;
 }
 
 /* ---------- MODAL BASE ---------- */
@@ -54,7 +43,6 @@
   right: 0;
   bottom: 0;
   background: rgba(0, 0, 0, 0.5);
-  backdrop-filter: blur(2px);
   display: flex;
   align-items: center;
   justify-content: center;
@@ -64,8 +52,8 @@
 }
 
 .modal-container {
-  background: var(--background);
-  border-radius: 16px;
+  background: #ffffff;
+  border-radius: 12px;
   box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.1), 0 10px 10px -5px rgba(0, 0, 0, 0.04);
   width: 100%;
   max-width: 600px;
@@ -88,8 +76,8 @@
   justify-content: space-between;
   gap: 1rem;
   flex-shrink: 0;
-  background: var(--background);
-  border-radius: 16px 16px 0 0;
+  background: #ffffff;
+  border-radius: 12px 12px 0 0;
 }
 
 .modal-title {
@@ -97,7 +85,6 @@
   font-weight: 700;
   color: var(--text-primary);
   margin: 0;
-  letter-spacing: -0.01em;
 }
 
 .btn-close {
@@ -125,7 +112,7 @@
   padding: 1.5rem;
   overflow-y: auto;
   flex: 1;
-  background: var(--gray-50);
+  background: #ffffff;
 }
 
 /* ---------- LOADING OVERLAY ---------- */
@@ -136,7 +123,7 @@
   justify-content: center;
   padding: 3rem 2rem;
   gap: 1rem;
-  background: var(--background);
+  background: #ffffff;
   border-radius: 12px;
 }
 
@@ -149,10 +136,10 @@
 /* ---------- FORM SECTIONS ---------- */
 .form-section {
   margin-bottom: 1.5rem;
-  background: var(--background);
-  border-radius: 12px;
-  padding: 1.25rem;
-  border: 1px solid var(--border);
+  background: #ffffff;
+  border-radius: 0;
+  padding: 0;
+  border: none;
 }
 
 .form-section:last-child {
@@ -165,12 +152,14 @@
   gap: 0.75rem;
   margin-bottom: 1.25rem;
   padding-bottom: 0.75rem;
-  border-bottom: 1px solid var(--gray-200);
+  border-bottom: 2px solid var(--gray-200);
   flex-wrap: wrap;
 }
 
 .section-header svg {
   color: var(--primary);
+  width: 1.25rem;
+  height: 1.25rem;
 }
 
 .section-title {
@@ -179,7 +168,6 @@
   color: var(--text-primary);
   margin: 0;
   flex-shrink: 0;
-  letter-spacing: -0.01em;
 }
 
 .section-actions {
@@ -220,7 +208,6 @@
   font-weight: 600;
   color: var(--gray-700);
   display: block;
-  letter-spacing: -0.01em;
 }
 
 .form-label.required::after {
@@ -235,13 +222,13 @@
 .select-insumo {
   width: 100%;
   padding: 0.75rem;
-  border: 1.5px solid var(--gray-300);
+  border: 1px solid var(--gray-300);
   border-radius: 8px;
   font-size: 0.9rem;
   color: var(--text-primary);
   transition: all 0.2s ease;
   font-family: inherit;
-  background: var(--background);
+  background: #ffffff;
 }
 
 .form-input:hover,
@@ -305,19 +292,17 @@
   transition: all 0.2s ease;
   border: none;
   white-space: nowrap;
-  letter-spacing: -0.01em;
 }
 
 .btn-primary {
   background: var(--primary);
-  color: white;
-  box-shadow: 0 1px 2px rgba(0, 0, 0, 0.05);
+  color: rgb(10, 8, 8);
+  box-shadow: 0 1px 2px rgba(0, 0, 0, 0.164);
 }
 
 .btn-primary:hover:not(:disabled) {
   background: var(--primary-hover);
-  box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
-  transform: translateY(-1px);
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
 }
 
 .btn-primary:disabled {
@@ -326,9 +311,9 @@
 }
 
 .btn-secondary {
-  background: var(--background);
+  background: #f6f3f3;
   color: var(--gray-700);
-  border: 1.5px solid var(--gray-300);
+  border: 1px solid var(--gray-300);
 }
 
 .btn-secondary:hover:not(:disabled) {
@@ -343,7 +328,7 @@
 
 .btn-add-insumo {
   background: var(--primary);
-  color: white;
+  color: rgb(0, 0, 0);
   padding: 0.75rem 1rem;
   flex-shrink: 0;
   box-shadow: 0 1px 2px rgba(0, 0, 0, 0.05);
@@ -351,8 +336,7 @@
 
 .btn-add-insumo:hover:not(:disabled) {
   background: var(--primary-hover);
-  box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
-  transform: translateY(-1px);
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
 }
 
 .btn-add-insumo:disabled {
@@ -364,8 +348,8 @@
   width: 36px;
   height: 36px;
   border-radius: 8px;
-  border: 1.5px solid var(--danger-light);
-  background: var(--background);
+  border: 1px solid #fecaca;
+  background: #edebeb;
   color: var(--danger);
   cursor: pointer;
   display: inline-flex;
@@ -378,7 +362,6 @@
 .btn-delete:hover {
   background: var(--danger-light);
   border-color: var(--danger);
-  transform: scale(1.05);
 }
 
 /* ---------- TABLA DE INSUMOS - DESKTOP ---------- */
@@ -386,9 +369,9 @@
   display: none;
   overflow-x: auto;
   border: 1px solid var(--border);
-  border-radius: 12px;
+  border-radius: 8px;
   margin-top: 1rem;
-  background: var(--background);
+  background: #ffffff;
 }
 
 @media (min-width: 768px) {
@@ -401,6 +384,7 @@
   width: 100%;
   min-width: 700px;
   border-collapse: collapse;
+  background: #ffffff;
 }
 
 .insumos-table thead {
@@ -421,6 +405,7 @@
 .insumos-table tbody tr {
   border-bottom: 1px solid var(--gray-100);
   transition: background 0.2s ease;
+  background: #ffffff;
 }
 
 .insumos-table tbody tr:hover {
@@ -457,12 +442,12 @@
   width: 100%;
   max-width: 120px;
   padding: 0.5rem 0.75rem;
-  border: 1.5px solid var(--gray-300);
+  border: 1px solid var(--gray-300);
   border-radius: 6px;
   font-size: 0.85rem;
   transition: all 0.2s ease;
   font-family: inherit;
-  background: var(--background);
+  background: #ffffff;
 }
 
 .table-input:hover {
@@ -514,8 +499,8 @@
 }
 
 .insumo-card {
-  background: var(--background);
-  border: 1.5px solid var(--border);
+  background: #ffffff;
+  border: 1px solid var(--border);
   border-radius: 12px;
   overflow: hidden;
   transition: all 0.2s ease;
@@ -523,7 +508,7 @@
 
 .insumo-card:hover {
   border-color: var(--gray-300);
-  box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.05);
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.05);
 }
 
 .card-header-insumo {
@@ -553,6 +538,7 @@
   display: flex;
   flex-direction: column;
   gap: 1rem;
+  background: #ffffff;
 }
 
 .card-field {
@@ -565,13 +551,12 @@
   font-size: 0.8rem;
   font-weight: 600;
   color: var(--gray-600);
-  letter-spacing: -0.01em;
 }
 
 .stock-info {
   padding: 0.75rem;
   background: var(--success-light);
-  border: 1.5px solid var(--success);
+  border: 1px solid var(--success);
   border-radius: 8px;
   display: flex;
   align-items: center;
@@ -613,7 +598,6 @@
   font-weight: 700;
   color: var(--gray-700);
   margin: 0 0 0.5rem 0;
-  letter-spacing: -0.01em;
 }
 
 .empty-text-insumos {
@@ -631,8 +615,8 @@
   justify-content: flex-end;
   gap: 1rem;
   flex-shrink: 0;
-  background: var(--background);
-  border-radius: 0 0 16px 16px;
+  background: #ffffff;
+  border-radius: 0 0 12px 12px;
 }
 
 /* ---------- RESPONSIVE ---------- */
@@ -649,10 +633,6 @@
   }
 
   .modal-body {
-    padding: 1rem;
-  }
-
-  .form-section {
     padding: 1rem;
   }
 

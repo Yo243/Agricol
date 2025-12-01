@@ -1,92 +1,187 @@
-import { Component, OnInit } from '@angular/core';
-import { CommonModule } from '@angular/common';
-import { Router } from '@angular/router';
-import { AuthService } from '../../../../core/services/auth.service';
-import { User } from '../../../../models/user.model';
+import { Component } from '@angular/core';
+import { CommonModule } from '@angular/common'; // 👈 esto trae NgIf, NgFor, NgClass, etc.
+
+interface DashboardMetric {
+  key: 'parcelas' | 'inventario' | 'ordenes';
+  title: string;
+  value: number | string;
+  subtitle: string;
+  accent: 'primary' | 'warning' | 'info';
+}
+
+type TaskType = 'parcela' | 'inventario' | 'orden';
+type TaskStatus = 'pendiente' | 'en_progreso' | 'completada';
+
+interface TodayTask {
+  title: string;
+  type: TaskType;
+  time: string;
+  status: TaskStatus;
+}
+
+type AlertSeverity = 'alto' | 'medio' | 'bajo';
+type AlertModule = 'parcelas' | 'inventario' | 'ordenes';
+
+interface AlertItem {
+  title: string;
+  description: string;
+  severity: AlertSeverity;
+  module: AlertModule;
+}
+
+interface ActivityItem {
+  title: string;
+  time: string;
+}
 
 @Component({
   selector: 'app-dashboard',
   standalone: true,
-  imports: [CommonModule],
-  template: `
-    <div class="min-h-screen bg-gray-50">
-      <!-- Header -->
-      <header class="bg-white shadow">
-        <div class="max-w-7xl mx-auto px-4 py-4 sm:px-6 lg:px-8">
-          <div class="flex justify-between items-center">
-            <h1 class="text-2xl font-bold text-gray-900">🌾 AgriCol Dashboard</h1>
-            <div class="flex items-center gap-4">
-              <span class="text-gray-600">{{ user?.name }}</span>
-              <button 
-                (click)="logout()"
-                class="bg-red-600 hover:bg-red-700 text-white px-4 py-2 rounded-lg transition"
-              >
-                Cerrar Sesión
-              </button>
-            </div>
-          </div>
-        </div>
-      </header>
-
-      <!-- Main Content -->
-      <main class="max-w-7xl mx-auto px-4 py-8 sm:px-6 lg:px-8">
-        <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
-          
-          <!-- Card 1 -->
-          <div class="bg-white rounded-lg shadow p-6">
-            <h3 class="text-lg font-semibold text-gray-800 mb-2">📊 Parcelas</h3>
-            <p class="text-3xl font-bold text-green-600">12</p>
-            <p class="text-gray-600 text-sm mt-2">Total de parcelas activas</p>
-          </div>
-
-          <!-- Card 2 -->
-          <div class="bg-white rounded-lg shadow p-6">
-            <h3 class="text-lg font-semibold text-gray-800 mb-2">📦 Inventario</h3>
-            <p class="text-3xl font-bold text-blue-600">150</p>
-            <p class="text-gray-600 text-sm mt-2">Productos en stock</p>
-          </div>
-
-          <!-- Card 3 -->
-          <div class="bg-white rounded-lg shadow p-6">
-            <h3 class="text-lg font-semibold text-gray-800 mb-2">📋 Órdenes</h3>
-            <p class="text-3xl font-bold text-orange-600">8</p>
-            <p class="text-gray-600 text-sm mt-2">Órdenes pendientes</p>
-          </div>
-
-        </div>
-
-        <!-- Bienvenida -->
-        <div class="mt-8 bg-white rounded-lg shadow p-8">
-          <h2 class="text-2xl font-bold text-gray-800 mb-4">
-            ¡Bienvenido, {{ user?.name }}! 👋
-          </h2>
-          <p class="text-gray-600">
-            Has iniciado sesión correctamente en el sistema AgriCol.
-          </p>
-          <div class="mt-4 text-sm text-gray-500">
-            <p><strong>Email:</strong> {{ user?.email }}</p>
-            <p><strong>Rol:</strong> {{ user?.role }}</p>
-          </div>
-        </div>
-      </main>
-    </div>
-  `,
-  styles: []
+  imports: [CommonModule],   // 👈 con esto ya se quitan los warnings de *ngIf / *ngFor / [ngClass]
+  templateUrl: './dashboard.component.html',
+  styleUrls: ['./dashboard.component.css'],
 })
-export class DashboardComponent implements OnInit {
-  user: User | null = null;
+export class DashboardComponent {
+  metrics: DashboardMetric[] = [
+    {
+      key: 'parcelas',
+      title: 'Parcelas',
+      value: 12,
+      subtitle: 'Parcelas activas',
+      accent: 'primary',
+    },
+    {
+      key: 'inventario',
+      title: 'Inventario',
+      value: 150,
+      subtitle: 'Productos en stock',
+      accent: 'info',
+    },
+    {
+      key: 'ordenes',
+      title: 'Órdenes',
+      value: 8,
+      subtitle: 'Órdenes pendientes',
+      accent: 'warning',
+    },
+  ];
 
-  constructor(
-    private authService: AuthService,
-    private router: Router
-  ) {}
+  todayTasks: TodayTask[] = [
+    {
+      title: 'Riego programado - Parcela Norte',
+      type: 'parcela',
+      time: 'Hoy • 17:00',
+      status: 'pendiente',
+    },
+    {
+      title: 'Aplicación de fertilizante - Parcela Este',
+      type: 'parcela',
+      time: 'Hoy • 18:30',
+      status: 'en_progreso',
+    },
+    {
+      title: 'Revisión de stock de fertilizantes',
+      type: 'inventario',
+      time: 'Hoy • 20:00',
+      status: 'pendiente',
+    },
+    {
+      title: 'Cierre de órdenes del día',
+      type: 'orden',
+      time: 'Hoy • 21:30',
+      status: 'pendiente',
+    },
+  ];
 
-  ngOnInit(): void {
-    // Obtener el usuario después de que el componente se inicialice
-    this.user = this.authService.getCurrentUser();
+  alerts: AlertItem[] = [
+    {
+      title: 'Stock bajo de fertilizante NPK',
+      description: 'Quedan menos de 5 unidades disponibles en inventario.',
+      severity: 'alto',
+      module: 'inventario',
+    },
+    {
+      title: 'Riego atrasado en Parcela Oeste',
+      description: 'La última aplicación de riego fue hace más de 5 días.',
+      severity: 'medio',
+      module: 'parcelas',
+    },
+    {
+      title: 'Órdenes abiertas sin responsable',
+      description: 'Hay 2 órdenes sin usuario asignado.',
+      severity: 'bajo',
+      module: 'ordenes',
+    },
+  ];
+
+  recentActivity: ActivityItem[] = [
+    {
+      title: 'Se registró una nueva parcela: Parcela Sur',
+      time: 'Hace 15 minutos',
+    },
+    {
+      title: 'Se actualizó el stock de herbicida selectivo',
+      time: 'Hace 40 minutos',
+    },
+    {
+      title: 'Se completó la orden OR-00125',
+      time: 'Hace 1 hora',
+    },
+    {
+      title: 'Se creó la orden OR-00126',
+      time: 'Hace 2 horas',
+    },
+  ];
+
+  mapTaskType(type: TaskType): string {
+    switch (type) {
+      case 'parcela':
+        return 'Parcela';
+      case 'inventario':
+        return 'Inventario';
+      case 'orden':
+        return 'Orden';
+      default:
+        return '';
+    }
   }
 
-  logout(): void {
-    this.authService.logout();
+  mapTaskStatus(status: TaskStatus): string {
+    switch (status) {
+      case 'pendiente':
+        return 'Pendiente';
+      case 'en_progreso':
+        return 'En progreso';
+      case 'completada':
+        return 'Completada';
+      default:
+        return '';
+    }
+  }
+
+  mapSeverity(severity: AlertSeverity): string {
+    switch (severity) {
+      case 'alto':
+        return 'Alta prioridad';
+      case 'medio':
+        return 'Prioridad media';
+      case 'bajo':
+        return 'Prioridad baja';
+      default:
+        return '';
+    }
+  }
+
+  mapModule(module: AlertModule): string {
+    switch (module) {
+      case 'parcelas':
+        return 'Módulo de Parcelas';
+      case 'inventario':
+        return 'Módulo de Inventario';
+      case 'ordenes':
+        return 'Módulo de Órdenes';
+      default:
+        return '';
+    }
   }
 }

@@ -310,7 +310,8 @@
 <!-- Modales -->
 <app-new-movement *ngIf="showNewMovementModal" 
                   [item]="selectedItem" 
-                  (closed)="closeNewMovementModal()">
+                  (closed)="closeNewMovementModal()"
+                  (newItemRequested)="onNewItemFromMovement()">
 </app-new-movement>
 
 <app-edit-item *ngIf="showEditItemModal" 

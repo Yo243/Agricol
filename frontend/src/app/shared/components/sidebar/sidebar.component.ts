@@ -1,24 +1,24 @@
-import { Component, OnInit } from '@angular/core';
-import { CommonModule } from '@angular/common';
+import { Component, OnInit, EventEmitter, Output } from '@angular/core';
+import { NgIf, NgFor, UpperCasePipe } from '@angular/common';
 import { Router, RouterModule } from '@angular/router';
 
 interface MenuItem {
   label: string;
   icon: string;
   route: string;
-  badge?: string;
-  badgeColor?: string;
   requiresAdmin?: boolean;
 }
 
 @Component({
   selector: 'app-sidebar',
   standalone: true,
-  imports: [CommonModule, RouterModule],
+  imports: [NgIf, NgFor, UpperCasePipe, RouterModule],
   templateUrl: './sidebar.component.html',
   styleUrls: ['./sidebar.component.css']
 })
 export class SidebarComponent implements OnInit {
+  @Output() collapsedChange = new EventEmitter<boolean>();  // 👈 nuevo
+
   userName: string = 'Usuario';
   userRole: string = 'Operador';
   isAdmin: boolean = false;
@@ -26,17 +26,13 @@ export class SidebarComponent implements OnInit {
   isMobileMenuOpen: boolean = false;
 
   menuItems: MenuItem[] = [
-    { label: 'Inicio', icon: '', route: '/dashboard', requiresAdmin: false },
-    { label: 'Inventario', icon: '', route: '/inventario', badge: '2', badgeColor: 'warning', requiresAdmin: false },
-    { label: 'Recetas', icon: '', route: '/receta', requiresAdmin: false },
-    { label: 'Órdenes', icon: '', route: '/ordenes', badge: '3', badgeColor: 'info', requiresAdmin: false },
-    { label: 'Parcelas', icon: '', route: '/parcelas', requiresAdmin: false },
-
-    // 🔥 SOLO ADMIN
-    { label: 'Reportes', icon: '', route: '/reportes', requiresAdmin: true },
-
-    // 🔥 SOLO ADMIN
-    { label: 'Usuarios', icon: '', route: '/usuarios', requiresAdmin: true }
+    { label: 'Inicio',     icon: '', route: '/dashboard',  requiresAdmin: false },
+    { label: 'Inventario', icon: '', route: '/inventario', requiresAdmin: false },
+    { label: 'Recetas',    icon: '', route: '/receta',     requiresAdmin: false },
+    { label: 'Órdenes',    icon: '', route: '/ordenes',    requiresAdmin: false },
+    { label: 'Parcelas',   icon: '', route: '/parcelas',   requiresAdmin: false },
+    { label: 'Reportes',   icon: '', route: '/reportes',   requiresAdmin: true },
+    { label: 'Usuarios',   icon: '', route: '/usuarios',   requiresAdmin: true }
   ];
 
   constructor(private router: Router) {}
@@ -46,8 +42,6 @@ export class SidebarComponent implements OnInit {
 
     if (user.name) {
       this.userName = user.name;
-
-      // 🔥 TU BD USA: "admin" y "user"
       this.userRole = user.role === 'admin' ? 'Administrador' : 'Operador';
       this.isAdmin = user.role === 'admin';
     }
@@ -66,6 +60,7 @@ export class SidebarComponent implements OnInit {
 
   toggleSidebar(): void {
     this.isCollapsed = !this.isCollapsed;
+    this.collapsedChange.emit(this.isCollapsed);  // 👈 avisamos al layout
   }
 
   toggleMobileMenu(): void {

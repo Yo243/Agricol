@@ -1,0 +1,126 @@
+<div class="dashboard-container">
+  <!-- Header -->
+  <header class="dashboard-header">
+    <div>
+      <h1 class="dashboard-title">AgriCol Dashboard</h1>
+      <p class="dashboard-subtitle">
+        Resumen general de tus operaciones agrícolas.
+      </p>
+    </div>
+  </header>
+
+  <!-- Métricas principales -->
+  <section class="metrics-grid">
+    <article
+      class="metric-card"
+      *ngFor="let metric of metrics"
+      [ngClass]="'metric-' + metric.accent"
+    >
+      <div class="metric-header">
+        <h2 class="metric-title">{{ metric.title }}</h2>
+      </div>
+      <div class="metric-body">
+        <div class="metric-value">{{ metric.value }}</div>
+        <div class="metric-subtitle">{{ metric.subtitle }}</div>
+      </div>
+    </article>
+  </section>
+
+  <!-- Grid principal: tareas y alertas -->
+  <section class="main-grid">
+    <!-- Tareas de hoy -->
+    <article class="panel panel-tasks">
+      <div class="panel-header">
+        <h2 class="panel-title">Tareas de hoy</h2>
+        <p class="panel-helper">
+          Próximas actividades relacionadas con parcelas e inventario.
+        </p>
+      </div>
+
+      <ul class="task-list">
+        <li class="task-item" *ngFor="let task of todayTasks">
+          <div class="task-main">
+            <span
+              class="task-chip"
+              [ngClass]="'task-type-' + task.type"
+            >
+              {{ mapTaskType(task.type) }}
+            </span>
+            <span class="task-title">{{ task.title }}</span>
+          </div>
+          <div class="task-meta">
+            <span class="task-time">{{ task.time }}</span>
+            <span
+              class="task-status"
+              [ngClass]="'status-' + task.status"
+            >
+              {{ mapTaskStatus(task.status) }}
+            </span>
+          </div>
+        </li>
+      </ul>
+
+      <div class="panel-empty" *ngIf="todayTasks.length === 0">
+        No hay tareas registradas para hoy.
+      </div>
+    </article>
+
+    <!-- Alertas importantes -->
+    <article class="panel panel-alerts">
+      <div class="panel-header">
+        <h2 class="panel-title">Alertas importantes</h2>
+        <p class="panel-helper">
+          Elementos que requieren revisión y seguimiento.
+        </p>
+      </div>
+
+      <ul class="alert-list">
+        <li class="alert-item" *ngFor="let alert of alerts">
+          <div class="alert-main">
+            <span
+              class="alert-pill"
+              [ngClass]="'severity-' + alert.severity"
+            >
+              {{ mapSeverity(alert.severity) }}
+            </span>
+            <span class="alert-title">{{ alert.title }}</span>
+          </div>
+          <p class="alert-description">{{ alert.description }}</p>
+          <span class="alert-module">
+            {{ mapModule(alert.module) }}
+          </span>
+        </li>
+      </ul>
+
+      <div class="panel-empty" *ngIf="alerts.length === 0">
+        No hay alertas activas en este momento.
+      </div>
+    </article>
+  </section>
+
+  <!-- Actividad reciente -->
+  <section class="secondary-grid">
+    <article class="panel panel-activity">
+      <div class="panel-header">
+        <h2 class="panel-title">Actividad reciente</h2>
+        <p class="panel-helper">
+          Últimas acciones registradas en el sistema.
+        </p>
+      </div>
+
+      <ul class="activity-list">
+        <li class="activity-item" *ngFor="let item of recentActivity">
+          <span class="activity-dot"></span>
+          <div class="activity-content">
+            <span class="activity-title">{{ item.title }}</span>
+            <span class="activity-time">{{ item.time }}</span>
+          </div>
+        </li>
+      </ul>
+
+      <div class="panel-empty" *ngIf="recentActivity.length === 0">
+        Aún no hay actividad registrada.
+      </div>
+    </article>
+  </section>
+</div>

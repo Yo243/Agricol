@@ -1,10 +1,3 @@
-<!-- Overlay para mobile -->
-<div 
-  class="mobile-overlay" 
-  [class.active]="isMobileMenuOpen"
-  (click)="closeMobileMenu()">
-</div>
-
 <!-- Sidebar -->
 <aside class="sidebar" [class.collapsed]="isCollapsed" [class.mobile-open]="isMobileMenuOpen">
   <!-- Header del Sidebar -->
@@ -20,10 +13,7 @@
     </div>
   </div>
 
-  <!-- Botón para colapsar/expandir (Desktop) - FLECHA A LA IZQUIERDA -->
-  <button class="toggle-btn" (click)="toggleSidebar()" [class.collapsed]="isCollapsed">
-    <span class="arrow" [class.rotated]="isCollapsed">◀</span>
-  </button>
+  <!-- (YA SIN BOTÓN AQUÍ) -->
 
   <!-- Navegación Principal -->
   <nav class="sidebar-nav">
@@ -35,15 +25,13 @@
           [class.active]="isActive(item.route)"
           [title]="item.label"
           (click)="closeMobileMenu()">
-          <span class="nav-icon">{{ item.icon }}</span>
-          <span class="nav-label" *ngIf="!isCollapsed">{{ item.label }}</span>
-          <span 
-            *ngIf="item.badge && !isCollapsed" 
-            class="nav-badge"
-            [class.badge-warning]="item.badgeColor === 'warning'"
-            [class.badge-info]="item.badgeColor === 'info'">
-            {{ item.badge }}
+
+          <!-- Inicial del módulo -->
+          <span class="nav-icon">
+            {{ item.label[0] | uppercase }}
           </span>
+
+          <span class="nav-label" *ngIf="!isCollapsed">{{ item.label }}</span>
         </a>
       </li>
     </ul>
@@ -60,6 +48,7 @@
         <p class="user-role">{{ userRole }}</p>
       </div>
     </div>
+
     <button 
       class="logout-btn" 
       (click)="logout()"
@@ -67,10 +56,10 @@
       <span class="logout-icon">🚪</span>
       <span *ngIf="!isCollapsed">Cerrar Sesión</span>
     </button>
+
+    <!-- 🔽 Flecha para colapsar/expandir, ahora debajo del usuario -->
+    <button class="toggle-btn" (click)="toggleSidebar()" [class.collapsed]="isCollapsed">
+      <span class="arrow" [class.rotated]="isCollapsed">◀</span>
+    </button>
   </div>
 </aside>
-
-<!-- Botón de menú mobile (Hamburguesa) -->
-<button class="mobile-menu-btn" (click)="toggleMobileMenu()">
-  <span class="hamburger">☰</span>
-</button>

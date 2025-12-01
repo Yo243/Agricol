@@ -1,39 +1,15 @@
-.main-layout {
-  display: flex;
+.layout-root {
   min-height: 100vh;
-  background: #f8fafc;
 }
 
+/* contenido cuando el sidebar está normal (260px) */
 .main-content {
-  flex: 1;
   margin-left: 260px;
-  padding: 2rem;
+  padding: 1.5rem 2rem;
   transition: margin-left 0.3s ease;
-  min-height: 100vh;
-  overflow-x: hidden;
 }
 
-/* Cuando sidebar está colapsado (Desktop) */
-.sidebar.collapsed ~ .main-content {
+/* contenido cuando el sidebar está colapsado (70px) */
+.main-content.collapsed {
   margin-left: 70px;
-}
-
-/* ==================== RESPONSIVE ==================== */
-@media (max-width: 1024px) {
-  .main-content {
-    margin-left: 0;
-    padding: 5rem 2rem 2rem; /* Espacio arriba para el botón hamburguesa */
-  }
-}
-
-@media (max-width: 768px) {
-  .main-content {
-    padding: 4.5rem 1.5rem 1.5rem;
-  }
-}
-
-@media (max-width: 480px) {
-  .main-content {
-    padding: 4rem 1rem 1rem;
-  }
 }

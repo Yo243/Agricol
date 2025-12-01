@@ -49,9 +49,9 @@
                 name="periodoSiembra"
                 (change)="onPeriodoChange()"
                 required>
-                <option value="0">Seleccionar período...</option>
-                <option *ngFor="let periodo of periodos" [value]="periodo.id">
-                  {{periodo.cultivo}} ({{periodo.hectareasSembradas}} ha)
+                <option [ngValue]="0">Seleccionar período...</option>
+                <option *ngFor="let periodo of periodos" [ngValue]="periodo.id">
+                  {{ periodo.cultivo?.nombre || 'Cultivo' }} ({{ periodo.hectareasSembradas }} ha)
                 </option>
               </select>
             </div>
@@ -124,8 +124,8 @@
                 class="form-input select-insumo"
                 [(ngModel)]="insumoSeleccionado"
                 name="insumoSeleccionado">
-                <option value="0">Seleccionar insumo...</option>
-                <option *ngFor="let insumo of insumos" [value]="insumo.id">
+                <option [ngValue]="null">Seleccionar insumo...</option>
+                <option *ngFor="let insumo of insumos" [ngValue]="insumo.id">
                   {{insumo.nombre}} - Stock: {{insumo.stockActual}} {{insumo.unidadMedida}}
                 </option>
               </select>
@@ -134,7 +134,7 @@
                 type="button" 
                 class="btn-add-insumo"
                 (click)="agregarInsumo()"
-                [disabled]="!insumoSeleccionado || insumoSeleccionado === 0">
+                [disabled]="insumoSeleccionado === null">
                 <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                   <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"/>
                 </svg>

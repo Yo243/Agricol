@@ -69,10 +69,6 @@
 
 /* ==================== BOTÓN TOGGLE (FLECHA A LA IZQUIERDA) ==================== */
 .toggle-btn {
-  position: absolute;
-  left: 12px;
-  top: 50%;
-  transform: translateY(-50%);
   width: 32px;
   height: 32px;
   background: rgba(255, 255, 255, 0.2);
@@ -84,12 +80,12 @@
   align-items: center;
   justify-content: center;
   transition: all 0.2s ease;
-  z-index: 10;
+  margin: 0.75rem auto 0; /* centrado debajo del footer */
 }
 
 .toggle-btn:hover {
   background: rgba(255, 255, 255, 0.3);
-  transform: translateY(-50%) scale(1.1);
+  transform: scale(1.05);
 }
 
 .arrow {
@@ -101,6 +97,7 @@
 .arrow.rotated {
   transform: rotate(180deg);
 }
+
 
 /* ==================== NAVEGACIÓN ==================== */
 .sidebar-nav {
@@ -168,12 +165,22 @@
 }
 
 .nav-icon {
-  font-size: 1.5rem;
+  width: 32px;
+  height: 32px;
+  border-radius: 999px;
+  background: rgba(255, 255, 255, 0.15);
   display: flex;
   align-items: center;
   justify-content: center;
-  width: 24px;
+  font-weight: 600;
+  font-size: 0.9rem;
   flex-shrink: 0;
+}
+
+/* Cuando el item está activo, que destaque más */
+.nav-link.active .nav-icon {
+  background: #0f766e;
+  color: white;
 }
 
 .nav-label {

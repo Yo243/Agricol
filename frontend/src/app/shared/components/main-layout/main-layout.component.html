@@ -1,9 +1,9 @@
-<div class="main-layout">
-  <!-- Sidebar -->
-  <app-sidebar></app-sidebar>
+<div class="layout-root">
+  <app-sidebar
+    (collapsedChange)="onSidebarCollapsedChange($event)">
+  </app-sidebar>
 
-  <!-- Contenido Principal -->
-  <main class="main-content">
+  <main class="main-content" [class.collapsed]="isSidebarCollapsed">
     <router-outlet></router-outlet>
   </main>
 </div>

@@ -1,5 +1,5 @@
 import { Component, OnInit } from '@angular/core';
-import { CommonModule, DecimalPipe, CurrencyPipe, DatePipe } from '@angular/common';
+import { CommonModule, CurrencyPipe, DatePipe } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { InventarioService } from '../../services/inventario.service';
 import { NewMovementComponent } from '../../components/new-movement/new-movement.component';
@@ -158,6 +158,20 @@ export class InventarioComponent implements OnInit {
     this.showNewMovementModal = false;
     this.selectedItem = null;
     this.cargarInventario();
+  }
+
+  // abrir modal de producto en modo NUEVO (desde la página o desde movimiento)
+  openNewItemModal(): void {
+    this.selectedItem = null;
+    this.showEditItemModal = true;
+  }
+
+  // se dispara cuando el modal de movimiento emite (newItemRequested)
+  onNewItemFromMovement(): void {
+    // opcional: si quieres cerrar el modal de movimiento:
+    // this.showNewMovementModal = false;
+
+    this.openNewItemModal();
   }
 
   openEditItemModal(item: InventarioItem): void {

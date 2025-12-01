@@ -2,7 +2,7 @@ import { Component, Input, Output, EventEmitter, OnInit } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormBuilder, FormGroup, Validators, ReactiveFormsModule } from '@angular/forms';
 import { InventarioService } from '../../services/inventario.service';
-import { InventarioItem, TipoMovimiento, UnidadMedida } from '../../../../models/inventario.model';
+import { InventarioItem, TipoMovimiento } from '../../../../models/inventario.model';
 
 @Component({
   selector: 'app-new-movement',
@@ -14,6 +14,9 @@ import { InventarioItem, TipoMovimiento, UnidadMedida } from '../../../../models
 export class NewMovementComponent implements OnInit {
   @Input() item: InventarioItem | null = null;
   @Output() closed = new EventEmitter<void>();
+
+  // 👉 para que el padre pueda abrir el modal de nuevo producto
+  @Output() newItemRequested = new EventEmitter<void>();
 
   movimientoForm: FormGroup;
   loading = false;
@@ -42,17 +45,21 @@ export class NewMovementComponent implements OnInit {
 
   ngOnInit(): void {
     if (this.item) {
+      // Cuando vienes desde un item específico
       this.movimientoForm.patchValue({
         itemId: this.item.id,
         costoUnitario: this.item.costoUnitario
       });
     } else {
+      // Cuando es "nuevo movimiento" general, cargar todos
       this.cargarItems();
     }
 
     // Actualizar costo total cuando cambia cantidad o costo unitario
-    this.movimientoForm.get('cantidad')?.valueChanges.subscribe(() => this.actualizarCostoTotal());
-    this.movimientoForm.get('costoUnitario')?.valueChanges.subscribe(() => this.actualizarCostoTotal());
+    this.movimientoForm.get('cantidad')?.valueChanges
+      .subscribe(() => this.actualizarCostoTotal());
+    this.movimientoForm.get('costoUnitario')?.valueChanges
+      .subscribe(() => this.actualizarCostoTotal());
   }
 
   cargarItems(): void {
@@ -64,10 +71,33 @@ export class NewMovementComponent implements OnInit {
     });
   }
 
+  /**
+   * Al seleccionar un producto:
+   * - Si tiene costoUnitario > 0 → rellenamos el campo.
+   * - Si no tiene, dejamos 0 para que el usuario lo capture.
+   */
+  onItemChange(): void {
+    const itemId = Number(this.movimientoForm.get('itemId')?.value);
+    if (!itemId) return;
+
+    const selected = this.items.find(i => i.id === itemId);
+    if (!selected) return;
+
+    if (selected.costoUnitario != null && selected.costoUnitario > 0) {
+      this.movimientoForm.patchValue({
+        costoUnitario: selected.costoUnitario
+      });
+    } else {
+      this.movimientoForm.patchValue({
+        costoUnitario: 0
+      });
+    }
+  }
+
   actualizarCostoTotal(): void {
     const cantidad = this.movimientoForm.get('cantidad')?.value || 0;
     const costoUnitario = this.movimientoForm.get('costoUnitario')?.value || 0;
-    // El costo total se calculará en el backend
+    // Solo para exponerlo al template; el backend igual lo recalcula
   }
 
   onSubmit(): void {
@@ -93,6 +123,11 @@ export class NewMovementComponent implements OnInit {
 
   close(): void {
     this.closed.emit();
+  }
+
+  // 👉 botón "Nuevo producto"
+  onNewItem(): void {
+    this.newItemRequested.emit();
   }
 
   get costoTotal(): number {
