@@ -7,6 +7,3 @@ app.listen(PORT, () => {
   console.log(`🚀 Servidor corriendo en ${PORT}`);
   console.log(`📝 Entorno: ${process.env.NODE_ENV}`);
 });
-
-
-

@@ -21,7 +21,7 @@ exports.getItems = async (req, res) => {
     res.json(items);
   } catch (error) {
     console.error('Error al obtener items:', error);
-    res.status(500).json({ message: 'Error al obtener items del inventario' });
+    res.status(500).json({ message: 'Error al obtener items del inventario', error: error.message });
   }
 };
 
@@ -49,7 +49,7 @@ exports.getItemById = async (req, res) => {
     res.json(item);
   } catch (error) {
     console.error('Error al obtener item:', error);
-    res.status(500).json({ message: 'Error al obtener item' });
+    res.status(500).json({ message: 'Error al obtener item', error: error.message });
   }
 };
 
@@ -83,7 +83,7 @@ exports.createItem = async (req, res) => {
     res.status(201).json(item);
   } catch (error) {
     console.error('Error al crear item:', error);
-    res.status(500).json({ message: 'Error al crear item' });
+    res.status(500).json({ message: 'Error al crear item', error: error.message });
   }
 };
 
@@ -126,7 +126,7 @@ exports.updateItem = async (req, res) => {
     res.json(item);
   } catch (error) {
     console.error('Error al actualizar item:', error);
-    res.status(500).json({ message: 'Error al actualizar item' });
+    res.status(500).json({ message: 'Error al actualizar item', error: error.message });
   }
 };
 
@@ -144,7 +144,7 @@ exports.deleteItem = async (req, res) => {
     res.json({ message: 'Item eliminado correctamente' });
   } catch (error) {
     console.error('Error al eliminar item:', error);
-    res.status(500).json({ message: 'Error al eliminar item' });
+    res.status(500).json({ message: 'Error al eliminar item', error: error.message });
   }
 };
 
@@ -175,16 +175,49 @@ exports.getMovimientos = async (req, res) => {
     res.json(movimientos);
   } catch (error) {
     console.error('Error al obtener movimientos:', error);
-    res.status(500).json({ message: 'Error al obtener movimientos' });
+    res.status(500).json({ message: 'Error al obtener movimientos', error: error.message });
   }
 };
 
 /**
- * Registrar movimiento
+ * Registrar movimiento - CORREGIDO PARA COINCIDIR CON SCHEMA
  */
 exports.registrarMovimiento = async (req, res) => {
   try {
-    const { itemId, tipo, cantidad, costoUnitario, ...restoData } = req.body;
+    console.log('═══════════════════════════════════════════');
+    console.log('📦 INICIO - Registro de Movimiento');
+    console.log('═══════════════════════════════════════════');
+    console.log('Body completo recibido:', JSON.stringify(req.body, null, 2));
+
+    const { 
+      itemId, 
+      tipo, 
+      cantidad, 
+      costoUnitario, 
+      motivo,        // Frontend envía "motivo"
+      referencia, 
+      destino, 
+      observaciones,
+      responsable 
+    } = req.body;
+
+    // ✅ VALIDACIONES
+    if (!itemId) {
+      console.error('❌ Error: itemId es requerido');
+      return res.status(400).json({ message: 'itemId es requerido' });
+    }
+    
+    if (!tipo) {
+      console.error('❌ Error: tipo es requerido');
+      return res.status(400).json({ message: 'tipo es requerido' });
+    }
+    
+    if (!cantidad || isNaN(parseFloat(cantidad))) {
+      console.error('❌ Error: cantidad inválida:', cantidad);
+      return res.status(400).json({ message: 'cantidad es requerida y debe ser un número válido' });
+    }
+
+    console.log('✅ Validaciones pasadas');
 
     // Obtener item actual
     const item = await prisma.inventarioItem.findUnique({
@@ -192,66 +225,165 @@ exports.registrarMovimiento = async (req, res) => {
     });
 
     if (!item) {
+      console.error('❌ Error: Item no encontrado con ID:', itemId);
       return res.status(404).json({ message: 'Item no encontrado' });
     }
 
+    console.log('✅ Item encontrado:', {
+      id: item.id,
+      nombre: item.nombre,
+      codigo: item.codigo,
+      stockActual: item.stockActual,
+      unidadMedida: item.unidadMedida
+    });
+
     // Calcular nuevo stock según tipo de movimiento
     let nuevoStock = item.stockActual;
-    if (tipo === 'Entrada' || tipo === 'Devolución') {
-      nuevoStock += parseFloat(cantidad);
-    } else if (tipo === 'Salida' || tipo === 'Merma') {
-      nuevoStock -= parseFloat(cantidad);
-    } else if (tipo === 'Ajuste') {
-      nuevoStock = parseFloat(cantidad);
+    const cantidadFloat = parseFloat(cantidad);
+
+    console.log('📊 Cálculo de stock:');
+    console.log('   Stock actual:', nuevoStock);
+    console.log('   Tipo movimiento:', tipo);
+    console.log('   Cantidad:', cantidadFloat);
+
+    if (tipo === 'Entrada' || tipo === 'ENTRADA') {
+      nuevoStock += cantidadFloat;
+      console.log('   ➕ Entrada - Nuevo stock:', nuevoStock);
+    } else if (tipo === 'Salida' || tipo === 'SALIDA') {
+      nuevoStock -= cantidadFloat;
+      console.log('   ➖ Salida - Nuevo stock:', nuevoStock);
+    } else if (tipo === 'Merma' || tipo === 'MERMA') {
+      nuevoStock -= cantidadFloat;
+      console.log('   ➖ Merma - Nuevo stock:', nuevoStock);
+    } else if (tipo === 'Ajuste' || tipo === 'AJUSTE') {
+      nuevoStock = cantidadFloat;
+      console.log('   🔄 Ajuste - Nuevo stock:', nuevoStock);
+    } else if (tipo === 'Devolución' || tipo === 'DEVOLUCION') {
+      nuevoStock += cantidadFloat;
+      console.log('   ↩️ Devolución - Nuevo stock:', nuevoStock);
+    } else {
+      console.error('❌ Tipo de movimiento desconocido:', tipo);
+      return res.status(400).json({ 
+        message: `Tipo de movimiento no válido: ${tipo}`,
+        tiposValidos: ['Entrada', 'Salida', 'Merma', 'Ajuste', 'Devolución']
+      });
     }
 
     // Validar que el stock no sea negativo
     if (nuevoStock < 0) {
-      return res.status(400).json({ message: 'Stock insuficiente' });
+      console.error('❌ Stock insuficiente:', {
+        stockActual: item.stockActual,
+        cantidadSolicitada: cantidadFloat,
+        stockResultante: nuevoStock
+      });
+      return res.status(400).json({ 
+        message: 'Stock insuficiente',
+        stockActual: item.stockActual,
+        cantidadSolicitada: cantidadFloat,
+        faltante: Math.abs(nuevoStock)
+      });
     }
 
-    // Calcular costo total
-    const costoTotal = (costoUnitario || item.costoUnitario) * parseFloat(cantidad);
+    // Calcular costo
+    const costoUnitarioFinal = costoUnitario ? parseFloat(costoUnitario) : item.costoUnitario;
+    const costoTotal = costoUnitarioFinal * cantidadFloat;
 
-    // Registrar movimiento
+    console.log('💰 Cálculo de costos:');
+    console.log('   Costo unitario:', costoUnitarioFinal);
+    console.log('   Costo total:', costoTotal);
+
+    // ⚠️ IMPORTANTE: El schema usa "razon" no "motivo"
+    // Preparar datos del movimiento según el schema exacto
+    const movimientoData = {
+      itemId: parseInt(itemId),
+      tipo: tipo,
+      cantidad: cantidadFloat,
+      unidadMedida: item.unidadMedida,
+      costoUnitario: costoUnitarioFinal,
+      costoTotal: costoTotal,
+      razon: motivo || null,           // ⚠️ Cambio: "motivo" → "razon" (schema)
+      referencia: referencia || null,
+      destino: destino || null,
+      responsable: responsable || null,
+      fecha: new Date()
+    };
+
+    console.log('📝 Datos del movimiento a crear:', movimientoData);
+
+    // Registrar movimiento en la base de datos
+    console.log('💾 Creando movimiento en BD...');
     const movimiento = await prisma.movimientoInventario.create({
-      data: {
-        itemId: parseInt(itemId),
-        tipo,
-        cantidad: parseFloat(cantidad),
-        unidadMedida: item.unidadMedida,
-        costoUnitario: costoUnitario || item.costoUnitario,
-        costoTotal,
-        ...restoData
-      }
+      data: movimientoData
     });
 
+    console.log('✅ Movimiento creado con ID:', movimiento.id);
+
     // Actualizar stock del item
-    const nuevoValorTotal = nuevoStock * (costoUnitario || item.costoUnitario);
+    const nuevoValorTotal = nuevoStock * costoUnitarioFinal;
     const nuevoEstado = determinarEstado({
       ...item,
       stockActual: nuevoStock,
-      costoUnitario: costoUnitario || item.costoUnitario
+      costoUnitario: costoUnitarioFinal
     });
 
-    await prisma.inventarioItem.update({
+    console.log('🔄 Actualizando item:');
+    console.log('   Nuevo stock:', nuevoStock);
+    console.log('   Nuevo valor total:', nuevoValorTotal);
+    console.log('   Nuevo estado:', nuevoEstado);
+
+    const itemActualizado = await prisma.inventarioItem.update({
       where: { id: parseInt(itemId) },
       data: {
         stockActual: nuevoStock,
         valorTotal: nuevoValorTotal,
         estado: nuevoEstado,
         ultimoMovimiento: new Date(),
-        ...(costoUnitario && { costoUnitario })
+        ...(costoUnitario && { costoUnitario: costoUnitarioFinal })
       }
     });
 
-    // Generar alertas
-    await generarAlertas(parseInt(itemId));
+    console.log('✅ Item actualizado correctamente');
 
-    res.status(201).json(movimiento);
+    // Generar alertas
+    console.log('🔔 Generando alertas...');
+    await generarAlertas(parseInt(itemId));
+    console.log('✅ Alertas generadas');
+
+    console.log('═══════════════════════════════════════════');
+    console.log('✅ ÉXITO - Movimiento registrado');
+    console.log('═══════════════════════════════════════════');
+
+    res.status(201).json({
+      success: true,
+      message: 'Movimiento registrado correctamente',
+      movimiento,
+      item: {
+        id: itemActualizado.id,
+        nombre: itemActualizado.nombre,
+        codigo: itemActualizado.codigo,
+        stockAnterior: item.stockActual,
+        stockNuevo: nuevoStock,
+        estadoAnterior: item.estado,
+        estadoNuevo: nuevoEstado
+      }
+    });
+
   } catch (error) {
-    console.error('Error al registrar movimiento:', error);
-    res.status(500).json({ message: 'Error al registrar movimiento' });
+    console.error('═══════════════════════════════════════════');
+    console.error('❌ ERROR CRÍTICO en registro de movimiento');
+    console.error('═══════════════════════════════════════════');
+    console.error('Mensaje:', error.message);
+    console.error('Stack:', error.stack);
+    console.error('═══════════════════════════════════════════');
+    
+    res.status(500).json({ 
+      message: 'Error al registrar movimiento',
+      error: error.message,
+      details: process.env.NODE_ENV === 'development' ? {
+        stack: error.stack,
+        prismaCode: error.code
+      } : undefined
+    });
   }
 };
 
@@ -277,7 +409,7 @@ exports.getAlertas = async (req, res) => {
     res.json(alertas);
   } catch (error) {
     console.error('Error al obtener alertas:', error);
-    res.status(500).json({ message: 'Error al obtener alertas' });
+    res.status(500).json({ message: 'Error al obtener alertas', error: error.message });
   }
 };
 
@@ -296,7 +428,7 @@ exports.marcarAlertaLeida = async (req, res) => {
     res.json({ message: 'Alerta marcada como leída' });
   } catch (error) {
     console.error('Error al marcar alerta:', error);
-    res.status(500).json({ message: 'Error al marcar alerta' });
+    res.status(500).json({ message: 'Error al marcar alerta', error: error.message });
   }
 };
 
@@ -330,7 +462,7 @@ exports.getEstadisticas = async (req, res) => {
     res.json(estadisticas);
   } catch (error) {
     console.error('Error al obtener estadísticas:', error);
-    res.status(500).json({ message: 'Error al obtener estadísticas' });
+    res.status(500).json({ message: 'Error al obtener estadísticas', error: error.message });
   }
 };
 
@@ -356,7 +488,7 @@ exports.buscarItems = async (req, res) => {
     res.json(items);
   } catch (error) {
     console.error('Error al buscar items:', error);
-    res.status(500).json({ message: 'Error al buscar items' });
+    res.status(500).json({ message: 'Error al buscar items', error: error.message });
   }
 };
 
@@ -380,75 +512,85 @@ function determinarEstado(item) {
 }
 
 async function generarAlertas(itemId) {
-  const item = await prisma.inventarioItem.findUnique({
-    where: { id: itemId }
-  });
-
-  if (!item) return;
-
-  // Eliminar alertas antiguas del item
-  await prisma.alertaInventario.deleteMany({
-    where: { itemId }
-  });
-
-  const alertas = [];
-
-  // Alerta de stock agotado
-  if (item.stockActual === 0) {
-    alertas.push({
-      itemId,
-      itemNombre: item.nombre,
-      tipoAlerta: 'Stock Agotado',
-      mensaje: `El producto ${item.nombre} (${item.codigo}) está agotado`,
-      prioridad: 'alta'
+  try {
+    const item = await prisma.inventarioItem.findUnique({
+      where: { id: itemId }
     });
-  }
-  // Alerta de stock crítico
-  else if (item.stockActual <= item.stockMinimo * 0.5) {
-    alertas.push({
-      itemId,
-      itemNombre: item.nombre,
-      tipoAlerta: 'Stock Crítico',
-      mensaje: `Stock crítico: ${item.stockActual} ${item.unidadMedida} (Mínimo: ${item.stockMinimo})`,
-      prioridad: 'alta'
-    });
-  }
-  // Alerta de stock bajo
-  else if (item.stockActual <= item.stockMinimo) {
-    alertas.push({
-      itemId,
-      itemNombre: item.nombre,
-      tipoAlerta: 'Stock Bajo',
-      mensaje: `Stock bajo: ${item.stockActual} ${item.unidadMedida} (Mínimo: ${item.stockMinimo})`,
-      prioridad: 'media'
-    });
-  }
 
-  // Alerta de vencimiento
-  if (item.diasParaVencer !== null && item.diasParaVencer !== undefined) {
-    if (item.diasParaVencer < 0) {
+    if (!item) return;
+
+    // Eliminar alertas antiguas del item
+    await prisma.alertaInventario.deleteMany({
+      where: { itemId }
+    });
+
+    const alertas = [];
+
+    // Alerta de stock agotado
+    if (item.stockActual === 0) {
       alertas.push({
         itemId,
         itemNombre: item.nombre,
-        tipoAlerta: 'Producto Vencido',
-        mensaje: `Producto vencido hace ${Math.abs(item.diasParaVencer)} días`,
+        tipo: 'Stock Agotado',
+        tipoAlerta: 'Stock Agotado',
+        mensaje: `El producto ${item.nombre} (${item.codigo}) está agotado`,
         prioridad: 'alta'
       });
-    } else if (item.diasParaVencer <= 30) {
+    }
+    // Alerta de stock crítico
+    else if (item.stockActual <= item.stockMinimo * 0.5) {
       alertas.push({
         itemId,
         itemNombre: item.nombre,
-        tipoAlerta: 'Próximo a Vencer',
-        mensaje: `Vence en ${item.diasParaVencer} días`,
-        prioridad: item.diasParaVencer <= 7 ? 'alta' : 'media'
+        tipo: 'Stock Crítico',
+        tipoAlerta: 'Stock Crítico',
+        mensaje: `Stock crítico: ${item.stockActual} ${item.unidadMedida} (Mínimo: ${item.stockMinimo})`,
+        prioridad: 'alta'
       });
     }
-  }
+    // Alerta de stock bajo
+    else if (item.stockActual <= item.stockMinimo) {
+      alertas.push({
+        itemId,
+        itemNombre: item.nombre,
+        tipo: 'Stock Bajo',
+        tipoAlerta: 'Stock Bajo',
+        mensaje: `Stock bajo: ${item.stockActual} ${item.unidadMedida} (Mínimo: ${item.stockMinimo})`,
+        prioridad: 'media'
+      });
+    }
 
-  // Crear alertas
-  if (alertas.length > 0) {
-    await prisma.alertaInventario.createMany({
-      data: alertas
-    });
+    // Alerta de vencimiento
+    if (item.diasParaVencer !== null && item.diasParaVencer !== undefined) {
+      if (item.diasParaVencer < 0) {
+        alertas.push({
+          itemId,
+          itemNombre: item.nombre,
+          tipo: 'Producto Vencido',
+          tipoAlerta: 'Producto Vencido',
+          mensaje: `Producto vencido hace ${Math.abs(item.diasParaVencer)} días`,
+          prioridad: 'alta'
+        });
+      } else if (item.diasParaVencer <= 30) {
+        alertas.push({
+          itemId,
+          itemNombre: item.nombre,
+          tipo: 'Próximo a Vencer',
+          tipoAlerta: 'Próximo a Vencer',
+          mensaje: `Vence en ${item.diasParaVencer} días`,
+          prioridad: item.diasParaVencer <= 7 ? 'alta' : 'media'
+        });
+      }
+    }
+
+    // Crear alertas
+    if (alertas.length > 0) {
+      await prisma.alertaInventario.createMany({
+        data: alertas
+      });
+    }
+  } catch (error) {
+    console.error('Error al generar alertas:', error);
+    // No lanzar el error para no interrumpir el flujo principal
   }
 }

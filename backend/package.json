@@ -5,14 +5,15 @@
   "main": "server.js",
   "type": "commonjs",
   "scripts": {
-  "dev": "nodemon server.js",
+  "dev": "nodemon src/server.js",
   "start": "node src/server.js",
 
   "build": "npm run render-build",
 
-  "build:frontend": "cd ../frontend && npm install && npm run build --configuration production",
-  
-  "copy:frontend": "rm -rf ./public && mkdir public && cp -r ../frontend/dist/frontend/browser/* ./public/",
+  "build:frontend": "cd ../frontend && npm install && npm run build",
+
+  "copy:frontend": "rm -rf ./public && mkdir public && cp -r ../frontend/dist/frontend/* ./public/",
+  "copy:frontend:win": "rmdir /s /q public 2>nul & mkdir public & xcopy \"..\\frontend\\dist\\frontend\" .\\public /E /I /Y",
 
   "render-build": "npx prisma generate && npm run build:frontend && npm run copy:frontend",
 
