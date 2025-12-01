@@ -46,7 +46,7 @@ export const routes: Routes = [
       {
         path: 'parcelas/:id',
         loadComponent: () =>
-          import('./modules/parcela/components/detalle-parcela/detalle-parcela').then(
+          import('./modules/parcela/components/detalle-parcela/detalle-parcela.component').then(
             (m) => m.DetalleParcelaComponent
           )
       },

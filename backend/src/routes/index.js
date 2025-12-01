@@ -10,7 +10,8 @@ const ordenesRoutes = require('./ordenes.routes');
 const reportesRoutes = require('./reportes.routes');
 const periodosSiembraRoutes = require('./periodos-siembra.routes');
 const usuariosRoutes = require('./usuarios.routes');
-const cultivosRoutes = require('./cultivos.routes');   // 🆕 NUEVO
+const cultivosRoutes = require('./cultivos.routes');
+const aplicacionIARoutes = require('./aplicacion-ia.routes'); // ✅ SIN './routes/'
 
 // Registrar rutas
 router.use('/auth', authRoutes);
@@ -21,6 +22,7 @@ router.use('/ordenes-aplicacion', ordenesRoutes);
 router.use('/reportes', reportesRoutes);
 router.use('/periodos-siembra', periodosSiembraRoutes);
 router.use('/users', usuariosRoutes);
-router.use('/cultivos', cultivosRoutes);               // 🆕 NUEVO
+router.use('/cultivos', cultivosRoutes);
+router.use('/aplicaciones', aplicacionIARoutes); // ✅ CAMBIADO
 
 module.exports = router;

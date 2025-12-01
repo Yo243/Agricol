@@ -29,7 +29,22 @@ exports.getAll = async (req, res) => {
       orderBy: { fechaInicio: 'desc' }
     });
 
-    res.json(periodos);
+    // ✅ MAPEO PARA FRONTEND
+    const periodosFormateados = periodos.map(p => ({
+      id: p.id,
+      parcelaId: p.parcelaId,
+      parcelaNombre: p.parcela?.nombre || 'Sin nombre',
+      cultivoId: p.cultivoId,
+      cultivo: p.cultivo?.nombre || 'Sin cultivo',
+      hectareasSembradas: parseFloat(p.hectareasSembradas),
+      fechaInicio: p.fechaInicio,
+      fechaCosechaEsperada: p.fechaCosechaEsperada,
+      estado: p.estado,
+      codigo: p.codigo,
+      observaciones: p.observaciones
+    }));
+
+    res.json(periodosFormateados);
   } catch (error) {
     console.error('Error en getAll:', error);
     res.status(500).json({ message: 'Error al obtener períodos de siembra', error: error.message });
@@ -65,13 +80,28 @@ exports.getActivos = async (req, res) => {
       orderBy: { fechaInicio: 'desc' }
     });
 
-    res.json(periodosActivos);
+    // ✅ MAPEO PARA FRONTEND
+    const periodosFormateados = periodosActivos.map(p => ({
+      id: p.id,
+      parcelaId: p.parcelaId,
+      parcelaNombre: p.parcela?.nombre || 'Sin nombre',
+      cultivoId: p.cultivoId,
+      cultivo: p.cultivo?.nombre || 'Sin cultivo',
+      hectareasSembradas: parseFloat(p.hectareasSembradas),
+      fechaInicio: p.fechaInicio,
+      fechaCosechaEsperada: p.fechaCosechaEsperada,
+      estado: p.estado,
+      codigo: p.codigo
+    }));
+
+    res.json(periodosFormateados);
   } catch (error) {
     console.error('Error en getActivos:', error);
     res.status(500).json({ message: 'Error al obtener períodos activos', error: error.message });
   }
 };
 
+// ... El resto de las funciones (getById, create, update, etc.) quedan igual
 /**
  * Obtener un período por ID
  * GET /api/periodos-siembra/:id

@@ -55,7 +55,8 @@ export interface PeriodoSiembra {
   createdAt: Date;
   updatedAt: Date;
   parcela?: Parcela;
-  cultivo?: Cultivo;
+  cultivo?: Cultivo | string;  // ✅ CORREGIDO: Puede ser objeto O string
+  parcelaNombre?: string;      // ✅ AGREGADO: Nombre de la parcela
   aplicaciones?: AplicacionParcela[];
   actividades?: Actividad[];
   _count?: {

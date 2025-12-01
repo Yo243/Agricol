@@ -1,5 +1,5 @@
 <!-- ============================================================
-     FORMULARIO DE APLICACIÓN DE INSUMOS - AgriCol
+     FORMULARIO DE APLICACIÓN DE INSUMOS CON IA - AgriCol
      ============================================================ -->
 
 <div class="modal-overlay" *ngIf="true" (click)="cerrar()">
@@ -29,13 +29,30 @@
 
       <form *ngIf="!loadingData">
         
-        <!-- Sección 1: Información General -->
+        <!-- Sección 1: Información General con Botón IA -->
         <div class="form-section">
           <div class="section-header">
             <svg class="w-5 h-5 text-primary" fill="none" stroke="currentColor" viewBox="0 0 24 24">
               <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"/>
             </svg>
             <h3 class="section-title">Información General</h3>
+            
+            <!-- Botón de IA -->
+            <button 
+              type="button" 
+              class="btn-ia ml-auto"
+              (click)="obtenerSugerenciaIA()"
+              [disabled]="loadingIA || !formData.periodoSiembraId"
+              title="Obtener sugerencias de IA">
+              <svg *ngIf="!loadingIA" class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9.663 17h4.673M12 3v1m6.364 1.636l-.707.707M21 12h-1M4 12H3m3.343-5.657l-.707-.707m2.828 9.9a5 5 0 117.072 0l-.548.547A3.374 3.374 0 0014 18.469V19a2 2 0 11-4 0v-.531c0-.895-.356-1.754-.988-2.386l-.548-.547z"/>
+              </svg>
+              <svg *ngIf="loadingIA" class="animate-spin w-4 h-4" fill="none" viewBox="0 0 24 24">
+                <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
+                <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+              </svg>
+              <span>{{ loadingIA ? 'Generando...' : 'Sugerencia IA' }}</span>
+            </button>
           </div>
 
           <div class="form-grid-2">
@@ -49,9 +66,9 @@
                 name="periodoSiembra"
                 (change)="onPeriodoChange()"
                 required>
-                <option [ngValue]="0">Seleccionar período...</option>
-                <option *ngFor="let periodo of periodos" [ngValue]="periodo.id">
-                  {{ periodo.cultivo?.nombre || 'Cultivo' }} ({{ periodo.hectareasSembradas }} ha)
+                <option value="0">Seleccionar período...</option>
+                <option *ngFor="let periodo of periodos" [value]="periodo.id">
+                  {{ getPeriodoNombre(periodo) }}
                 </option>
               </select>
             </div>
@@ -124,8 +141,8 @@
                 class="form-input select-insumo"
                 [(ngModel)]="insumoSeleccionado"
                 name="insumoSeleccionado">
-                <option [ngValue]="null">Seleccionar insumo...</option>
-                <option *ngFor="let insumo of insumos" [ngValue]="insumo.id">
+                <option value="0">Seleccionar insumo...</option>
+                <option *ngFor="let insumo of insumos" [value]="insumo.id">
                   {{insumo.nombre}} - Stock: {{insumo.stockActual}} {{insumo.unidadMedida}}
                 </option>
               </select>
@@ -134,7 +151,7 @@
                 type="button" 
                 class="btn-add-insumo"
                 (click)="agregarInsumo()"
-                [disabled]="insumoSeleccionado === null">
+                [disabled]="!insumoSeleccionado || insumoSeleccionado === 0">
                 <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                   <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"/>
                 </svg>
@@ -309,6 +326,99 @@
           <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
         </svg>
         <span>{{ loading ? 'Guardando...' : 'Registrar Aplicación' }}</span>
+      </button>
+    </div>
+
+  </div>
+</div>
+
+<!-- Modal de Sugerencia IA -->
+<div class="modal-overlay" *ngIf="mostrarSugerencia" (click)="cerrarSugerencia()">
+  <div class="modal-sugerencia-ia" (click)="$event.stopPropagation()">
+    
+    <div class="sugerencia-header">
+      <div class="sugerencia-title-container">
+        <svg class="w-6 h-6 text-ia" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9.663 17h4.673M12 3v1m6.364 1.636l-.707.707M21 12h-1M4 12H3m3.343-5.657l-.707-.707m2.828 9.9a5 5 0 117.072 0l-.548.547A3.374 3.374 0 0014 18.469V19a2 2 0 11-4 0v-.531c0-.895-.356-1.754-.988-2.386l-.548-.547z"/>
+        </svg>
+        <h3 class="sugerencia-title">Sugerencia de IA</h3>
+      </div>
+      <button type="button" class="btn-close-sugerencia" (click)="cerrarSugerencia()">
+        <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/>
+        </svg>
+      </button>
+    </div>
+
+    <div class="sugerencia-body" *ngIf="sugerenciaIA">
+      
+      <!-- Insumos Recomendados -->
+      <div class="sugerencia-section">
+        <h4 class="sugerencia-subtitle">
+          <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M20 7l-8-4-8 4m16 0l-8 4m8-4v10l-8 4m0-10L4 7m8 4v10M4 7v10l8 4"/>
+          </svg>
+          Insumos Recomendados
+        </h4>
+        <div class="insumos-sugeridos">
+          <div *ngFor="let insumo of sugerenciaIA.insumos" class="insumo-sugerido">
+            <div class="insumo-sugerido-header">
+              <span class="insumo-sugerido-nombre">{{insumo.nombre}}</span>
+              <span class="insumo-sugerido-dosis">{{insumo.dosisHectarea}} {{insumo.unidad}}/ha</span>
+            </div>
+            <p class="insumo-sugerido-razon">{{insumo.razon}}</p>
+          </div>
+        </div>
+      </div>
+
+      <!-- Momento Óptimo -->
+      <div class="sugerencia-section">
+        <h4 class="sugerencia-subtitle">
+          <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"/>
+          </svg>
+          Momento Óptimo
+        </h4>
+        <p class="momento-optimo">{{sugerenciaIA.momentoOptimo}}</p>
+      </div>
+
+      <!-- Observaciones -->
+      <div class="sugerencia-section" *ngIf="sugerenciaIA?.observaciones && sugerenciaIA.observaciones.length > 0">
+        <h4 class="sugerencia-subtitle">
+          <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"/>
+          </svg>
+          Observaciones
+        </h4>
+        <ul class="lista-sugerencias">
+          <li *ngFor="let obs of sugerenciaIA.observaciones">{{obs}}</li>
+        </ul>
+      </div>
+
+      <!-- Precauciones -->
+      <div class="sugerencia-section precauciones" *ngIf="sugerenciaIA?.precauciones && sugerenciaIA.precauciones.length > 0">
+        <h4 class="sugerencia-subtitle">
+          <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z"/>
+          </svg>
+          Precauciones
+        </h4>
+        <ul class="lista-sugerencias">
+          <li *ngFor="let prec of sugerenciaIA.precauciones">{{prec}}</li>
+        </ul>
+      </div>
+
+    </div>
+
+    <div class="sugerencia-footer">
+      <button type="button" class="btn-secondary" (click)="cerrarSugerencia()">
+        Cerrar
+      </button>
+      <button type="button" class="btn-aplicar-ia" (click)="aplicarSugerenciasIA()">
+        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"/>
+        </svg>
+        Aplicar Sugerencias
       </button>
     </div>
 

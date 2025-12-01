@@ -182,7 +182,7 @@
             
             <div class="item-header">
               <div class="item-header-left">
-                <h3 class="item-title">{{ periodo.cultivo?.nombre }}</h3>
+                <h3 class="item-title">{{ typeof periodo.cultivo === 'string' ? periodo.cultivo : periodo.cultivo?.nombre }}</h3>
                 <span class="item-date">{{ formatearFecha(periodo.fechaInicio) }}</span>
               </div>
               <span class="item-badge" [ngClass]="getEstadoPeriodoColor(periodo.estado)">
