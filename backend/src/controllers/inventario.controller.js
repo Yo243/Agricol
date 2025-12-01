@@ -21,7 +21,10 @@ exports.getItems = async (req, res) => {
     res.json(items);
   } catch (error) {
     console.error('Error al obtener items:', error);
-    res.status(500).json({ message: 'Error al obtener items del inventario', error: error.message });
+    res.status(500).json({
+      message: 'Error al obtener items del inventario',
+      error: error.message
+    });
   }
 };
 
@@ -49,7 +52,10 @@ exports.getItemById = async (req, res) => {
     res.json(item);
   } catch (error) {
     console.error('Error al obtener item:', error);
-    res.status(500).json({ message: 'Error al obtener item', error: error.message });
+    res.status(500).json({
+      message: 'Error al obtener item',
+      error: error.message
+    });
   }
 };
 
@@ -67,7 +73,9 @@ exports.createItem = async (req, res) => {
     if (data.fechaVencimiento) {
       const hoy = new Date();
       const vencimiento = new Date(data.fechaVencimiento);
-      data.diasParaVencer = Math.ceil((vencimiento - hoy) / (1000 * 60 * 60 * 24));
+      data.diasParaVencer = Math.ceil(
+        (vencimiento - hoy) / (1000 * 60 * 60 * 24)
+      );
     }
 
     // Determinar estado automáticamente
@@ -83,7 +91,10 @@ exports.createItem = async (req, res) => {
     res.status(201).json(item);
   } catch (error) {
     console.error('Error al crear item:', error);
-    res.status(500).json({ message: 'Error al crear item', error: error.message });
+    res.status(500).json({
+      message: 'Error al crear item',
+      error: error.message
+    });
   }
 };
 
@@ -93,9 +104,33 @@ exports.createItem = async (req, res) => {
 exports.updateItem = async (req, res) => {
   try {
     const { id } = req.params;
-    const data = req.body;
+    const data = { ...req.body };
 
-    // Recalcular valor total
+    // 🔧 Normalizar valores vacíos en numéricos
+    const numericFields = [
+      'stockActual',
+      'stockMinimo',
+      'stockMaximo',
+      'costoUnitario',
+      'precioVenta'
+    ];
+
+    numericFields.forEach((field) => {
+      if (data[field] === '' || data[field] === null) {
+        delete data[field];
+      } else if (data[field] !== undefined) {
+        data[field] = Number(data[field]);
+      }
+    });
+
+    // Fechas: si viene vacío, eliminar
+    ['fechaAdquisicion', 'fechaVencimiento'].forEach((field) => {
+      if (!data[field]) {
+        delete data[field];
+      }
+    });
+
+    // Recalcular valor total si tenemos ambas cosas
     if (data.stockActual !== undefined && data.costoUnitario !== undefined) {
       data.valorTotal = data.stockActual * data.costoUnitario;
     }
@@ -104,14 +139,21 @@ exports.updateItem = async (req, res) => {
     if (data.fechaVencimiento) {
       const hoy = new Date();
       const vencimiento = new Date(data.fechaVencimiento);
-      data.diasParaVencer = Math.ceil((vencimiento - hoy) / (1000 * 60 * 60 * 24));
+      data.diasParaVencer = Math.ceil(
+        (vencimiento - hoy) / (1000 * 60 * 60 * 24)
+      );
     }
 
-    // Determinar estado
-    if (data.stockActual !== undefined || data.stockMinimo !== undefined || data.diasParaVencer !== undefined) {
+    // Determinar estado si cambiaron cosas relacionadas
+    if (
+      data.stockActual !== undefined ||
+      data.stockMinimo !== undefined ||
+      data.diasParaVencer !== undefined
+    ) {
       const itemActual = await prisma.inventarioItem.findUnique({
         where: { id: parseInt(id) }
       });
+
       data.estado = determinarEstado({ ...itemActual, ...data });
     }
 
@@ -120,13 +162,15 @@ exports.updateItem = async (req, res) => {
       data
     });
 
-    // Actualizar alertas
     await generarAlertas(item.id);
 
     res.json(item);
   } catch (error) {
     console.error('Error al actualizar item:', error);
-    res.status(500).json({ message: 'Error al actualizar item', error: error.message });
+    res.status(500).json({
+      message: 'Error al actualizar item',
+      error: error.message
+    });
   }
 };
 
@@ -144,7 +188,10 @@ exports.deleteItem = async (req, res) => {
     res.json({ message: 'Item eliminado correctamente' });
   } catch (error) {
     console.error('Error al eliminar item:', error);
-    res.status(500).json({ message: 'Error al eliminar item', error: error.message });
+    res.status(500).json({
+      message: 'Error al eliminar item',
+      error: error.message
+    });
   }
 };
 
@@ -175,12 +222,15 @@ exports.getMovimientos = async (req, res) => {
     res.json(movimientos);
   } catch (error) {
     console.error('Error al obtener movimientos:', error);
-    res.status(500).json({ message: 'Error al obtener movimientos', error: error.message });
+    res.status(500).json({
+      message: 'Error al obtener movimientos',
+      error: error.message
+    });
   }
 };
 
 /**
- * Registrar movimiento - CORREGIDO PARA COINCIDIR CON SCHEMA
+ * Registrar movimiento
  */
 exports.registrarMovimiento = async (req, res) => {
   try {
@@ -189,16 +239,16 @@ exports.registrarMovimiento = async (req, res) => {
     console.log('═══════════════════════════════════════════');
     console.log('Body completo recibido:', JSON.stringify(req.body, null, 2));
 
-    const { 
-      itemId, 
-      tipo, 
-      cantidad, 
-      costoUnitario, 
-      motivo,        // Frontend envía "motivo"
-      referencia, 
-      destino, 
-      observaciones,
-      responsable 
+    const {
+      itemId,
+      tipo,
+      cantidad,
+      costoUnitario,
+      razon,        // ya usamos "razon"
+      referencia,
+      destino,
+      observaciones, // por ahora NO lo mandamos a Prisma
+      responsable
     } = req.body;
 
     // ✅ VALIDACIONES
@@ -206,15 +256,17 @@ exports.registrarMovimiento = async (req, res) => {
       console.error('❌ Error: itemId es requerido');
       return res.status(400).json({ message: 'itemId es requerido' });
     }
-    
+
     if (!tipo) {
       console.error('❌ Error: tipo es requerido');
       return res.status(400).json({ message: 'tipo es requerido' });
     }
-    
+
     if (!cantidad || isNaN(parseFloat(cantidad))) {
       console.error('❌ Error: cantidad inválida:', cantidad);
-      return res.status(400).json({ message: 'cantidad es requerida y debe ser un número válido' });
+      return res.status(400).json({
+        message: 'cantidad es requerida y debe ser un número válido'
+      });
     }
 
     console.log('✅ Validaciones pasadas');
@@ -263,7 +315,7 @@ exports.registrarMovimiento = async (req, res) => {
       console.log('   ↩️ Devolución - Nuevo stock:', nuevoStock);
     } else {
       console.error('❌ Tipo de movimiento desconocido:', tipo);
-      return res.status(400).json({ 
+      return res.status(400).json({
         message: `Tipo de movimiento no válido: ${tipo}`,
         tiposValidos: ['Entrada', 'Salida', 'Merma', 'Ajuste', 'Devolución']
       });
@@ -276,7 +328,7 @@ exports.registrarMovimiento = async (req, res) => {
         cantidadSolicitada: cantidadFloat,
         stockResultante: nuevoStock
       });
-      return res.status(400).json({ 
+      return res.status(400).json({
         message: 'Stock insuficiente',
         stockActual: item.stockActual,
         cantidadSolicitada: cantidadFloat,
@@ -285,27 +337,30 @@ exports.registrarMovimiento = async (req, res) => {
     }
 
     // Calcular costo
-    const costoUnitarioFinal = costoUnitario ? parseFloat(costoUnitario) : item.costoUnitario;
+    const costoUnitarioFinal = costoUnitario
+      ? parseFloat(costoUnitario)
+      : item.costoUnitario;
     const costoTotal = costoUnitarioFinal * cantidadFloat;
 
     console.log('💰 Cálculo de costos:');
     console.log('   Costo unitario:', costoUnitarioFinal);
     console.log('   Costo total:', costoTotal);
 
-    // ⚠️ IMPORTANTE: El schema usa "razon" no "motivo"
-    // Preparar datos del movimiento según el schema exacto
+    // Datos del movimiento (SIN observaciones por ahora)
     const movimientoData = {
       itemId: parseInt(itemId),
-      tipo: tipo,
+      tipo,
       cantidad: cantidadFloat,
       unidadMedida: item.unidadMedida,
       costoUnitario: costoUnitarioFinal,
-      costoTotal: costoTotal,
-      razon: motivo || null,           // ⚠️ Cambio: "motivo" → "razon" (schema)
+      costoTotal,
+      razon: razon || null,
       referencia: referencia || null,
       destino: destino || null,
       responsable: responsable || null,
       fecha: new Date()
+      // ⚠️ No mandamos observaciones todavía para evitar el error de Prisma
+      // observaciones: observaciones || null,
     };
 
     console.log('📝 Datos del movimiento a crear:', movimientoData);
@@ -367,7 +422,6 @@ exports.registrarMovimiento = async (req, res) => {
         estadoNuevo: nuevoEstado
       }
     });
-
   } catch (error) {
     console.error('═══════════════════════════════════════════');
     console.error('❌ ERROR CRÍTICO en registro de movimiento');
@@ -375,14 +429,17 @@ exports.registrarMovimiento = async (req, res) => {
     console.error('Mensaje:', error.message);
     console.error('Stack:', error.stack);
     console.error('═══════════════════════════════════════════');
-    
-    res.status(500).json({ 
+
+    res.status(500).json({
       message: 'Error al registrar movimiento',
       error: error.message,
-      details: process.env.NODE_ENV === 'development' ? {
-        stack: error.stack,
-        prismaCode: error.code
-      } : undefined
+      details:
+        process.env.NODE_ENV === 'development'
+          ? {
+              stack: error.stack,
+              prismaCode: error.code
+            }
+          : undefined
     });
   }
 };
@@ -409,7 +466,10 @@ exports.getAlertas = async (req, res) => {
     res.json(alertas);
   } catch (error) {
     console.error('Error al obtener alertas:', error);
-    res.status(500).json({ message: 'Error al obtener alertas', error: error.message });
+    res.status(500).json({
+      message: 'Error al obtener alertas',
+      error: error.message
+    });
   }
 };
 
@@ -428,7 +488,10 @@ exports.marcarAlertaLeida = async (req, res) => {
     res.json({ message: 'Alerta marcada como leída' });
   } catch (error) {
     console.error('Error al marcar alerta:', error);
-    res.status(500).json({ message: 'Error al marcar alerta', error: error.message });
+    res.status(500).json({
+      message: 'Error al marcar alerta',
+      error: error.message
+    });
   }
 };
 
@@ -444,15 +507,17 @@ exports.getEstadisticas = async (req, res) => {
     const estadisticas = {
       totalItems: items.length,
       valorTotal: items.reduce((sum, item) => sum + item.valorTotal, 0),
-      itemsBajoStock: items.filter(i => i.estado === 'Stock Bajo' || i.estado === 'Stock Crítico').length,
-      itemsPorVencer: items.filter(i => i.estado === 'Por Vencer').length,
-      itemsVencidos: items.filter(i => i.estado === 'Vencido').length,
-      itemsAgotados: items.filter(i => i.estado === 'Agotado').length,
+      itemsBajoStock: items.filter(
+        (i) => i.estado === 'Stock Bajo' || i.estado === 'Stock Crítico'
+      ).length,
+      itemsPorVencer: items.filter((i) => i.estado === 'Por Vencer').length,
+      itemsVencidos: items.filter((i) => i.estado === 'Vencido').length,
+      itemsAgotados: items.filter((i) => i.estado === 'Agotado').length,
       porCategoria: {}
     };
 
     // Agrupar por categoría
-    items.forEach(item => {
+    items.forEach((item) => {
       if (!estadisticas.porCategoria[item.categoria]) {
         estadisticas.porCategoria[item.categoria] = 0;
       }
@@ -462,7 +527,10 @@ exports.getEstadisticas = async (req, res) => {
     res.json(estadisticas);
   } catch (error) {
     console.error('Error al obtener estadísticas:', error);
-    res.status(500).json({ message: 'Error al obtener estadísticas', error: error.message });
+    res.status(500).json({
+      message: 'Error al obtener estadísticas',
+      error: error.message
+    });
   }
 };
 
@@ -488,7 +556,10 @@ exports.buscarItems = async (req, res) => {
     res.json(items);
   } catch (error) {
     console.error('Error al buscar items:', error);
-    res.status(500).json({ message: 'Error al buscar items', error: error.message });
+    res.status(500).json({
+      message: 'Error al buscar items',
+      error: error.message
+    });
   }
 };
 
@@ -591,6 +662,6 @@ async function generarAlertas(itemId) {
     }
   } catch (error) {
     console.error('Error al generar alertas:', error);
-    // No lanzar el error para no interrumpir el flujo principal
+    // No lanzamos error para no romper el flujo principal
   }
 }

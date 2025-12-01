@@ -2,13 +2,13 @@ import { Component, EventEmitter, Input, OnInit, Output, inject } from '@angular
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { HttpClient } from '@angular/common/http';
-import { ParcelasService } from '../../services/parcela.service';  // ✅ CORREGIDO
+import { ParcelasService } from '../../services/parcela.service';
 import { 
   PeriodoSiembra, 
   CreateAplicacionDto, 
   TIPOS_APLICACION, 
   TipoAplicacion 
-} from '../../../../models/parcela.model';  // ✅ CORREGIDO
+} from '../../../../models/parcela.model';
 
 interface Insumo {
   id: number;

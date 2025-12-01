@@ -79,25 +79,16 @@ export class OrdenAplicacionService {
 
   // ==================== OPERACIONES ESPECIALES ====================
 
-  /**
-   * Cerrar orden y descontar inventario
-   */
   cerrarOrden(id: number): Observable<OrdenAplicacion> {
     return this.http.post<ApiResponse<OrdenAplicacion>>(`${this.apiUrl}/${id}/cerrar`, {})
       .pipe(map(response => response.data));
   }
 
-  /**
-   * Cancelar orden sin descontar inventario
-   */
   cancelarOrden(id: number, motivo?: string): Observable<OrdenAplicacion> {
     return this.http.post<ApiResponse<OrdenAplicacion>>(`${this.apiUrl}/${id}/cancelar`, { motivo })
       .pipe(map(response => response.data));
   }
 
-  /**
-   * Validar si hay suficiente stock antes de crear la orden
-   */
   validarStock(recetaId: number, hectareas: number): Observable<ValidacionStock> {
     return this.http.post<ApiResponse<ValidacionStock>>(`${this.apiUrl}/validar-stock`, {
       recetaId,
@@ -106,34 +97,50 @@ export class OrdenAplicacionService {
   }
 
   // ==================== DATOS RELACIONADOS ====================
+  // 👇 AQUÍ VIENE LA PARTE IMPORTANTE
 
   getParcelas(): Observable<Parcela[]> {
-    return this.http.get<ApiResponse<Parcela[]>>(`${environment.apiUrl}/parcelas`)
-      .pipe(map(response => response.data));
+    return this.http.get<any>(`${environment.apiUrl}/parcelas`).pipe(
+      map((resp: any) => {
+        // Soporta:
+        //  - [ ... ]
+        //  - { data: [ ... ] }
+        //  - { parcelas: [ ... ] }
+        if (Array.isArray(resp)) return resp as Parcela[];
+        if (Array.isArray(resp?.data)) return resp.data as Parcela[];
+        if (Array.isArray(resp?.parcelas)) return resp.parcelas as Parcela[];
+        return [];
+      })
+    );
   }
 
   getRecetas(): Observable<Receta[]> {
-    return this.http.get<ApiResponse<Receta[]>>(`${environment.apiUrl}/recetas`)
-      .pipe(map(response => response.data));
+    return this.http.get<any>(`${environment.apiUrl}/recetas`).pipe(
+      map((resp: any) => {
+        if (Array.isArray(resp)) return resp as Receta[];
+        if (Array.isArray(resp?.data)) return resp.data as Receta[];
+        if (Array.isArray(resp?.recetas)) return resp.recetas as Receta[];
+        return [];
+      })
+    );
   }
 
   getRecetaById(id: number): Observable<Receta> {
-    return this.http.get<ApiResponse<Receta>>(`${environment.apiUrl}/recetas/${id}`)
-      .pipe(map(response => response.data));
+    return this.http.get<any>(`${environment.apiUrl}/recetas/${id}`).pipe(
+      map((resp: any) => {
+        // Puede venir como objeto directo o envuelto en { data: obj }
+        if (resp?.data) return resp.data as Receta;
+        return resp as Receta;
+      })
+    );
   }
 
   // ==================== CÁLCULOS ====================
 
-  /**
-   * Calcular consumo de insumo según receta y hectáreas
-   */
   calcularConsumo(dosisPorHectarea: number, hectareas: number): number {
     return dosisPorHectarea * hectareas;
   }
 
-  /**
-   * Calcular costo total de la orden
-   */
   calcularCostoTotal(orden: OrdenAplicacion): number {
     if (!orden.detalles || orden.detalles.length === 0) return 0;
     
@@ -142,9 +149,6 @@ export class OrdenAplicacionService {
     }, 0);
   }
 
-  /**
-   * Calcular detalles de orden basado en receta y hectáreas
-   */
   calcularDetallesOrden(receta: Receta, hectareas: number): any[] {
     if (!receta.detalles || receta.detalles.length === 0) return [];
 
@@ -155,9 +159,9 @@ export class OrdenAplicacionService {
       return {
         insumoId: detalle.insumoId,
         insumo: detalle.insumo,
-        cantidadCalculada: cantidadCalculada,
+        cantidadCalculada,
         unidadMedida: detalle.unidadMedida,
-        costoUnitario: costoUnitario,
+        costoUnitario,
         costoTotal: cantidadCalculada * costoUnitario
       };
     });
@@ -166,8 +170,9 @@ export class OrdenAplicacionService {
   // ==================== REPORTES ====================
 
   getHistorialParcela(parcelaId: number): Observable<OrdenAplicacion[]> {
-    return this.http.get<ApiResponse<OrdenAplicacion[]>>(`${this.apiUrl}/historial/parcela/${parcelaId}`)
-      .pipe(map(response => response.data));
+    return this.http.get<ApiResponse<OrdenAplicacion[]>>(
+      `${this.apiUrl}/historial/parcela/${parcelaId}`
+    ).pipe(map(response => response.data));
   }
 
   getEstadisticasPeriodo(fechaInicio: Date, fechaFin: Date): Observable<any> {

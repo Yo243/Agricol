@@ -12,6 +12,11 @@ const validate = (schema) => {
     });
 
     if (error) {
+      // 👇👀 LOG PARA DEBUG
+      console.log('❌ Joi validation error en:', req.method, req.originalUrl);
+      console.log('👉 Body recibido:', req.body);
+      console.log('👉 Detalles:', error.details);
+
       // Formatear errores de validación
       const errors = error.details.map(detail => ({
         field: detail.path.join('.'),

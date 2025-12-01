@@ -1,8 +1,9 @@
+// src/app/modules/parcela/components/form-periodo/form-periodo.ts
+
 import { Component, EventEmitter, Input, OnInit, Output, inject } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { ParcelasService } from '../../services/parcela.service';
-import { HttpClient } from '@angular/common/http';
 import { Parcela, Cultivo, CreatePeriodoSiembraDto } from '../../../../models/parcela.model';
 
 @Component({
@@ -15,7 +16,6 @@ import { Parcela, Cultivo, CreatePeriodoSiembraDto } from '../../../../models/pa
 export class FormPeriodoComponent implements OnInit {
 
   private parcelasService = inject(ParcelasService);
-  private http = inject(HttpClient);
 
   @Input() parcelaId?: number;
   @Output() onClose = new EventEmitter<void>();
@@ -37,6 +37,7 @@ export class FormPeriodoComponent implements OnInit {
 
   ngOnInit() {
     this.cargarDatos();
+
     if (this.parcelaId) {
       this.formData.parcelaId = this.parcelaId;
     }
@@ -45,17 +46,20 @@ export class FormPeriodoComponent implements OnInit {
   cargarDatos() {
     this.loadingData = true;
 
-    // Cargar parcelas activas
+    // Parcelas activas
     this.parcelasService.getParcelas(true, 'Activa').subscribe({
       next: (parcelas) => {
         this.parcelas = parcelas;
       },
-      error: (error) => console.error('Error al cargar parcelas:', error)
+      error: (error) => {
+        console.error('Error al cargar parcelas:', error);
+      }
     });
 
-    // Cargar cultivos
-    this.http.get<Cultivo[]>('http://localhost:3000/api/cultivos').subscribe({
+    // Cultivos
+    this.parcelasService.getCultivos().subscribe({
       next: (cultivos) => {
+        console.log('Cultivos recibidos en componente:', cultivos);
         this.cultivos = cultivos;
         this.loadingData = false;
       },
@@ -76,11 +80,11 @@ export class FormPeriodoComponent implements OnInit {
   onCultivoChange() {
     const cultivo = this.cultivos.find(c => c.id === this.formData.cultivoId);
     if (cultivo) {
+      // rendimientoEsperado en toneladas totales
       this.formData.rendimientoEsperado = cultivo.rendimientoEsperado
         ? cultivo.rendimientoEsperado * this.formData.hectareasSembradas
         : 0;
 
-      // Fecha estimada de cosecha
       if (cultivo.diasCiclo) {
         const fechaInicio = new Date(this.formData.fechaInicio);
         fechaInicio.setDate(fechaInicio.getDate() + cultivo.diasCiclo);

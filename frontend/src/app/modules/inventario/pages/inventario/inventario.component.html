@@ -31,7 +31,7 @@
     </div>
   </header>
 
-  <!-- EstadÃ­sticas -->
+  <!-- Estadísticas -->
   <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6 grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-5 gap-4">
 
     <!-- Total Items -->
@@ -90,9 +90,11 @@
         
         <!-- Buscar -->
         <div class="md:col-span-2">
-          <label class="text-sm font-medium text-gray-700">Buscar</label>
+          <label for="searchTerm" class="text-sm font-medium text-gray-700">Buscar</label>
           <div class="relative">
             <input
+              id="searchTerm"
+              name="searchTerm"
               type="text"
               [(ngModel)]="searchTerm"
               (ngModelChange)="onSearchChange()"
@@ -104,9 +106,14 @@
 
         <!-- Categoría -->
         <div>
-          <label class="text-sm font-medium text-gray-700">Categoría</label>
-          <select [(ngModel)]="categoriaFiltro" (ngModelChange)="onCategoriaChange()"
-                  class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-green-500">
+          <label for="categoriaFiltro" class="text-sm font-medium text-gray-700">Categoría</label>
+          <select
+            id="categoriaFiltro"
+            name="categoriaFiltro"
+            [(ngModel)]="categoriaFiltro"
+            (ngModelChange)="onCategoriaChange()"
+            class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-green-500"
+          >
             <option value="TODAS">Todas las categorías</option>
             <option *ngFor="let cat of categorias" [value]="cat">{{ cat }}</option>
           </select>
@@ -114,9 +121,14 @@
 
         <!-- Estado -->
         <div>
-          <label class="text-sm font-medium text-gray-700">Estado</label>
-          <select [(ngModel)]="estadoFiltro" (ngModelChange)="onEstadoChange()"
-                  class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-green-500">
+          <label for="estadoFiltro" class="text-sm font-medium text-gray-700">Estado</label>
+          <select
+            id="estadoFiltro"
+            name="estadoFiltro"
+            [(ngModel)]="estadoFiltro"
+            (ngModelChange)="onEstadoChange()"
+            class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-green-500"
+          >
             <option value="TODOS">Todos los estados</option>
             <option *ngFor="let est of estados" [value]="est">{{ est }}</option>
           </select>

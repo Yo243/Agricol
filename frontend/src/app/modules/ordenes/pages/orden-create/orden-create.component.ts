@@ -21,14 +21,14 @@ import {
   styleUrls: ['./orden-create.component.css']
 })
 export class OrdenCreateComponent implements OnInit {
-  
+
   private ordenService = inject(OrdenAplicacionService);
   private router = inject(Router);
 
   parcelas: Parcela[] = [];
   recetas: Receta[] = [];
   recetaSeleccionada?: Receta;
-  
+
   orden: CreateOrdenDto = {
     parcelaId: 0,
     recetaId: 0,
@@ -38,47 +38,82 @@ export class OrdenCreateComponent implements OnInit {
   };
 
   detallesCalculados: OrdenDetalle[] = [];
-  costoTotal: number = 0;
-  
+  costoTotal = 0;
+
   validacionStock?: ValidacionStock;
-  mostrandoValidacion: boolean = false;
-  
-  loading: boolean = false;
-  error: string = '';
-  success: string = '';
+  mostrandoValidacion = false;
+
+  loading = false;
+  error = '';
+  success = '';
 
   ngOnInit(): void {
     this.loadParcelas();
     this.loadRecetas();
-    
-    // Establecer fecha de hoy por defecto
-    const today = new Date();
-    this.orden.fechaAplicacion = today;
+
+    // fecha hoy por defecto
+    this.orden.fechaAplicacion = new Date();
   }
+
+  // ================= CARGA DE PARCELAS Y RECETAS =================
 
   loadParcelas(): void {
     this.ordenService.getParcelas().subscribe({
-      next: (data: Parcela[]) => {
-        this.parcelas = data.filter(p => p.activo);
+      next: (resp: any) => {
+        console.log('Parcelas (respuesta cruda):', resp);
+
+        let parcelas: Parcela[] = [];
+
+        if (Array.isArray(resp)) {
+          parcelas = resp;
+        } else if (Array.isArray(resp?.data)) {
+          parcelas = resp.data;
+        } else if (Array.isArray(resp?.parcelas)) {
+          parcelas = resp.parcelas;
+        } else {
+          console.warn('⚠️ No se encontraron parcelas en la respuesta');
+        }
+
+        this.parcelas = parcelas.filter(p => p.activo !== false);
+        console.log('Parcelas procesadas:', this.parcelas);
       },
       error: (err: any) => {
         console.error('Error al cargar parcelas:', err);
         this.error = 'Error al cargar parcelas';
+        this.parcelas = [];
       }
     });
   }
 
   loadRecetas(): void {
     this.ordenService.getRecetas().subscribe({
-      next: (data: Receta[]) => {
-        this.recetas = data.filter(r => r.activo);
+      next: (resp: any) => {
+        console.log('Recetas (respuesta cruda):', resp);
+
+        let recetas: Receta[] = [];
+
+        if (Array.isArray(resp)) {
+          recetas = resp;
+        } else if (Array.isArray(resp?.data)) {
+          recetas = resp.data;
+        } else if (Array.isArray(resp?.recetas)) {
+          recetas = resp.recetas;
+        } else {
+          console.warn('⚠️ No se encontraron recetas en la respuesta');
+        }
+
+        this.recetas = recetas.filter(r => r.activo !== false);
+        console.log('Recetas procesadas:', this.recetas);
       },
       error: (err: any) => {
         console.error('Error al cargar recetas:', err);
         this.error = 'Error al cargar recetas';
+        this.recetas = [];
       }
     });
   }
+
+  // ================= LÓGICA DE RECETA / DETALLES =================
 
   onRecetaChange(): void {
     if (this.orden.recetaId === 0) {
@@ -88,7 +123,6 @@ export class OrdenCreateComponent implements OnInit {
       return;
     }
 
-    // Cargar detalles de la receta
     this.ordenService.getRecetaById(this.orden.recetaId).subscribe({
       next: (receta: Receta) => {
         this.recetaSeleccionada = receta;
@@ -117,10 +151,13 @@ export class OrdenCreateComponent implements OnInit {
       this.orden.hectareasAplicadas
     );
 
-    this.costoTotal = this.detallesCalculados.reduce((total, detalle) => {
-      return total + detalle.costoTotal;
-    }, 0);
+    this.costoTotal = this.detallesCalculados.reduce(
+      (total, detalle) => total + detalle.costoTotal,
+      0
+    );
   }
+
+  // ================= VALIDAR STOCK =================
 
   validarStock(): void {
     if (this.orden.recetaId === 0 || this.orden.hectareasAplicadas <= 0) {
@@ -131,29 +168,32 @@ export class OrdenCreateComponent implements OnInit {
     this.loading = true;
     this.mostrandoValidacion = false;
 
-    this.ordenService.validarStock(this.orden.recetaId, this.orden.hectareasAplicadas).subscribe({
-      next: (validacion: ValidacionStock) => {
-        this.validacionStock = validacion;
-        this.mostrandoValidacion = true;
-        this.loading = false;
+    this.ordenService
+      .validarStock(this.orden.recetaId, this.orden.hectareasAplicadas)
+      .subscribe({
+        next: (validacion: ValidacionStock) => {
+          this.validacionStock = validacion;
+          this.mostrandoValidacion = true;
+          this.loading = false;
 
-        if (!validacion.esValido) {
-          this.error = 'Stock insuficiente para algunos insumos';
-        } else {
-          this.success = '✓ Stock disponible para todos los insumos';
-          setTimeout(() => this.success = '', 3000);
+          if (!validacion.esValido) {
+            this.error = 'Stock insuficiente para algunos insumos';
+          } else {
+            this.success = '✓ Stock disponible para todos los insumos';
+            setTimeout(() => (this.success = ''), 3000);
+          }
+        },
+        error: (err: any) => {
+          console.error('Error al validar stock:', err);
+          this.error = 'Error al validar disponibilidad de stock';
+          this.loading = false;
         }
-      },
-      error: (err: any) => {
-        console.error('Error al validar stock:', err);
-        this.error = 'Error al validar disponibilidad de stock';
-        this.loading = false;
-      }
-    });
+      });
   }
 
+  // ================= CREAR ORDEN =================
+
   onSubmit(): void {
-    // Validaciones
     if (this.orden.parcelaId === 0) {
       this.error = 'Debes seleccionar una parcela';
       return;
@@ -169,7 +209,6 @@ export class OrdenCreateComponent implements OnInit {
       return;
     }
 
-    // Verificar que se validó el stock
     if (!this.validacionStock) {
       const confirmar = confirm(
         'No has validado el stock disponible. ¿Deseas continuar de todos modos?'
@@ -177,11 +216,10 @@ export class OrdenCreateComponent implements OnInit {
       if (!confirmar) return;
     }
 
-    // Si el stock no es válido, confirmar
     if (this.validacionStock && !this.validacionStock.esValido) {
       const confirmar = confirm(
         'El stock es insuficiente para algunos insumos. ¿Deseas crear la orden de todos modos?\n\n' +
-        'Nota: La orden quedará pendiente y no se podrá aplicar hasta tener stock suficiente.'
+          'Nota: La orden quedará pendiente y no se podrá aplicar hasta tener stock suficiente.'
       );
       if (!confirmar) return;
     }

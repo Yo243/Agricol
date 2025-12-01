@@ -158,21 +158,51 @@ exports.deleteParcela = async (req, res) => {
  */
 exports.createPeriodoSiembra = async (req, res) => {
   try {
-    const { parcelaId, cultivoId, fechaInicio, hectareasSembradas, ...restoData } = req.body;
+    console.log('📥 Body periodo siembra:', req.body);
+
+    const {
+      parcelaId,
+      cultivoId,
+      fechaInicio,
+      hectareasSembradas,
+      rendimientoEsperado,
+      observaciones,
+      fechaCosechaEsperada, // ← viene como string "2026-05-13"
+    } = req.body;
+
+    // Parseo de fechas
+    const fechaInicioDate = fechaInicio
+      ? new Date(fechaInicio)  // "2025-12-01" -> Date
+      : new Date();
+
+    let fechaCosechaDate = null;
+    if (fechaCosechaEsperada && fechaCosechaEsperada.trim() !== '') {
+      fechaCosechaDate = new Date(fechaCosechaEsperada); // "2026-05-13" -> Date
+    }
 
     // Generar código
     const count = await prisma.periodoSiembra.count();
     const codigo = `PS-${String(count + 1).padStart(4, '0')}`;
 
+    const dataCreate = {
+      parcelaId: parseInt(parcelaId),
+      cultivoId: parseInt(cultivoId),
+      codigo,
+      fechaInicio: fechaInicioDate,
+      hectareasSembradas: parseFloat(hectareasSembradas),
+      rendimientoEsperado: rendimientoEsperado != null ? parseFloat(rendimientoEsperado) : 0,
+      observaciones: observaciones || '',
+      // si tu modelo tiene estado con default, puedes quitar esta línea
+      estado: 'En Curso'
+    };
+
+    // Solo mandamos fechaCosechaEsperada si realmente existe
+    if (fechaCosechaDate) {
+      dataCreate.fechaCosechaEsperada = fechaCosechaDate;
+    }
+
     const periodo = await prisma.periodoSiembra.create({
-      data: {
-        parcelaId: parseInt(parcelaId),
-        cultivoId: parseInt(cultivoId),
-        codigo,
-        fechaInicio: new Date(fechaInicio),
-        hectareasSembradas: parseFloat(hectareasSembradas),
-        ...restoData
-      },
+      data: dataCreate,
       include: {
         parcela: true,
         cultivo: true
@@ -182,7 +212,10 @@ exports.createPeriodoSiembra = async (req, res) => {
     res.status(201).json(periodo);
   } catch (error) {
     console.error('Error al crear período de siembra:', error);
-    res.status(500).json({ message: 'Error al crear período de siembra' });
+    res.status(500).json({
+      message: 'Error al crear período de siembra',
+      error: error.message
+    });
   }
 };
 
@@ -251,14 +284,24 @@ exports.finalizarPeriodoSiembra = async (req, res) => {
     const { id } = req.params;
     const { fechaCosechaReal, rendimientoReal, observaciones } = req.body;
 
+    let fechaCosechaDate = null;
+    if (fechaCosechaReal && fechaCosechaReal.trim() !== '') {
+      fechaCosechaDate = new Date(fechaCosechaReal);
+    }
+
+    const dataUpdate = {
+      rendimientoReal: rendimientoReal != null ? parseFloat(rendimientoReal) : null,
+      estado: 'Finalizado',
+      observaciones
+    };
+
+    if (fechaCosechaDate) {
+      dataUpdate.fechaCosechaReal = fechaCosechaDate;
+    }
+
     const periodo = await prisma.periodoSiembra.update({
       where: { id: parseInt(id) },
-      data: {
-        fechaCosechaReal: new Date(fechaCosechaReal),
-        rendimientoReal: parseFloat(rendimientoReal),
-        estado: 'Finalizado',
-        observaciones
-      },
+      data: dataUpdate,
       include: {
         parcela: true,
         cultivo: true

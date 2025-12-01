@@ -1,5 +1,5 @@
 generator client {
-  provider = "prisma-client-js"
+  provider      = "prisma-client-js"
   binaryTargets = ["native", "debian-openssl-3.0.x"]
 }
 
@@ -17,80 +17,103 @@ model User {
   password  String
   name      String
   role      String   @default("user")
-  activo    Boolean  @default(true)  // ← CAMPO AGREGADO
+  activo    Boolean  @default(true) // ← CAMPO AGREGADO
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
 
   // Relación con órdenes de aplicación
   ordenesOperadas OrdenAplicacion[]
 
+  @@index([email]) // ← ÍNDICE AGREGADO
+  @@index([role]) // ← ÍNDICE AGREGADO
+  @@index([activo]) // ← ÍNDICE AGREGADO
   @@map("users")
-  @@index([email])      // ← ÍNDICE AGREGADO
-  @@index([role])       // ← ÍNDICE AGREGADO
-  @@index([activo])     // ← ÍNDICE AGREGADO
 }
 
 // ==========================================
 // MODELO DE INVENTARIO
 // ==========================================
 model InventarioItem {
-  id                Int       @id @default(autoincrement())
-  codigo            String?   @unique
-  nombre            String
-  descripcion       String?
-  categoria         String
-  unidadMedida      String
-  stockActual       Float     @default(0)
-  stockMinimo       Float     @default(0)
-  stockMaximo       Float?
-  costoUnitario     Float     @default(0)
-  valorTotal        Float     @default(0)
-  estado            String    @default("Disponible")
-  ubicacion         String?
-  lote              String?
-  proveedor         String?
-  fechaAdquisicion  DateTime?
-  fechaVencimiento  DateTime?
-  diasParaVencer    Int?
-  observaciones     String?
-  activo            Boolean   @default(true)
-  ultimoMovimiento  DateTime?
-  createdAt         DateTime  @default(now())
-  updatedAt         DateTime  @updatedAt
+  id     Int     @id @default(autoincrement())
+  codigo String? @unique
+  nombre String
 
-  movimientos       MovimientoInventario[]
-  alertas           AlertaInventario[]
-  recetaDetalles    RecetaDetalle[]
-  aplicaciones      AplicacionInsumo[]
-  ordenDetalles     OrdenDetalle[]
+  // Info general
+  descripcion   String?
+  categoria     String
+  subcategoria  String?
+  marca         String?
+  presentacion  String?
+  composicion   String?
+  concentracion String?
 
-  @@map("inventario_items")
+  // Stock
+  unidadMedida String
+  stockActual  Float  @default(0)
+  stockMinimo  Float  @default(0)
+  stockMaximo  Float?
+
+  // Precios
+  costoUnitario Float  @default(0)
+  precioVenta   Float?
+  valorTotal    Float  @default(0)
+
+  // 🔹 Estado (lo que te falta)
+  estado String @default("Disponible")
+
+  // Ubicación
+  ubicacion String?
+  almacen   String?
+  seccion   String?
+
+  // Trazabilidad
+  proveedor        String?
+  numeroLote       String?   @map("lote")
+  fechaAdquisicion DateTime?
+  fechaVencimiento DateTime?
+  diasParaVencer   Int?
+
+  // Otros
+  observaciones    String?
+  activo           Boolean   @default(true)
+  ultimoMovimiento DateTime?
+  createdAt        DateTime  @default(now())
+  updatedAt        DateTime  @updatedAt
+
+  movimientos    MovimientoInventario[]
+  alertas        AlertaInventario[]
+  recetaDetalles RecetaDetalle[]
+  aplicaciones   AplicacionInsumo[]
+  ordenDetalles  OrdenDetalle[]
+
   @@index([categoria])
   @@index([estado])
   @@index([activo])
+  @@map("inventario_items")
 }
 
 model MovimientoInventario {
-  id                Int      @id @default(autoincrement())
-  itemId            Int
-  tipo              String
-  cantidad          Float
-  unidadMedida      String?
-  costoUnitario     Float?
-  costoTotal        Float?
-  fecha             DateTime @default(now())
-  razon             String?
-  referencia        String?
-  destino           String?
-  responsable       String?
-  createdAt         DateTime @default(now())
+  id            Int      @id @default(autoincrement())
+  itemId        Int
+  tipo          String
+  cantidad      Float
+  unidadMedida  String?
+  costoUnitario Float?
+  costoTotal    Float?
+  fecha         DateTime @default(now())
+  razon         String?
+  referencia    String?
+  destino       String?
+  responsable   String?
+  observaciones String?
+  createdAt     DateTime @default(now())
 
-  item              InventarioItem @relation(fields: [itemId], references: [id], onDelete: Cascade)
+  item InventarioItem @relation(fields: [itemId], references: [id], onDelete: Cascade)
 
-  @@map("movimientos_inventario")
   @@index([itemId])
   @@index([tipo])
   @@index([fecha])
+  @@map("movimientos_inventario")
 }
 
 model AlertaInventario {
@@ -106,256 +129,256 @@ model AlertaInventario {
   fechaAlerta DateTime @default(now())
   createdAt   DateTime @default(now())
 
-  item        InventarioItem @relation(fields: [itemId], references: [id], onDelete: Cascade)
+  item InventarioItem @relation(fields: [itemId], references: [id], onDelete: Cascade)
 
-  @@map("alertas_inventario")
   @@index([itemId])
   @@index([leida])
   @@index([fecha])
+  @@map("alertas_inventario")
 }
 
 // ==========================================
 // MÓDULO DE CULTIVOS
 // ==========================================
 model Cultivo {
-  id                Int      @id @default(autoincrement())
-  nombre            String
-  variedad          String?
-  descripcion       String?
-  diasCiclo         Int?
-  costoPorHectarea  Float    @default(0)
+  id                  Int      @id @default(autoincrement())
+  nombre              String
+  variedad            String?
+  descripcion         String?
+  diasCiclo           Int?
+  costoPorHectarea    Float    @default(0)
   rendimientoEsperado Float?
-  activo            Boolean  @default(true)
-  createdAt         DateTime @default(now())
-  updatedAt         DateTime @updatedAt
+  activo              Boolean  @default(true)
+  createdAt           DateTime @default(now())
+  updatedAt           DateTime @updatedAt
 
-  periodosSiembra   PeriodoSiembra[]
-  recetas           Receta[]
+  periodosSiembra PeriodoSiembra[]
+  recetas         Receta[]
 
-  @@map("cultivos")
   @@index([activo])
   @@index([nombre])
+  @@map("cultivos")
 }
 
 // ==========================================
 // MÓDULO DE PARCELAS
 // ==========================================
 model Parcela {
-  id              Int      @id @default(autoincrement())
-  codigo          String   @unique
-  nombre          String
-  superficieHa    Float
-  ubicacion       String?
-  coordenadas     String?
-  tipoSuelo       String?
-  sistemaRiego    String?
-  estado          String   @default("Activa")
-  observaciones   String?
-  activo          Boolean  @default(true)
-  createdAt       DateTime @default(now())
-  updatedAt       DateTime @updatedAt
+  id            Int      @id @default(autoincrement())
+  codigo        String   @unique
+  nombre        String
+  superficieHa  Float
+  ubicacion     String?
+  coordenadas   String?
+  tipoSuelo     String?
+  sistemaRiego  String?
+  estado        String   @default("Activa")
+  observaciones String?
+  activo        Boolean  @default(true)
+  createdAt     DateTime @default(now())
+  updatedAt     DateTime @updatedAt
 
-  periodosSiembra PeriodoSiembra[]
-  aplicaciones    AplicacionParcela[]
+  periodosSiembra   PeriodoSiembra[]
+  aplicaciones      AplicacionParcela[]
   ordenesAplicacion OrdenAplicacion[]
 
-  @@map("parcelas")
   @@index([activo])
   @@index([estado])
   @@index([nombre])
+  @@map("parcelas")
 }
 
 // ==========================================
 // PERÍODOS DE SIEMBRA (Trazabilidad)
 // ==========================================
 model PeriodoSiembra {
-  id                  Int       @id @default(autoincrement())
-  parcelaId           Int
-  cultivoId           Int
-  codigo              String    @unique
-  fechaInicio         DateTime
-  fechaFin            DateTime?
+  id                   Int       @id @default(autoincrement())
+  parcelaId            Int
+  cultivoId            Int
+  codigo               String    @unique
+  fechaInicio          DateTime
+  fechaFin             DateTime?
   fechaCosechaEsperada DateTime?
-  fechaCosechaReal    DateTime?
-  hectareasSembradas  Float
-  rendimientoEsperado Float?
-  rendimientoReal     Float?
-  costoTotal          Float     @default(0)
-  estado              String    @default("En Curso")
-  observaciones       String?   @db.Text
-  createdAt           DateTime  @default(now())
-  updatedAt           DateTime  @updatedAt
+  fechaCosechaReal     DateTime?
+  hectareasSembradas   Float
+  rendimientoEsperado  Float?
+  rendimientoReal      Float?
+  costoTotal           Float     @default(0)
+  estado               String    @default("En Curso")
+  observaciones        String?   @db.Text
+  createdAt            DateTime  @default(now())
+  updatedAt            DateTime  @updatedAt
 
-  parcela             Parcela   @relation(fields: [parcelaId], references: [id])
-  cultivo             Cultivo   @relation(fields: [cultivoId], references: [id])
-  aplicaciones        AplicacionParcela[]
-  actividades         Actividad[]
+  parcela      Parcela             @relation(fields: [parcelaId], references: [id])
+  cultivo      Cultivo             @relation(fields: [cultivoId], references: [id])
+  aplicaciones AplicacionParcela[]
+  actividades  Actividad[]
 
-  @@map("periodos_siembra")
   @@index([parcelaId])
   @@index([cultivoId])
   @@index([estado])
   @@index([fechaInicio])
   @@index([fechaCosechaEsperada])
+  @@map("periodos_siembra")
 }
 
 // ==========================================
 // APLICACIONES POR PARCELA (Historial)
 // ==========================================
 model AplicacionParcela {
-  id                Int       @id @default(autoincrement())
-  periodoSiembraId  Int
-  parcelaId         Int
-  fecha             DateTime  @default(now())
+  id                 Int      @id @default(autoincrement())
+  periodoSiembraId   Int
+  parcelaId          Int
+  fecha              DateTime @default(now())
   hectareasAplicadas Float
-  tipoAplicacion    String
-  costoTotal        Float     @default(0)
-  responsable       String?
-  observaciones     String?   @db.Text
-  createdAt         DateTime  @default(now())
+  tipoAplicacion     String
+  costoTotal         Float    @default(0)
+  responsable        String?
+  observaciones      String?  @db.Text
+  createdAt          DateTime @default(now())
 
-  periodoSiembra    PeriodoSiembra @relation(fields: [periodoSiembraId], references: [id], onDelete: Cascade)
-  parcela           Parcela        @relation(fields: [parcelaId], references: [id])
-  insumos           AplicacionInsumo[]
+  periodoSiembra PeriodoSiembra     @relation(fields: [periodoSiembraId], references: [id], onDelete: Cascade)
+  parcela        Parcela            @relation(fields: [parcelaId], references: [id])
+  insumos        AplicacionInsumo[]
 
-  @@map("aplicaciones_parcela")
   @@index([periodoSiembraId])
   @@index([parcelaId])
   @@index([fecha])
   @@index([tipoAplicacion])
+  @@map("aplicaciones_parcela")
 }
 
 // ==========================================
 // INSUMOS USADOS EN APLICACIONES
 // ==========================================
 model AplicacionInsumo {
-  id                  Int      @id @default(autoincrement())
-  aplicacionId        Int
-  insumoId            Int
-  cantidad            Float
-  unidadMedida        String
-  costoUnitario       Float
-  costoTotal          Float
-  dosisPorHectarea    Float
-  createdAt           DateTime @default(now())
+  id               Int      @id @default(autoincrement())
+  aplicacionId     Int
+  insumoId         Int
+  cantidad         Float
+  unidadMedida     String
+  costoUnitario    Float
+  costoTotal       Float
+  dosisPorHectarea Float
+  createdAt        DateTime @default(now())
 
-  aplicacion          AplicacionParcela @relation(fields: [aplicacionId], references: [id], onDelete: Cascade)
-  insumo              InventarioItem    @relation(fields: [insumoId], references: [id])
+  aplicacion AplicacionParcela @relation(fields: [aplicacionId], references: [id], onDelete: Cascade)
+  insumo     InventarioItem    @relation(fields: [insumoId], references: [id])
 
-  @@map("aplicaciones_insumos")
   @@index([aplicacionId])
   @@index([insumoId])
+  @@map("aplicaciones_insumos")
 }
 
 // ==========================================
 // RECETAS DE APLICACIÓN
 // ==========================================
 model Receta {
-  id          Int      @id @default(autoincrement())
-  cultivoId   Int
-  nombre      String
-  descripcion String?  @db.Text
+  id           Int      @id @default(autoincrement())
+  cultivoId    Int
+  nombre       String
+  descripcion  String?  @db.Text
   etapaCultivo String?
-  activo      Boolean  @default(true)
-  createdAt   DateTime @default(now())
-  updatedAt   DateTime @updatedAt
+  activo       Boolean  @default(true)
+  createdAt    DateTime @default(now())
+  updatedAt    DateTime @updatedAt
 
-  cultivo     Cultivo           @relation(fields: [cultivoId], references: [id])
-  detalles    RecetaDetalle[]
+  cultivo           Cultivo           @relation(fields: [cultivoId], references: [id])
+  detalles          RecetaDetalle[]
   ordenesAplicacion OrdenAplicacion[]
 
-  @@map("recetas")
   @@index([cultivoId])
   @@index([activo])
+  @@map("recetas")
 }
 
 model RecetaDetalle {
-  id                 Int     @id @default(autoincrement())
-  recetaId           Int
-  insumoId           Int
-  dosisPorHectarea   Float
-  unidadMedida       String
-  orden              Int     @default(1)
+  id               Int    @id @default(autoincrement())
+  recetaId         Int
+  insumoId         Int
+  dosisPorHectarea Float
+  unidadMedida     String
+  orden            Int    @default(1)
 
-  receta             Receta           @relation(fields: [recetaId], references: [id], onDelete: Cascade)
-  insumo             InventarioItem   @relation(fields: [insumoId], references: [id])
+  receta Receta         @relation(fields: [recetaId], references: [id], onDelete: Cascade)
+  insumo InventarioItem @relation(fields: [insumoId], references: [id])
 
   @@unique([recetaId, insumoId])
-  @@map("receta_detalles")
   @@index([recetaId])
   @@index([insumoId])
+  @@map("receta_detalles")
 }
 
 // ==========================================
 // ACTIVIDADES PROGRAMADAS
 // ==========================================
 model Actividad {
-  id                Int       @id @default(autoincrement())
-  periodoSiembraId  Int
-  nombre            String
-  tipo              String
-  fechaProgramada   DateTime
-  fechaRealizada    DateTime?
-  estado            String    @default("Pendiente")
-  responsable       String?
-  costo             Float?
-  observaciones     String?   @db.Text
-  createdAt         DateTime  @default(now())
-  updatedAt         DateTime  @updatedAt
+  id               Int       @id @default(autoincrement())
+  periodoSiembraId Int
+  nombre           String
+  tipo             String
+  fechaProgramada  DateTime
+  fechaRealizada   DateTime?
+  estado           String    @default("Pendiente")
+  responsable      String?
+  costo            Float?
+  observaciones    String?   @db.Text
+  createdAt        DateTime  @default(now())
+  updatedAt        DateTime  @updatedAt
 
-  periodoSiembra    PeriodoSiembra @relation(fields: [periodoSiembraId], references: [id], onDelete: Cascade)
+  periodoSiembra PeriodoSiembra @relation(fields: [periodoSiembraId], references: [id], onDelete: Cascade)
 
-  @@map("actividades")
   @@index([periodoSiembraId])
   @@index([estado])
   @@index([fechaProgramada])
+  @@map("actividades")
 }
 
 // ==========================================
 // ÓRDENES DE APLICACIÓN
 // ==========================================
 model OrdenAplicacion {
-  id                  Int       @id @default(autoincrement())
-  parcelaId           Int
-  recetaId            Int
-  hectareasAplicadas  Float
-  fechaCreacion       DateTime  @default(now())
-  fechaAplicacion     DateTime?
-  operadorId          Int?
-  estado              EstadoOrden @default(PENDIENTE)
-  observaciones       String?   @db.Text
-  costoTotal          Float?
-  createdAt           DateTime  @default(now())
-  updatedAt           DateTime  @updatedAt
+  id                 Int         @id @default(autoincrement())
+  parcelaId          Int
+  recetaId           Int
+  hectareasAplicadas Float
+  fechaCreacion      DateTime    @default(now())
+  fechaAplicacion    DateTime?
+  operadorId         Int?
+  estado             EstadoOrden @default(PENDIENTE)
+  observaciones      String?     @db.Text
+  costoTotal         Float?
+  createdAt          DateTime    @default(now())
+  updatedAt          DateTime    @updatedAt
 
-  parcela             Parcela   @relation(fields: [parcelaId], references: [id])
-  receta              Receta    @relation(fields: [recetaId], references: [id])
-  operador            User?     @relation(fields: [operadorId], references: [id])
-  detalles            OrdenDetalle[]
+  parcela  Parcela        @relation(fields: [parcelaId], references: [id])
+  receta   Receta         @relation(fields: [recetaId], references: [id])
+  operador User?          @relation(fields: [operadorId], references: [id])
+  detalles OrdenDetalle[]
 
-  @@map("ordenes_aplicacion")
   @@index([parcelaId])
   @@index([recetaId])
   @@index([estado])
   @@index([fechaCreacion])
+  @@map("ordenes_aplicacion")
 }
 
 model OrdenDetalle {
-  id                  Int       @id @default(autoincrement())
-  ordenId             Int
-  insumoId            Int
-  cantidadCalculada   Float
-  unidadMedida        String
-  costoUnitario       Float
-  costoTotal          Float
-  createdAt           DateTime  @default(now())
+  id                Int      @id @default(autoincrement())
+  ordenId           Int
+  insumoId          Int
+  cantidadCalculada Float
+  unidadMedida      String
+  costoUnitario     Float
+  costoTotal        Float
+  createdAt         DateTime @default(now())
 
-  orden               OrdenAplicacion @relation(fields: [ordenId], references: [id], onDelete: Cascade)
-  insumo              InventarioItem @relation(fields: [insumoId], references: [id])
+  orden  OrdenAplicacion @relation(fields: [ordenId], references: [id], onDelete: Cascade)
+  insumo InventarioItem  @relation(fields: [insumoId], references: [id])
 
-  @@map("orden_detalles")
   @@index([ordenId])
   @@index([insumoId])
+  @@map("orden_detalles")
 }
 
 enum EstadoOrden {

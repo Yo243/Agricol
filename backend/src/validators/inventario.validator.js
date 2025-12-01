@@ -1,24 +1,42 @@
 const Joi = require('joi');
 
+// 🔹 Unidades de medida válidas (códigos cortos + nombres largos)
+const UNIDADES_MEDIDA_VALIDAS = [
+  // Códigos cortos que manda el front
+  'kg',
+  'L',
+  'unidades',
+  'sacos',
+  'cajas',
+
+  // Nombres largos (por compatibilidad)
+  'Kilogramos',
+  'Litros',
+  'Gramos',
+  'Mililitros',
+  'Toneladas',
+  'Unidades',
+  'Sacos',
+  'Cajas',
+  'Galones',
+  'Metros',
+  'Metros Cuadrados',
+  'Hectáreas'
+];
+
 /**
  * Validación para crear item
  */
 exports.createItemSchema = Joi.object({
-  codigo: Joi.string()
-    .required()
-    .trim()
-    .messages({
-      'string.empty': 'El código es requerido',
-      'any.required': 'El código es requerido'
-    }),
+  codigo: Joi.string().required().trim().messages({
+    'string.empty': 'El código es requerido',
+    'any.required': 'El código es requerido'
+  }),
 
-  nombre: Joi.string()
-    .required()
-    .trim()
-    .messages({
-      'string.empty': 'El nombre es requerido',
-      'any.required': 'El nombre es requerido'
-    }),
+  nombre: Joi.string().required().trim().messages({
+    'string.empty': 'El nombre es requerido',
+    'any.required': 'El nombre es requerido'
+  }),
 
   categoria: Joi.string()
     .required()
@@ -46,21 +64,15 @@ exports.createItemSchema = Joi.object({
   descripcion: Joi.string().allow('', null),
 
   // Stock
-  stockActual: Joi.number()
-    .min(0)
-    .required()
-    .messages({
-      'number.min': 'El stock actual no puede ser negativo',
-      'any.required': 'El stock actual es requerido'
-    }),
+  stockActual: Joi.number().min(0).required().messages({
+    'number.min': 'El stock actual no puede ser negativo',
+    'any.required': 'El stock actual es requerido'
+  }),
 
-  stockMinimo: Joi.number()
-    .min(0)
-    .required()
-    .messages({
-      'number.min': 'El stock mínimo no puede ser negativo',
-      'any.required': 'El stock mínimo es requerido'
-    }),
+  stockMinimo: Joi.number().min(0).required().messages({
+    'number.min': 'El stock mínimo no puede ser negativo',
+    'any.required': 'El stock mínimo es requerido'
+  }),
 
   stockMaximo: Joi.number()
     .min(Joi.ref('stockMinimo'))
@@ -72,44 +84,24 @@ exports.createItemSchema = Joi.object({
 
   unidadMedida: Joi.string()
     .required()
-    .valid(
-      'Kilogramos',
-      'Litros',
-      'Gramos',
-      'Mililitros',
-      'Toneladas',
-      'Unidades',
-      'Sacos',
-      'Cajas',
-      'Galones',
-      'Metros',
-      'Metros Cuadrados',
-      'Hectáreas'
-    )
+    .valid(...UNIDADES_MEDIDA_VALIDAS)
     .messages({
       'any.required': 'La unidad de medida es requerida',
       'any.only': 'Unidad de medida no válida'
     }),
 
   // Ubicación
-  ubicacion: Joi.string()
-    .required()
-    .messages({
-      'any.required': 'La ubicación es requerida'
-    }),
-
+  ubicacion: Joi.string().required().messages({
+    'any.required': 'La ubicación es requerida'
+  }),
   almacen: Joi.string().allow('', null),
   seccion: Joi.string().allow('', null),
 
   // Precios
-  costoUnitario: Joi.number()
-    .min(0)
-    .required()
-    .messages({
-      'number.min': 'El costo unitario no puede ser negativo',
-      'any.required': 'El costo unitario es requerido'
-    }),
-
+  costoUnitario: Joi.number().min(0).required().messages({
+    'number.min': 'El costo unitario no puede ser negativo',
+    'any.required': 'El costo unitario es requerido'
+  }),
   precioVenta: Joi.number().min(0).allow(null),
 
   // Proveedor
@@ -153,6 +145,7 @@ exports.createItemSchema = Joi.object({
 exports.updateItemSchema = Joi.object({
   codigo: Joi.string().trim(),
   nombre: Joi.string().trim(),
+
   categoria: Joi.string().valid(
     'Fertilizantes',
     'Pesticidas',
@@ -168,34 +161,32 @@ exports.updateItemSchema = Joi.object({
     'Material de Riego',
     'Envases y Embalajes'
   ),
+
   subcategoria: Joi.string().allow('', null),
   descripcion: Joi.string().allow('', null),
-  stockActual: Joi.number().min(0),
-  stockMinimo: Joi.number().min(0),
-  stockMaximo: Joi.number().min(0),
-  unidadMedida: Joi.string().valid(
-    'Kilogramos',
-    'Litros',
-    'Gramos',
-    'Mililitros',
-    'Toneladas',
-    'Unidades',
-    'Sacos',
-    'Cajas',
-    'Galones',
-    'Metros',
-    'Metros Cuadrados',
-    'Hectáreas'
-  ),
+
+  // numéricos opcionales
+  stockActual: Joi.number().min(0).allow(null),
+  stockMinimo: Joi.number().min(0).allow(null),
+  stockMaximo: Joi.number().min(0).allow(null),
+
+  unidadMedida: Joi.string().valid(...UNIDADES_MEDIDA_VALIDAS),
+
   ubicacion: Joi.string(),
+
   almacen: Joi.string().allow('', null),
   seccion: Joi.string().allow('', null),
-  costoUnitario: Joi.number().min(0),
+
+  costoUnitario: Joi.number().min(0).allow(null),
   precioVenta: Joi.number().min(0).allow(null),
+
   proveedor: Joi.string().allow('', null),
   numeroLote: Joi.string().allow('', null),
-  fechaAdquisicion: Joi.date().allow(null),
-  fechaVencimiento: Joi.date().allow(null),
+
+  // fechas: permitimos null y ''
+  fechaAdquisicion: Joi.date().allow(null, ''),
+  fechaVencimiento: Joi.date().allow(null, ''),
+
   estado: Joi.string().valid(
     'Disponible',
     'Stock Bajo',
@@ -206,7 +197,9 @@ exports.updateItemSchema = Joi.object({
     'En Tránsito',
     'Reservado'
   ),
+
   activo: Joi.boolean(),
+
   composicion: Joi.string().allow('', null),
   concentracion: Joi.string().allow('', null),
   marca: Joi.string().allow('', null),
@@ -251,11 +244,8 @@ exports.registrarMovimientoSchema = Joi.object({
       'any.required': 'La fecha es requerida'
     }),
 
-  usuario: Joi.string()
-    .required()
-    .messages({
-      'any.required': 'El usuario es requerido'
-    }),
+  // usuario opcional; si quieres puedes sacarlo de req.user en el controller
+  usuario: Joi.string().allow('', null),
 
   razon: Joi.string()
     .required()

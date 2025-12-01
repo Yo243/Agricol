@@ -1,371 +1,316 @@
-<!-- Formulario de Aplicación - Mejorado y Minimalista -->
+<!-- ============================================================
+     FORMULARIO DE APLICACIÓN DE INSUMOS - AgriCol
+     ============================================================ -->
 
-<div class="modal-overlay">
-  <div class="modal-container modal-wide">
+<div class="modal-overlay" *ngIf="true" (click)="cerrar()">
+  <div class="modal-container modal-wide" (click)="$event.stopPropagation()">
     
-    <!-- Header -->
+    <!-- Header del Modal -->
     <div class="modal-header">
-      <div class="header-content">
-        <svg class="header-icon" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M20 7l-8-4-8 4m16 0l-8 4m8-4v10l-8 4m0-10L4 7m8 4v10M4 7v10l8 4"/>
-        </svg>
-        <h2 class="header-title">Registrar Aplicación de Insumos</h2>
-      </div>
-      <button (click)="cerrar()" type="button" class="btn-close">
-        <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+      <h2 class="modal-title">Registrar Aplicación de Insumos</h2>
+      <button type="button" class="btn-close" (click)="cerrar()" aria-label="Cerrar">
+        <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
           <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/>
         </svg>
       </button>
     </div>
 
-    <!-- Loading -->
-    <div *ngIf="loadingData" class="loading-container">
-      <svg class="loading-spinner" fill="none" viewBox="0 0 24 24">
-        <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
-        <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
-      </svg>
-      <p class="loading-text">Cargando datos...</p>
-    </div>
-
-    <!-- Body -->
-    <form *ngIf="!loadingData" (ngSubmit)="guardar()" class="modal-body">
+    <!-- Body del Modal -->
+    <div class="modal-body">
       
-      <!-- Sección 1: Información General -->
-      <div class="form-section">
-        <div class="section-header">
-          <div class="section-badge">1</div>
-          <h3 class="section-title">Información General</h3>
-        </div>
+      <!-- Indicador de Carga -->
+      <div *ngIf="loadingData" class="loading-overlay">
+        <svg class="animate-spin w-8 h-8 text-primary" fill="none" viewBox="0 0 24 24">
+          <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
+          <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+        </svg>
+        <p>Cargando datos...</p>
+      </div>
 
-        <div class="form-grid form-grid-2">
-          
-          <!-- Período de Siembra -->
-          <div class="form-group">
-            <label class="form-label">
-              <svg class="label-icon" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 21a4 4 0 01-4-4V5a2 2 0 012-2h4a2 2 0 012 2v12a4 4 0 01-4 4zm0 0h12a2 2 0 002-2v-4a2 2 0 00-2-2h-2.343M11 7.343l1.657-1.657a2 2 0 012.828 0l2.829 2.829a2 2 0 010 2.828l-8.486 8.485M7 17h.01"/>
-              </svg>
-              Período de Siembra
-              <span class="required">*</span>
-            </label>
-            <div class="select-wrapper">
-              <select
+      <form *ngIf="!loadingData">
+        
+        <!-- Sección 1: Información General -->
+        <div class="form-section">
+          <div class="section-header">
+            <svg class="w-5 h-5 text-primary" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"/>
+            </svg>
+            <h3 class="section-title">Información General</h3>
+          </div>
+
+          <div class="form-grid-2">
+            
+            <!-- Período de Siembra -->
+            <div class="form-group">
+              <label class="form-label required">Período de Siembra</label>
+              <select 
+                class="form-input"
                 [(ngModel)]="formData.periodoSiembraId"
-                name="periodoSiembraId"
-                (ngModelChange)="onPeriodoChange()"
-                [disabled]="!!periodoId"
-                required
-                class="form-select"
-                [class.form-input-disabled]="!!periodoId">
+                name="periodoSiembra"
+                (change)="onPeriodoChange()"
+                required>
                 <option value="0">Seleccionar período...</option>
                 <option *ngFor="let periodo of periodos" [value]="periodo.id">
-                  {{ periodo.parcela?.nombre }} - {{ periodo.cultivo?.nombre }}
+                  {{periodo.cultivo}} ({{periodo.hectareasSembradas}} ha)
                 </option>
               </select>
-              <svg class="select-icon" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"/>
-              </svg>
             </div>
-          </div>
 
-          <!-- Tipo de Aplicación -->
-          <div class="form-group">
-            <label class="form-label">
-              <svg class="label-icon" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 7h.01M7 3h5c.512 0 1.024.195 1.414.586l7 7a2 2 0 010 2.828l-7 7a2 2 0 01-2.828 0l-7-7A1.994 1.994 0 013 12V7a4 4 0 014-4z"/>
-              </svg>
-              Tipo de Aplicación
-              <span class="required">*</span>
-            </label>
-            <div class="select-wrapper">
-              <select
+            <!-- Tipo de Aplicación -->
+            <div class="form-group">
+              <label class="form-label required">Tipo de Aplicación</label>
+              <select 
+                class="form-input"
                 [(ngModel)]="formData.tipoAplicacion"
                 name="tipoAplicacion"
-                required
-                class="form-select">
-                <option *ngFor="let tipo of TIPOS_APLICACION" [value]="tipo">{{ tipo }}</option>
+                required>
+                <option *ngFor="let tipo of TIPOS_APLICACION" [value]="tipo">
+                  {{tipo}}
+                </option>
               </select>
-              <svg class="select-icon" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"/>
-              </svg>
+            </div>
+
+            <!-- Fecha de Aplicación -->
+            <div class="form-group">
+              <label class="form-label required">Fecha de Aplicación</label>
+              <input 
+                type="date"
+                class="form-input"
+                [(ngModel)]="formData.fecha"
+                name="fecha"
+                required>
+            </div>
+
+            <!-- Hectáreas Aplicadas -->
+            <div class="form-group">
+              <label class="form-label required">Hectáreas Aplicadas</label>
+              <div class="input-with-unit">
+                <input 
+                  type="number"
+                  class="form-input"
+                  [(ngModel)]="formData.hectareasAplicadas"
+                  name="hectareasAplicadas"
+                  step="0.01"
+                  min="0"
+                  placeholder="0"
+                  required>
+                <span class="input-unit">ha</span>
+              </div>
+            </div>
+
+            <!-- Responsable de la Aplicación -->
+            <div class="form-group full-width">
+              <label class="form-label">Responsable de la Aplicación</label>
+              <input 
+                type="text"
+                class="form-input"
+                [(ngModel)]="formData.responsable"
+                name="responsable"
+                placeholder="Nombre del responsable o aplicador">
             </div>
           </div>
-
-          <!-- Fecha -->
-          <div class="form-group">
-            <label class="form-label">
-              <svg class="label-icon" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z"/>
-              </svg>
-              Fecha de Aplicación
-              <span class="required">*</span>
-            </label>
-            <input
-              type="date"
-              [(ngModel)]="formData.fecha"
-              name="fecha"
-              required
-              class="form-input">
-          </div>
-
-          <!-- Hectáreas Aplicadas -->
-          <div class="form-group">
-            <label class="form-label">
-              <svg class="label-icon" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 5a1 1 0 011-1h14a1 1 0 011 1v2a1 1 0 01-1 1H5a1 1 0 01-1-1V5zM4 13a1 1 0 011-1h6a1 1 0 011 1v6a1 1 0 01-1 1H5a1 1 0 01-1-1v-6zM16 13a1 1 0 011-1h2a1 1 0 011 1v6a1 1 0 01-1 1h-2a1 1 0 01-1-1v-6z"/>
-              </svg>
-              Hectáreas Aplicadas
-              <span class="required">*</span>
-            </label>
-            <div class="input-with-unit">
-              <input
-                type="number"
-                [(ngModel)]="formData.hectareasAplicadas"
-                name="hectareasAplicadas"
-                required
-                min="0.01"
-                step="0.01"
-                placeholder="0.00"
-                class="form-input">
-              <span class="input-unit">ha</span>
-            </div>
-          </div>
-
-          <!-- Responsable -->
-          <div class="form-group form-group-full">
-            <label class="form-label">
-              <svg class="label-icon" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z"/>
-              </svg>
-              Responsable de la Aplicación
-            </label>
-            <input
-              type="text"
-              [(ngModel)]="formData.responsable"
-              name="responsable"
-              placeholder="Nombre del responsable de la aplicación"
-              class="form-input">
-          </div>
-
-        </div>
-      </div>
-
-      <!-- Sección 2: Insumos Aplicados -->
-      <div class="form-section">
-        <div class="section-header">
-          <div class="section-badge">2</div>
-          <h3 class="section-title">Insumos Aplicados</h3>
-          <button
-            type="button"
-            (click)="agregarInsumo()"
-            class="btn-add-insumo">
-            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"/>
-            </svg>
-            <span>Agregar</span>
-          </button>
         </div>
 
-        <!-- Selector de Insumo -->
-        <div class="form-group">
-          <label class="form-label">
-            <svg class="label-icon" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+        <!-- Sección 2: Insumos Aplicados -->
+        <div class="form-section">
+          <div class="section-header">
+            <svg class="w-5 h-5 text-primary" fill="none" stroke="currentColor" viewBox="0 0 24 24">
               <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M20 7l-8-4-8 4m16 0l-8 4m8-4v10l-8 4m0-10L4 7m8 4v10M4 7v10l8 4"/>
             </svg>
-            Seleccionar Insumo
-          </label>
-          <div class="select-wrapper">
-            <select
-              [(ngModel)]="insumoSeleccionado"
-              name="insumoSelector"
-              class="form-select">
-              <option [value]="0">Seleccionar insumo del inventario...</option>
-              <option *ngFor="let insumo of insumos" [value]="insumo.id">
-                {{ insumo.nombre }} (Stock: {{ insumo.stockActual }} {{ insumo.unidadMedida }})
-              </option>
-            </select>
-            <svg class="select-icon" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"/>
-            </svg>
-          </div>
-        </div>
-
-        <!-- Tabla de Insumos - Desktop -->
-        <div *ngIf="insumosSeleccionados.length > 0" class="table-container">
-          <table class="insumos-table">
-            <thead>
-              <tr>
-                <th>Insumo</th>
-                <th>Dosis/ha</th>
-                <th>Cantidad Total</th>
-                <th>Stock Disponible</th>
-                <th class="text-center">Acción</th>
-              </tr>
-            </thead>
-            <tbody>
-              <tr *ngFor="let insumo of insumosSeleccionados; let i = index">
-                <td>
-                  <div class="insumo-info">
-                    <span class="insumo-name">{{ insumo.nombre }}</span>
-                    <span class="insumo-unit">{{ insumo.unidadMedida }}</span>
-                  </div>
-                </td>
-                <td>
-                  <input
-                    type="number"
-                    [(ngModel)]="insumo.dosisPorHectarea"
-                    [name]="'dosis_' + i"
-                    (ngModelChange)="calcularCantidad(insumo)"
-                    min="0.01"
-                    step="0.01"
-                    class="table-input">
-                </td>
-                <td>
-                  <input
-                    type="number"
-                    [(ngModel)]="insumo.cantidad"
-                    [name]="'cantidad_' + i"
-                    min="0.01"
-                    step="0.01"
-                    class="table-input"
-                    [class.input-error]="insumo.cantidad > (insumo.stockDisponible || 0)">
-                </td>
-                <td>
-                  <span class="stock-value" [class.stock-error]="insumo.cantidad > (insumo.stockDisponible || 0)">
-                    {{ insumo.stockDisponible }}
-                  </span>
-                </td>
-                <td class="text-center">
-                  <button
-                    type="button"
-                    (click)="eliminarInsumo(i)"
-                    class="btn-delete"
-                    title="Eliminar insumo">
-                    <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                      <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"/>
-                    </svg>
-                  </button>
-                </td>
-              </tr>
-            </tbody>
-          </table>
-        </div>
-
-        <!-- Cards de Insumos - Mobile -->
-        <div *ngIf="insumosSeleccionados.length > 0" class="insumos-cards">
-          <div *ngFor="let insumo of insumosSeleccionados; let i = index" class="insumo-card">
-            <div class="card-header-insumo">
-              <div>
-                <span class="insumo-name">{{ insumo.nombre }}</span>
-                <span class="insumo-unit">{{ insumo.unidadMedida }}</span>
-              </div>
-              <button
-                type="button"
-                (click)="eliminarInsumo(i)"
-                class="btn-delete"
-                title="Eliminar">
+            <h3 class="section-title">Insumos Aplicados</h3>
+            
+            <div class="section-actions">
+              <select 
+                class="form-input select-insumo"
+                [(ngModel)]="insumoSeleccionado"
+                name="insumoSeleccionado">
+                <option value="0">Seleccionar insumo...</option>
+                <option *ngFor="let insumo of insumos" [value]="insumo.id">
+                  {{insumo.nombre}} - Stock: {{insumo.stockActual}} {{insumo.unidadMedida}}
+                </option>
+              </select>
+              
+              <button 
+                type="button" 
+                class="btn-add-insumo"
+                (click)="agregarInsumo()"
+                [disabled]="!insumoSeleccionado || insumoSeleccionado === 0">
                 <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"/>
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"/>
                 </svg>
+                <span>Agregar</span>
               </button>
             </div>
-            
-            <div class="card-body-insumo">
-              <div class="card-field">
-                <label class="card-label">Dosis por Hectárea</label>
-                <input
-                  type="number"
-                  [(ngModel)]="insumo.dosisPorHectarea"
-                  [name]="'dosis_mobile_' + i"
-                  (ngModelChange)="calcularCantidad(insumo)"
-                  min="0.01"
-                  step="0.01"
-                  class="form-input">
+          </div>
+
+          <!-- Empty State -->
+          <div *ngIf="insumosSeleccionados.length === 0" class="empty-state-insumos">
+            <svg class="empty-icon-insumos" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M20 7l-8-4-8 4m16 0l-8 4m8-4v10l-8 4m0-10L4 7m8 4v10M4 7v10l8 4"/>
+            </svg>
+            <p class="empty-title-insumos">No hay insumos agregados</p>
+            <p class="empty-text-insumos">Selecciona un insumo y haz clic en "Agregar" para comenzar</p>
+          </div>
+
+          <!-- Tabla de Insumos - Desktop -->
+          <div *ngIf="insumosSeleccionados.length > 0" class="table-container">
+            <table class="insumos-table">
+              <thead>
+                <tr>
+                  <th>Insumo</th>
+                  <th class="text-center">Dosis/ha</th>
+                  <th class="text-center">Cantidad Total</th>
+                  <th class="text-center">Stock Disponible</th>
+                  <th class="text-center">Acciones</th>
+                </tr>
+              </thead>
+              <tbody>
+                <tr *ngFor="let insumo of insumosSeleccionados; let i = index">
+                  <td>
+                    <div class="insumo-info">
+                      <span class="insumo-name">{{insumo.nombre}}</span>
+                      <span class="insumo-unit">{{insumo.unidadMedida}}</span>
+                    </div>
+                  </td>
+                  <td class="text-center">
+                    <input 
+                      type="number"
+                      class="table-input"
+                      [(ngModel)]="insumo.dosisPorHectarea"
+                      [name]="'dosis-' + i"
+                      (ngModelChange)="calcularCantidad(insumo)"
+                      step="0.01"
+                      min="0"
+                      placeholder="0">
+                  </td>
+                  <td class="text-center">
+                    <input 
+                      type="number"
+                      class="table-input"
+                      [class.input-error]="insumo.cantidad > (insumo.stockDisponible || 0)"
+                      [(ngModel)]="insumo.cantidad"
+                      [name]="'cantidad-' + i"
+                      step="0.01"
+                      min="0"
+                      placeholder="0">
+                  </td>
+                  <td class="text-center">
+                    <span 
+                      class="stock-value"
+                      [class.stock-error]="insumo.cantidad > (insumo.stockDisponible || 0)">
+                      {{insumo.stockDisponible}}
+                    </span>
+                  </td>
+                  <td class="text-center">
+                    <button 
+                      type="button"
+                      class="btn-delete"
+                      (click)="eliminarInsumo(i)"
+                      title="Eliminar insumo">
+                      <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"/>
+                      </svg>
+                    </button>
+                  </td>
+                </tr>
+              </tbody>
+            </table>
+          </div>
+
+          <!-- Cards de Insumos - Mobile -->
+          <div *ngIf="insumosSeleccionados.length > 0" class="insumos-cards">
+            <div *ngFor="let insumo of insumosSeleccionados; let i = index" class="insumo-card">
+              <div class="card-header-insumo">
+                <div>
+                  <div class="insumo-name">{{insumo.nombre}}</div>
+                  <div class="insumo-unit">{{insumo.unidadMedida}}</div>
+                </div>
+                <button 
+                  type="button"
+                  class="btn-delete"
+                  (click)="eliminarInsumo(i)"
+                  title="Eliminar insumo">
+                  <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"/>
+                  </svg>
+                </button>
               </div>
 
-              <div class="card-field">
-                <label class="card-label">Cantidad Total</label>
-                <input
-                  type="number"
-                  [(ngModel)]="insumo.cantidad"
-                  [name]="'cantidad_mobile_' + i"
-                  min="0.01"
-                  step="0.01"
-                  class="form-input"
-                  [class.input-error]="insumo.cantidad > (insumo.stockDisponible || 0)">
-              </div>
+              <div class="card-body-insumo">
+                <div class="card-field">
+                  <label class="card-label">Dosis por hectárea</label>
+                  <input 
+                    type="number"
+                    class="form-input"
+                    [(ngModel)]="insumo.dosisPorHectarea"
+                    [name]="'dosis-mobile-' + i"
+                    (ngModelChange)="calcularCantidad(insumo)"
+                    step="0.01"
+                    min="0"
+                    placeholder="0">
+                </div>
 
-              <div class="stock-info" [class.stock-warning]="insumo.cantidad > (insumo.stockDisponible || 0)">
-                <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M20 7l-8-4-8 4m16 0l-8 4m8-4v10l-8 4m0-10L4 7m8 4v10M4 7v10l8 4"/>
-                </svg>
-                <span>Stock disponible: {{ insumo.stockDisponible }}</span>
+                <div class="card-field">
+                  <label class="card-label">Cantidad total</label>
+                  <input 
+                    type="number"
+                    class="form-input"
+                    [class.input-error]="insumo.cantidad > (insumo.stockDisponible || 0)"
+                    [(ngModel)]="insumo.cantidad"
+                    [name]="'cantidad-mobile-' + i"
+                    step="0.01"
+                    min="0"
+                    placeholder="0">
+                </div>
+
+                <div class="stock-info" [class.stock-warning]="insumo.cantidad > (insumo.stockDisponible || 0)">
+                  <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"/>
+                  </svg>
+                  <span>Stock disponible: {{insumo.stockDisponible}} {{insumo.unidadMedida}}</span>
+                </div>
               </div>
             </div>
           </div>
         </div>
 
-        <!-- Empty State -->
-        <div *ngIf="insumosSeleccionados.length === 0" class="empty-state-insumos">
-          <svg class="empty-icon-insumos" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M20 7l-8-4-8 4m16 0l-8 4m8-4v10l-8 4m0-10L4 7m8 4v10M4 7v10l8 4"/>
-          </svg>
-          <p class="empty-title-insumos">No hay insumos agregados</p>
-          <p class="empty-text-insumos">Selecciona un insumo y haz clic en "Agregar"</p>
-        </div>
-      </div>
-
-      <!-- Sección 3: Observaciones -->
-      <div class="form-section">
-        <div class="section-header">
-          <div class="section-badge">3</div>
-          <h3 class="section-title">Notas y Observaciones</h3>
+        <!-- Sección 3: Observaciones -->
+        <div class="form-section">
+          <div class="form-group">
+            <label class="form-label">Observaciones</label>
+            <textarea 
+              class="form-textarea"
+              [(ngModel)]="formData.observaciones"
+              name="observaciones"
+              rows="3"
+              placeholder="Notas adicionales sobre la aplicación (opcional)"></textarea>
+          </div>
         </div>
 
-        <div class="form-group">
-          <label class="form-label">
-            <svg class="label-icon" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"/>
-            </svg>
-            Observaciones de la Aplicación
-          </label>
-          <textarea
-            [(ngModel)]="formData.observaciones"
-            name="observaciones"
-            rows="4"
-            placeholder="Añade notas sobre condiciones climáticas, métodos de aplicación, resultados observados o cualquier información relevante..."
-            class="form-textarea"></textarea>
-          <p class="form-hint">Opcional - Información adicional sobre la aplicación</p>
-        </div>
-      </div>
+      </form>
+    </div>
 
-      <!-- Footer con Botones -->
-      <div class="modal-footer">
-        <button
-          type="button"
-          (click)="cerrar()"
-          class="btn-secondary">
-          <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/>
-          </svg>
-          <span>Cancelar</span>
-        </button>
-        <button
-          type="submit"
-          [disabled]="loading || insumosSeleccionados.length === 0"
-          class="btn-primary">
-          <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24" *ngIf="!loading">
-            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"/>
-          </svg>
-          <svg class="w-4 h-4 animate-spin" fill="none" viewBox="0 0 24 24" *ngIf="loading">
-            <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
-            <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
-          </svg>
-          <span>{{ loading ? 'Registrando...' : 'Registrar Aplicación' }}</span>
-        </button>
-      </div>
-
-    </form>
+    <!-- Footer del Modal -->
+    <div class="modal-footer">
+      <button 
+        type="button" 
+        class="btn-secondary" 
+        (click)="cerrar()"
+        [disabled]="loading">
+        Cancelar
+      </button>
+      <button 
+        type="button" 
+        class="btn-primary" 
+        (click)="guardar()"
+        [disabled]="loading || loadingData">
+        <svg *ngIf="loading" class="animate-spin w-4 h-4" fill="none" viewBox="0 0 24 24">
+          <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
+          <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+        </svg>
+        <span>{{ loading ? 'Guardando...' : 'Registrar Aplicación' }}</span>
+      </button>
+    </div>
 
   </div>
 </div>
