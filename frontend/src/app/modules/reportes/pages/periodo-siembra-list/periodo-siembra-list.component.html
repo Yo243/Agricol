@@ -1,24 +1,19 @@
-<!-- Períodos de Siembra - Lista Mejorada y Responsive -->
+<!-- Períodos de Siembra - Vista de Consulta (SIN CREAR MANUAL) -->
 
 <div class="periodos-container">
 
-  <!-- Header -->
+  <!-- Header SIN BOTÓN -->
   <div class="page-header">
     <div class="header-content">
       <svg class="header-icon" fill="none" stroke="currentColor" viewBox="0 0 24 24">
         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 21a4 4 0 01-4-4V5a2 2 0 012-2h4a2 2 0 012 2v12a4 4 0 01-4 4zm0 0h12a2 2 0 002-2v-4a2 2 0 00-2-2h-2.343M11 7.343l1.657-1.657a2 2 0 012.828 0l2.829 2.829a2 2 0 010 2.828l-8.486 8.485M7 17h.01"/>
       </svg>
       <div class="header-text">
-        <h1 class="page-title">Períodos de Siembra</h1>
-        <p class="page-subtitle">Gestiona los ciclos de cultivo en tus parcelas</p>
+        <h1 class="page-title">Períodos de Siembra Activos</h1>
+        <p class="page-subtitle">Consulta los ciclos de cultivo. Los períodos se crean desde el módulo de Parcelas.</p>
       </div>
     </div>
-    <button class="btn-create" routerLink="/periodos-siembra/nuevo">
-      <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"/>
-      </svg>
-      <span>Nuevo Período</span>
-    </button>
+    <!-- NO HAY BOTÓN AQUÍ -->
   </div>
 
   <!-- Filtros Tabs -->
@@ -70,12 +65,12 @@
         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 21a4 4 0 01-4-4V5a2 2 0 012-2h4a2 2 0 012 2v12a4 4 0 01-4 4zm0 0h12a2 2 0 002-2v-4a2 2 0 00-2-2h-2.343M11 7.343l1.657-1.657a2 2 0 012.828 0l2.829 2.829a2 2 0 010 2.828l-8.486 8.485M7 17h.01"/>
       </svg>
       <h3 class="empty-title">No hay períodos de siembra</h3>
-      <p class="empty-description">Crea tu primer período de siembra para comenzar a dar seguimiento a tus cultivos</p>
-      <button class="btn-empty-action" routerLink="/periodos-siembra/nuevo">
+      <p class="empty-description">Los períodos de siembra se crean automáticamente desde el módulo de Parcelas</p>
+      <button class="btn-empty-action" routerLink="/parcelas">
         <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"/>
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 20l-5.447-2.724A1 1 0 013 16.382V5.618a1 1 0 011.447-.894L9 7m0 13l6-3m-6 3V7m6 10l4.553 2.276A1 1 0 0021 18.382V7.618a1 1 0 00-.553-.894L15 4m0 13V4m0 0L9 7"/>
         </svg>
-        <span>Crear Primer Período</span>
+        <span>Ir a Parcelas</span>
       </button>
     </div>
   }
@@ -83,12 +78,12 @@
   <!-- Grid de Períodos -->
   @if (!loading && periodos.length > 0) {
     <div class="periodos-grid">
-      @for (periodo of periodos; track periodo) {
+      @for (periodo of periodos; track periodo.id) {
         <div class="periodo-card">
           <!-- Header -->
           <div class="periodo-header">
             <div class="header-left">
-              <h3 class="periodo-title">{{ periodo.cultivo?.nombre }}</h3>
+              <h3 class="periodo-title">{{ periodo.cultivo?.nombre || 'Sin cultivo' }}</h3>
               <span class="periodo-codigo">{{ periodo.codigo }}</span>
             </div>
             <span class="periodo-badge" [ngClass]="getEstadoBadgeClass(periodo.estado)">
@@ -103,7 +98,7 @@
               </svg>
               <div class="info-content">
                 <span class="info-label">Parcela</span>
-                <span class="info-value">{{ periodo.parcela?.nombre }}</span>
+                <span class="info-value">{{ periodo.parcela?.nombre || 'Sin parcela' }}</span>
               </div>
             </div>
             <div class="info-item">
@@ -161,8 +156,8 @@
               }
             </div>
           }
-          <!-- Actions -->
-          <button class="btn-detail" [routerLink]="['/periodos-siembra', periodo.id]">
+          <!-- Actions CON CLICK EVENT -->
+          <button class="btn-detail" (click)="verDetalle(periodo.id)">
             <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
               <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"/>
               <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z"/>

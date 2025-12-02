@@ -1,6 +1,6 @@
 import { Component, OnInit, ViewChild, inject } from '@angular/core';
 import { CommonModule } from '@angular/common';
-import { RouterModule } from '@angular/router';
+import { Router, RouterModule } from '@angular/router';
 import { FormsModule } from '@angular/forms';
 import { NgApexchartsModule, ChartComponent } from 'ng-apexcharts';
 import { ReportesService } from '../../services/reportes.service';
@@ -56,6 +56,7 @@ export class ReportesDashboardComponent implements OnInit {
 
   // Services
   private reportesService = inject(ReportesService);
+  private router = inject(Router);
 
   // Data
   dashboardData: DashboardResponse | null = null;
@@ -598,6 +599,18 @@ export class ReportesDashboardComponent implements OnInit {
       alert('Error al generar el archivo Excel. Asegúrese de tener instalado xlsx: npm install xlsx');
     }
   }
+  /**
+   * Navega al detalle de un período
+   */
+  verDetallePeriodo(periodoId: number, parcelaId?: any): void {
+    console.log("🔍 Ver detalle período clickeado desde dashboard. ID:", periodoId);
+    console.log("📋 ParcelaId recibido:", parcelaId);
+    
+    // Navegar al detalle del período
+    console.log("✅ Navegando a detalle del período:", periodoId);
+    this.router.navigate(["/periodos-siembra", periodoId]);
+  }
+
 
   /**
    * Recarga los datos del dashboard

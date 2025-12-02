@@ -1,9 +1,9 @@
 import { Component, inject, OnInit } from '@angular/core';
-
 import { FormsModule } from '@angular/forms';
 import { ActivatedRoute, Router, RouterModule } from '@angular/router';
 import { UsuariosService } from '../../services/usuarios.service';
 import { RolUsuario } from '../../../../models/usuario.model';
+import { environment } from '../../../../environments/environment';
 
 @Component({
   selector: 'app-editar-usuario',
@@ -20,13 +20,8 @@ export class EditarUsuarioComponent implements OnInit {
 
   userId!: number;
 
-  formData: {
-    name: string;
-    email: string;
-    role: RolUsuario;
-    activo: boolean;
-    password?: string;
-  } = {
+  // Form model
+  formData = {
     name: '',
     email: '',
     role: RolUsuario.USER,
@@ -37,108 +32,120 @@ export class EditarUsuarioComponent implements OnInit {
   loading = false;
   saving = false;
   errorMessage = '';
+  successMessage = '';
 
   ngOnInit() {
     this.userId = Number(this.route.snapshot.paramMap.get('id'));
-    
+
     if (!this.userId || isNaN(this.userId)) {
-      this.errorMessage = 'ID de usuario inválido';
+      this.errorMessage = 'ID de usuario inválido.';
       return;
     }
 
     this.loadUsuario();
   }
 
-  /**
-   * Carga los datos del usuario desde el backend
-   */
+  // ======================================================
+  // CARGAR USUARIO
+  // ======================================================
   loadUsuario() {
     this.loading = true;
     this.errorMessage = '';
 
     this.userService.getUsuario(this.userId).subscribe({
       next: (user) => {
-        console.log('Usuario cargado:', user);
-        
-        // IMPORTANTE: Convertir explícitamente el estado a boolean
         this.formData = {
           name: user.name,
           email: user.email,
           role: user.role,
-          activo: user.activo === false ? false : true, // Conversión explícita
-          password: '' // No mostrar contraseña real
+          activo: Boolean(user.activo),
+          password: ''
         };
 
-        console.log('FormData inicializado:', this.formData);
+        // Mensaje de debug solo en local
+        if (environment.production === false) {
+          console.log('%c[LOCALHOST] Usuario cargado:', 'color:#16a34a', this.formData);
+        }
+
         this.loading = false;
       },
-      error: (error) => {
-        console.error('Error al cargar usuario:', error);
-        this.errorMessage = 'No se pudo cargar el usuario';
+      error: (err) => {
+        this.errorMessage = 'No se pudo cargar el usuario.';
+        if (!environment.production) console.error('[LOCALHOST ERROR]', err);
         this.loading = false;
       }
     });
   }
 
-  /**
-   * Guarda los cambios del usuario
-   */
+  // ======================================================
+  // GUARDAR CAMBIOS
+  // ======================================================
   guardar() {
-    // Validaciones
-    if (!this.formData.name || !this.formData.email) {
-      this.errorMessage = 'Por favor completa todos los campos obligatorios';
+
+    // ========= VALIDACIONES =========
+    if (!this.formData.name.trim()) {
+      this.errorMessage = 'El nombre es obligatorio.';
       return;
     }
 
     if (!this.validateEmail(this.formData.email)) {
-      this.errorMessage = 'Por favor ingresa un email válido';
+      this.errorMessage = 'Ingresa un email válido.';
       return;
     }
 
     this.saving = true;
     this.errorMessage = '';
+    this.successMessage = '';
 
-    // Preparar payload - IMPORTANTE: Convertir activo a boolean explícitamente
     const payload: any = {
-      name: this.formData.name,
-      email: this.formData.email,
+      name: this.formData.name.trim(),
+      email: this.formData.email.trim(),
       role: this.formData.role,
-      activo: this.formData.activo === true ? true : false // Conversión explícita
+      activo: this.formData.activo
     };
 
-    // Solo incluir password si se proporcionó
-    if (this.formData.password && this.formData.password.trim() !== '') {
-      payload.password = this.formData.password;
+    if (this.formData.password.trim()) {
+      payload.password = this.formData.password.trim();
     }
 
-    console.log('Enviando payload:', payload);
+    // Debug solo en dev
+    if (!environment.production) {
+      console.log('%c[LOCALHOST] Payload enviado:', 'color:#0ea5e9', payload);
+    }
 
     this.userService.actualizarUsuario(this.userId, payload).subscribe({
-      next: (response) => {
-        console.log('Usuario actualizado:', response);
-        this.router.navigate(['/usuarios']);
-      },
-      error: (error) => {
-        console.error('Error al actualizar usuario:', error);
-        this.errorMessage = error.error?.message || 'Error al actualizar el usuario';
+      next: () => {
+        this.successMessage = 'Usuario actualizado correctamente.';
         this.saving = false;
+
+        setTimeout(() => {
+          this.router.navigate(['/usuarios']);
+        }, 800);
+      },
+      error: (err) => {
+        this.errorMessage = err.error?.message || 'Error al actualizar el usuario.';
+        this.saving = false;
+
+        if (!environment.production) {
+          console.error('[LOCALHOST ERROR]', err);
+        }
       }
     });
   }
 
-  /**
-   * Cancela la edición y vuelve a la lista
-   */
+  // ======================================================
+  // CANCELAR
+  // ======================================================
   cancelar() {
-    if (confirm('¿Estás seguro de cancelar? Los cambios no guardados se perderán.')) {
+    if (confirm('¿Seguro que deseas cancelar? Los cambios no guardados se perderán.')) {
       this.router.navigate(['/usuarios']);
     }
   }
 
-  /**
-   * Valida formato de email
-   */
-  private validateEmail(email: string): boolean {
+  // ======================================================
+  // VALIDAR EMAIL
+  // ======================================================
+  validateEmail(email: string): boolean {
     const re = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
     return re.test(email);
   }

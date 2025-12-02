@@ -2,11 +2,52 @@ const { PrismaClient } = require('@prisma/client');
 const prisma = new PrismaClient();
 
 /**
+ * 🔄 ACTUALIZACIÓN AUTOMÁTICA DE ESTADOS VENCIDOS
+ * Cambia de "En Curso" a "Finalizado" cuando la fecha de cosecha ya pasó
+ */
+async function actualizarEstadosVencidos() {
+  try {
+    const hoy = new Date();
+    hoy.setHours(0, 0, 0, 0); // Reiniciar horas para comparar solo fechas
+
+    console.log('🔍 Verificando períodos vencidos...');
+
+    // Actualizar períodos "En Curso" cuya fecha de cosecha ya pasó
+    const resultado = await prisma.periodoSiembra.updateMany({
+      where: {
+        estado: 'En Curso',
+        fechaCosechaEsperada: {
+          lt: hoy // Menor que hoy (ya pasó)
+        }
+      },
+      data: {
+        estado: 'Finalizado',
+        fechaFin: hoy
+      }
+    });
+
+    if (resultado.count > 0) {
+      console.log(`✅ ${resultado.count} período(s) actualizado(s) automáticamente a "Finalizado"`);
+    } else {
+      console.log('ℹ️  No hay períodos vencidos para actualizar');
+    }
+
+    return resultado.count;
+  } catch (error) {
+    console.error('❌ Error al actualizar estados vencidos:', error);
+    return 0;
+  }
+}
+
+/**
  * Obtener todos los períodos de siembra
  * GET /api/periodos-siembra
  */
 exports.getAll = async (req, res) => {
   try {
+    // 🔄 Actualizar estados automáticamente ANTES de consultar
+    await actualizarEstadosVencidos();
+
     const periodos = await prisma.periodoSiembra.findMany({
       include: {
         parcela: {
@@ -57,6 +98,9 @@ exports.getAll = async (req, res) => {
  */
 exports.getActivos = async (req, res) => {
   try {
+    // 🔄 Actualizar estados automáticamente ANTES de consultar
+    await actualizarEstadosVencidos();
+
     const periodosActivos = await prisma.periodoSiembra.findMany({
       where: { estado: 'En Curso' },
       include: {
@@ -101,7 +145,6 @@ exports.getActivos = async (req, res) => {
   }
 };
 
-// ... El resto de las funciones (getById, create, update, etc.) quedan igual
 /**
  * Obtener un período por ID
  * GET /api/periodos-siembra/:id
@@ -109,6 +152,9 @@ exports.getActivos = async (req, res) => {
 exports.getById = async (req, res) => {
   try {
     const { id } = req.params;
+
+    // 🔄 Actualizar estados antes de consultar
+    await actualizarEstadosVencidos();
 
     const periodo = await prisma.periodoSiembra.findUnique({
       where: { id: parseInt(id) },
@@ -390,6 +436,9 @@ exports.getPorParcela = async (req, res) => {
   try {
     const { parcelaId } = req.params;
 
+    // 🔄 Actualizar estados antes de consultar
+    await actualizarEstadosVencidos();
+
     const periodos = await prisma.periodoSiembra.findMany({
       where: { parcelaId: parseInt(parcelaId) },
       include: {
@@ -445,7 +494,7 @@ exports.getEstadisticas = async (req, res) => {
     const fin = new Date(periodo.fechaCosechaEsperada);
     const totalDias = (fin - inicio) / (1000 * 60 * 60 * 24);
     const diasTranscurridos = (hoy - inicio) / (1000 * 60 * 60 * 24);
-    const progreso = Math.min(Math.round((diasTranscurridos / totalDias) * 100), 100);
+    const progreso = Math.min(Math.max(Math.round((diasTranscurridos / totalDias) * 100), 0), 100);
 
     res.json({
       totalAplicaciones,

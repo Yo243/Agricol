@@ -143,14 +143,15 @@
         </div>
       }
       <!-- Gráficas -->
-      @if (chartConsumoOptions.series && chartCostosOptions.series) {
+      @if (chartConsumoOptions && chartCostosOptions) {
         <div class="charts-container">
+          <!-- Consumo por Cultivo -->
           <div class="chart-card">
             <div class="chart-header">
-              <h3 class="chart-title">Consumo de Insumos</h3>
+              <h3 class="chart-title">Consumo por Cultivo</h3>
             </div>
             <div class="chart-wrapper">
-              @if (chartConsumoOptions.series) {
+              @if (chartConsumoOptions.series && chartConsumoOptions.series.length > 0) {
                 <apx-chart
                   [series]="chartConsumoOptions.series"
                   [chart]="chartConsumoOptions.chart!"
@@ -160,17 +161,17 @@
                   [title]="chartConsumoOptions.title!"
                   [colors]="chartConsumoOptions.colors!"
                   [plotOptions]="chartConsumoOptions.plotOptions!"
-                  [tooltip]="chartConsumoOptions.tooltip!"
                 ></apx-chart>
               }
             </div>
           </div>
+          <!-- Costos Mensuales -->
           <div class="chart-card">
             <div class="chart-header">
-              <h3 class="chart-title">Evolución de Costos</h3>
+              <h3 class="chart-title">Costos Mensuales</h3>
             </div>
             <div class="chart-wrapper">
-              @if (chartCostosOptions.series) {
+              @if (chartCostosOptions.series && chartCostosOptions.series.length > 0) {
                 <apx-chart
                   [series]="chartCostosOptions.series"
                   [chart]="chartCostosOptions.chart!"
@@ -188,7 +189,7 @@
           </div>
         </div>
       }
-      <!-- Períodos de Siembra Activos -->
+      <!-- Períodos de Siembra Activos - CORREGIDO -->
       @if (dashboardData.periodosActivos) {
         <div class="section-card">
           <div class="section-header">
@@ -198,30 +199,33 @@
               </svg>
               <h2 class="section-title">Períodos de Siembra Activos</h2>
             </div>
-            <button class="btn-section-action" routerLink="/periodos-siembra/nuevo">
+            <!-- BOTÓN CAMBIADO: Va a la lista de períodos -->
+            <button class="btn-section-action" routerLink="/periodos-siembra">
               <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"/>
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"/>
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z"/>
               </svg>
-              <span>Nuevo Período</span>
+              <span>Ver Todos</span>
             </button>
           </div>
-          <!-- Empty State -->
+          <!-- Empty State - CORREGIDO -->
           @if (!dashboardData.periodosActivos || dashboardData.periodosActivos.length === 0) {
             <div class="empty-state">
               <svg class="empty-icon" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 21a4 4 0 01-4-4V5a2 2 0 012-2h4a2 2 0 012 2v12a4 4 0 01-4 4zm0 0h12a2 2 0 002-2v-4a2 2 0 00-2-2h-2.343M11 7.343l1.657-1.657a2 2 0 012.828 0l2.829 2.829a2 2 0 010 2.828l-8.486 8.485M7 17h.01"/>
               </svg>
               <h3 class="empty-title">No hay períodos de siembra activos</h3>
-              <p class="empty-description">Inicia un nuevo período para comenzar a dar seguimiento a tus cultivos</p>
-              <button class="btn-empty-action" routerLink="/periodos-siembra/nuevo">
+              <p class="empty-description">Los períodos de siembra se crean desde el módulo de Parcelas</p>
+              <!-- BOTÓN CAMBIADO: Ahora va a Parcelas -->
+              <button class="btn-empty-action" routerLink="/parcelas">
                 <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"/>
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 20l-5.447-2.724A1 1 0 013 16.382V5.618a1 1 0 011.447-.894L9 7m0 13l6-3m-6 3V7m6 10l4.553 2.276A1 1 0 0021 18.382V7.618a1 1 0 00-.553-.894L15 4m0 13V4m0 0L9 7"/>
                 </svg>
-                <span>Crear Primer Período</span>
+                <span>Ir a Parcelas</span>
               </button>
             </div>
           }
-          <!-- Grid de Períodos -->
+          <!-- Grid de Períodos - NAVEGACIÓN SIN CAMBIOS -->
           @if (dashboardData.periodosActivos && dashboardData.periodosActivos.length > 0) {
             <div class="periodos-grid">
               @for (periodo of dashboardData.periodosActivos; track periodo) {
@@ -257,7 +261,8 @@
                       <div class="progress-fill" [style.width.%]="periodo.progreso"></div>
                     </div>
                   </div>
-                  <button class="btn-periodo-detail" [routerLink]="['/periodos-siembra', periodo.id]">
+                  <!-- NAVEGACIÓN: Va al detalle del período -->
+                  <button class="btn-periodo-detail" (click)="verDetallePeriodo(periodo.id)">
                     <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                       <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"/>
                       <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z"/>

@@ -122,6 +122,13 @@ export const routes: Routes = [
             (m) => m.PeriodoSiembraCreateComponent
           )
       },
+      {
+        path: 'periodos-siembra/:id',
+        loadComponent: () =>
+          import('./modules/reportes/pages/periodo-siembra-detail/periodo-siembra-detail.component')
+          .then(m => m.PeriodoSiembraDetailComponent)
+     },
+
       // =========================================================
 
       // ==================== MÓDULO DE USUARIOS ====================

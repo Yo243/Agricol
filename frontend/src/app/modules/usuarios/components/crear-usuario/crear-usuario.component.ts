@@ -19,26 +19,22 @@ export class CrearUsuarioComponent implements OnInit {
   private router = inject(Router);
   private auth = inject(AuthService);
 
-  // Datos del formulario
-  formData: {
-    name: string;
-    email: string;
-    password: string;
-    role: RolUsuario;
-    activo: boolean;
-  } = {
+  // MODAL de confirmación al cancelar
+  confirmCancelVisible = false;
+
+  formData = {
     name: '',
     email: '',
     password: '',
-    role: RolUsuario.USER,  // ✅ Usar el enum
+    role: RolUsuario.USER,
     activo: true
   };
 
   loading = false;
   errorMessage = '';
+  submitted = false;
 
   ngOnInit() {
-    // Verificar que el usuario actual sea admin
     const currentUser = this.auth.getCurrentUser();
 
     if (!currentUser || currentUser.role !== 'admin') {
@@ -46,104 +42,85 @@ export class CrearUsuarioComponent implements OnInit {
     }
   }
 
-  /**
-   * Crea un nuevo usuario
-   */
   crear() {
-    // Limpiar mensaje de error previo
+    this.submitted = true;
     this.errorMessage = '';
 
-    // Validaciones básicas
+    // Validaciones
     if (!this.formData.name.trim()) {
-      this.errorMessage = 'El nombre es requerido';
+      this.errorMessage = 'El nombre es obligatorio';
       return;
     }
 
     if (!this.formData.email.trim()) {
-      this.errorMessage = 'El correo electrónico es requerido';
+      this.errorMessage = 'El correo electrónico es obligatorio';
+      return;
+    }
+
+    if (!this.validateEmail(this.formData.email)) {
+      this.errorMessage = 'El correo no tiene un formato válido';
       return;
     }
 
     if (!this.formData.password || this.formData.password.length < 6) {
-      this.errorMessage = 'La contraseña debe tener al menos 6 caracteres';
-      return;
-    }
-
-    // Validar formato de email
-    if (!this.validateEmail(this.formData.email)) {
-      this.errorMessage = 'El formato del correo electrónico no es válido';
+      this.errorMessage = 'La contraseña debe tener mínimo 6 caracteres';
       return;
     }
 
     this.loading = true;
 
-    // Crear el DTO para enviar al backend
     const payload: CreateUsuarioDto = {
       name: this.formData.name.trim(),
       email: this.formData.email.trim().toLowerCase(),
       password: this.formData.password,
       role: this.formData.role
-      // ✅ NOTA: activo no está en CreateUsuarioDto, se maneja en el backend con valor por defecto
     };
 
-    console.log('Creando usuario:', payload);
-
     this.userService.crearUsuario(payload).subscribe({
-      next: (response) => {
-        console.log('Usuario creado exitosamente:', response);
+      next: () => {
         this.loading = false;
         this.router.navigate(['/usuarios']);
       },
       error: (err) => {
         this.loading = false;
-        
-        // Manejo de errores específicos
+
         if (err?.error?.message) {
           this.errorMessage = err.error.message;
-        } else if (err?.error?.error) {
-          this.errorMessage = err.error.error;
-        } else if (err?.status === 409) {
-          this.errorMessage = 'Ya existe un usuario con este correo electrónico';
-        } else if (err?.status === 400) {
-          this.errorMessage = 'Los datos proporcionados no son válidos';
         } else {
-          this.errorMessage = 'Error al crear el usuario. Por favor, intenta nuevamente.';
+          this.errorMessage = 'No se pudo crear el usuario';
         }
-        
-        console.error('Error al crear usuario:', err);
       }
     });
   }
 
-  /**
-   * Cancela la creación y vuelve a la lista
-   */
   cancelar() {
-    // Si hay datos en el formulario, confirmar antes de cancelar
     if (this.hasUnsavedChanges()) {
-      if (confirm('¿Estás seguro de cancelar? Los datos ingresados se perderán.')) {
-        this.router.navigate(['/usuarios']);
-      }
-    } else {
-      this.router.navigate(['/usuarios']);
+      this.confirmCancelVisible = true;
+      return;
     }
+
+    this.router.navigate(['/usuarios']);
   }
 
-  /**
-   * Verifica si hay cambios sin guardar
-   */
-  private hasUnsavedChanges(): boolean {
+  confirmarCancelar() {
+    this.confirmCancelVisible = false;
+    this.router.navigate(['/usuarios']);
+  }
+
+  cerrarCancelar() {
+    this.confirmCancelVisible = false;
+  }
+
+  hasUnsavedChanges(): boolean {
     return !!(
-      this.formData.name.trim() || 
-      this.formData.email.trim() || 
+      this.formData.name ||
+      this.formData.email ||
       this.formData.password
     );
   }
 
-  /**
-   * Valida formato de email
-   */
-  private validateEmail(email: string): boolean {
+  // 🔥 HAZLA PÚBLICA!!
+  validateEmail(email: string): boolean {
     const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
     return emailRegex.test(email);
   }

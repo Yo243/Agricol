@@ -20,6 +20,11 @@ export class PeriodosSiembraService {
     return this.http.get(`${this.apiUrl}/${id}`);
   }
 
+  // ✅ Alias para que funcione tu componente sin errores
+  getPeriodoById(id: number): Observable<any> {
+    return this.getById(id);
+  }
+
   create(data: any): Observable<any> {
     return this.http.post(this.apiUrl, data);
   }
