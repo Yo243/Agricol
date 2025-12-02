@@ -1,7 +1,7 @@
 // src/app/modules/parcela/components/form-periodo/form-periodo.ts
 
 import { Component, EventEmitter, Input, OnInit, Output, inject } from '@angular/core';
-import { CommonModule } from '@angular/common';
+
 import { FormsModule } from '@angular/forms';
 import { ParcelasService } from '../../services/parcela.service';
 import { Parcela, Cultivo, CreatePeriodoSiembraDto } from '../../../../models/parcela.model';
@@ -9,7 +9,7 @@ import { Parcela, Cultivo, CreatePeriodoSiembraDto } from '../../../../models/pa
 @Component({
   selector: 'app-form-periodo',
   standalone: true,
-  imports: [CommonModule, FormsModule],
+  imports: [FormsModule],
   templateUrl: './form-periodo.html',
   styleUrls: ['./form-periodo.css']
 })

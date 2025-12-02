@@ -1,300 +1,299 @@
 <!-- Detalle de Parcela - Mejorado y Responsive -->
 
-<div class="page-container" *ngIf="parcela">
-
-  <!-- Header -->
-  <div class="page-header-detail">
-    
-    <!-- Back Button + Title -->
-    <div class="header-top">
-      <a routerLink="/parcelas" class="btn-back">
-        <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 19l-7-7m0 0l7-7m-7 7h18"/>
-        </svg>
-      </a>
-      <div class="header-title-section">
-        <h1 class="detail-title">{{ parcela.nombre }}</h1>
-        <span class="detail-code">{{ parcela.codigo }}</span>
-      </div>
-      <span class="status-badge" [ngClass]="getEstadoColor(parcela.estado)">
-        {{ parcela.estado }}
-      </span>
-    </div>
-
-    <!-- Info Card -->
-    <div class="info-card">
-      <div class="info-grid">
-        
-        <div class="info-item">
-          <svg class="info-icon" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 5a1 1 0 011-1h14a1 1 0 011 1v2a1 1 0 01-1 1H5a1 1 0 01-1-1V5zM4 13a1 1 0 011-1h6a1 1 0 011 1v6a1 1 0 01-1 1H5a1 1 0 01-1-1v-6zM16 13a1 1 0 011-1h2a1 1 0 011 1v6a1 1 0 01-1 1h-2a1 1 0 01-1-1v-6z"/>
+@if (parcela) {
+  <div class="page-container">
+    <!-- Header -->
+    <div class="page-header-detail">
+      <!-- Back Button + Title -->
+      <div class="header-top">
+        <a routerLink="/parcelas" class="btn-back">
+          <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 19l-7-7m0 0l7-7m-7 7h18"/>
           </svg>
-          <div>
-            <span class="info-label">Superficie</span>
-            <span class="info-value">{{ formatearHectareas(parcela.superficieHa) }}</span>
-          </div>
+        </a>
+        <div class="header-title-section">
+          <h1 class="detail-title">{{ parcela.nombre }}</h1>
+          <span class="detail-code">{{ parcela.codigo }}</span>
         </div>
-
-        <div class="info-item" *ngIf="parcela.ubicacion">
-          <svg class="info-icon" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z"/>
-            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 11a3 3 0 11-6 0 3 3 0 016 0z"/>
-          </svg>
-          <div>
-            <span class="info-label">Ubicación</span>
-            <span class="info-value">{{ parcela.ubicacion }}</span>
-          </div>
-        </div>
-
-        <div class="info-item" *ngIf="parcela.tipoSuelo">
-          <svg class="info-icon" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 21a4 4 0 01-4-4V5a2 2 0 012-2h4a2 2 0 012 2v12a4 4 0 01-4 4zm0 0h12a2 2 0 002-2v-4a2 2 0 00-2-2h-2.343M11 7.343l1.657-1.657a2 2 0 012.828 0l2.829 2.829a2 2 0 010 2.828l-8.486 8.485M7 17h.01"/>
-          </svg>
-          <div>
-            <span class="info-label">Tipo de Suelo</span>
-            <span class="info-value">{{ parcela.tipoSuelo }}</span>
-          </div>
-        </div>
-
-        <div class="info-item" *ngIf="parcela.sistemaRiego">
-          <svg class="info-icon" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 8h14M5 8a2 2 0 110-4h14a2 2 0 110 4M5 8v10a2 2 0 002 2h10a2 2 0 002-2V8m-9 4h4"/>
-          </svg>
-          <div>
-            <span class="info-label">Sistema de Riego</span>
-            <span class="info-value">{{ parcela.sistemaRiego }}</span>
-          </div>
-        </div>
-
+        <span class="status-badge" [ngClass]="getEstadoColor(parcela.estado)">
+          {{ parcela.estado }}
+        </span>
       </div>
-    </div>
-
-    <!-- Estadísticas -->
-    <div class="stats-grid">
-      
-      <div class="stat-card stat-green">
-        <svg class="stat-icon" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 21a4 4 0 01-4-4V5a2 2 0 012-2h4a2 2 0 012 2v12a4 4 0 01-4 4zm0 0h12a2 2 0 002-2v-4a2 2 0 00-2-2h-2.343M11 7.343l1.657-1.657a2 2 0 012.828 0l2.829 2.829a2 2 0 010 2.828l-8.486 8.485M7 17h.01"/>
-        </svg>
-        <div class="stat-content">
-          <span class="stat-label">Períodos Activos</span>
-          <span class="stat-value">{{ periodosActivos }}</span>
-        </div>
-      </div>
-
-      <div class="stat-card stat-blue">
-        <svg class="stat-icon" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M20 7l-8-4-8 4m16 0l-8 4m8-4v10l-8 4m0-10L4 7m8 4v10M4 7v10l8 4"/>
-        </svg>
-        <div class="stat-content">
-          <span class="stat-label">Total Aplicaciones</span>
-          <span class="stat-value">{{ totalAplicaciones }}</span>
-        </div>
-      </div>
-
-      <div class="stat-card stat-yellow">
-        <svg class="stat-icon" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8c-1.657 0-3 .895-3 2s1.343 2 3 2 3 .895 3 2-1.343 2-3 2m0-8c1.11 0 2.08.402 2.599 1M12 8V7m0 1v8m0 0v1m0-1c-1.11 0-2.08-.402-2.599-1M21 12a9 9 0 11-18 0 9 9 0 0118 0z"/>
-        </svg>
-        <div class="stat-content">
-          <span class="stat-label">Costo Total</span>
-          <span class="stat-value">{{ formatearCosto(costoTotal) }}</span>
-        </div>
-      </div>
-
-    </div>
-
-    <!-- Acciones Rápidas -->
-    <div class="actions-row">
-      <button
-        (click)="abrirFormPeriodo()"
-        class="btn-action btn-action-green">
-        <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 21a4 4 0 01-4-4V5a2 2 0 012-2h4a2 2 0 012 2v12a4 4 0 01-4 4zm0 0h12a2 2 0 002-2v-4a2 2 0 00-2-2h-2.343M11 7.343l1.657-1.657a2 2 0 012.828 0l2.829 2.829a2 2 0 010 2.828l-8.486 8.485M7 17h.01"/>
-        </svg>
-        <span>Iniciar Período</span>
-      </button>
-      <button
-        (click)="abrirFormAplicacion()"
-        [disabled]="periodosActivos === 0"
-        class="btn-action btn-action-blue">
-        <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M20 7l-8-4-8 4m16 0l-8 4m8-4v10l-8 4m0-10L4 7m8 4v10M4 7v10l8 4"/>
-        </svg>
-        <span>Registrar Aplicación</span>
-      </button>
-    </div>
-
-  </div>
-
-  <!-- Tabs Container -->
-  <div class="tabs-container">
-    
-    <!-- Tab Headers -->
-    <div class="tabs-header">
-      <button
-        (click)="cambiarTab('periodos')"
-        [class.tab-active]="tabActiva === 'periodos'"
-        class="tab-button">
-        <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z"/>
-        </svg>
-        <span>Períodos de Siembra</span>
-      </button>
-      <button
-        (click)="cambiarTab('aplicaciones')"
-        [class.tab-active]="tabActiva === 'aplicaciones'"
-        class="tab-button">
-        <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M20 7l-8-4-8 4m16 0l-8 4m8-4v10l-8 4m0-10L4 7m8 4v10M4 7v10l8 4"/>
-        </svg>
-        <span>Aplicaciones</span>
-      </button>
-      <button
-        (click)="cambiarTab('trazabilidad')"
-        [class.tab-active]="tabActiva === 'trazabilidad'"
-        class="tab-button">
-        <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z"/>
-        </svg>
-        <span>Trazabilidad</span>
-      </button>
-    </div>
-
-    <!-- Tab Content -->
-    <div class="tabs-content">
-      
-      <!-- Períodos Tab -->
-      <div *ngIf="tabActiva === 'periodos'" class="tab-panel">
-        
-        <!-- Empty State -->
-        <div *ngIf="periodos.length === 0" class="empty-state">
-          <svg class="empty-icon" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 21a4 4 0 01-4-4V5a2 2 0 012-2h4a2 2 0 012 2v12a4 4 0 01-4 4zm0 0h12a2 2 0 002-2v-4a2 2 0 00-2-2h-2.343M11 7.343l1.657-1.657a2 2 0 012.828 0l2.829 2.829a2 2 0 010 2.828l-8.486 8.485M7 17h.01"/>
-          </svg>
-          <h3 class="empty-title">No hay períodos de siembra</h3>
-          <p class="empty-description">Inicia tu primer período de siembra para comenzar a registrar las actividades de esta parcela</p>
-        </div>
-
-        <!-- Lista de Períodos -->
-        <div *ngIf="periodos.length > 0" class="items-list">
-          <div *ngFor="let periodo of periodos" class="item-card">
-            
-            <div class="item-header">
-              <div class="item-header-left">
-                <h3 class="item-title">{{ typeof periodo.cultivo === 'string' ? periodo.cultivo : periodo.cultivo?.nombre }}</h3>
-                <span class="item-date">{{ formatearFecha(periodo.fechaInicio) }}</span>
-              </div>
-              <span class="item-badge" [ngClass]="getEstadoPeriodoColor(periodo.estado)">
-                {{ periodo.estado }}
-              </span>
+      <!-- Info Card -->
+      <div class="info-card">
+        <div class="info-grid">
+          <div class="info-item">
+            <svg class="info-icon" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 5a1 1 0 011-1h14a1 1 0 011 1v2a1 1 0 01-1 1H5a1 1 0 01-1-1V5zM4 13a1 1 0 011-1h6a1 1 0 011 1v6a1 1 0 01-1 1H5a1 1 0 01-1-1v-6zM16 13a1 1 0 011-1h2a1 1 0 011 1v6a1 1 0 01-1 1h-2a1 1 0 01-1-1v-6z"/>
+            </svg>
+            <div>
+              <span class="info-label">Superficie</span>
+              <span class="info-value">{{ formatearHectareas(parcela.superficieHa) }}</span>
             </div>
-
-            <div class="item-stats">
-              <div class="item-stat">
-                <span class="item-stat-label">Hectáreas</span>
-                <span class="item-stat-value">{{ formatearHectareas(periodo.hectareasSembradas) }}</span>
-              </div>
-              <div class="item-stat">
-                <span class="item-stat-label">Rend. Esperado</span>
-                <span class="item-stat-value">{{ periodo.rendimientoEsperado || 0 }} ton</span>
-              </div>
-              <div class="item-stat" *ngIf="periodo.rendimientoReal">
-                <span class="item-stat-label">Rend. Real</span>
-                <span class="item-stat-value">{{ periodo.rendimientoReal }} ton</span>
-              </div>
-              <div class="item-stat">
-                <span class="item-stat-label">Costo Total</span>
-                <span class="item-stat-value item-stat-cost">{{ formatearCosto(periodo.costoTotal) }}</span>
+          </div>
+          @if (parcela.ubicacion) {
+            <div class="info-item">
+              <svg class="info-icon" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z"/>
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 11a3 3 0 11-6 0 3 3 0 016 0z"/>
+              </svg>
+              <div>
+                <span class="info-label">Ubicación</span>
+                <span class="info-value">{{ parcela.ubicacion }}</span>
               </div>
             </div>
-
+          }
+          @if (parcela.tipoSuelo) {
+            <div class="info-item">
+              <svg class="info-icon" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 21a4 4 0 01-4-4V5a2 2 0 012-2h4a2 2 0 012 2v12a4 4 0 01-4 4zm0 0h12a2 2 0 002-2v-4a2 2 0 00-2-2h-2.343M11 7.343l1.657-1.657a2 2 0 012.828 0l2.829 2.829a2 2 0 010 2.828l-8.486 8.485M7 17h.01"/>
+              </svg>
+              <div>
+                <span class="info-label">Tipo de Suelo</span>
+                <span class="info-value">{{ parcela.tipoSuelo }}</span>
+              </div>
+            </div>
+          }
+          @if (parcela.sistemaRiego) {
+            <div class="info-item">
+              <svg class="info-icon" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 8h14M5 8a2 2 0 110-4h14a2 2 0 110 4M5 8v10a2 2 0 002 2h10a2 2 0 002-2V8m-9 4h4"/>
+              </svg>
+              <div>
+                <span class="info-label">Sistema de Riego</span>
+                <span class="info-value">{{ parcela.sistemaRiego }}</span>
+              </div>
+            </div>
+          }
+        </div>
+      </div>
+      <!-- Estadísticas -->
+      <div class="stats-grid">
+        <div class="stat-card stat-green">
+          <svg class="stat-icon" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 21a4 4 0 01-4-4V5a2 2 0 012-2h4a2 2 0 012 2v12a4 4 0 01-4 4zm0 0h12a2 2 0 002-2v-4a2 2 0 00-2-2h-2.343M11 7.343l1.657-1.657a2 2 0 012.828 0l2.829 2.829a2 2 0 010 2.828l-8.486 8.485M7 17h.01"/>
+          </svg>
+          <div class="stat-content">
+            <span class="stat-label">Períodos Activos</span>
+            <span class="stat-value">{{ periodosActivos }}</span>
           </div>
         </div>
-
-      </div>
-
-      <!-- Aplicaciones Tab -->
-      <div *ngIf="tabActiva === 'aplicaciones'" class="tab-panel">
-        
-        <!-- Empty State -->
-        <div *ngIf="aplicaciones.length === 0" class="empty-state">
-          <svg class="empty-icon" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+        <div class="stat-card stat-blue">
+          <svg class="stat-icon" fill="none" stroke="currentColor" viewBox="0 0 24 24">
             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M20 7l-8-4-8 4m16 0l-8 4m8-4v10l-8 4m0-10L4 7m8 4v10M4 7v10l8 4"/>
           </svg>
-          <h3 class="empty-title">No hay aplicaciones registradas</h3>
-          <p class="empty-description">Registra las aplicaciones de insumos realizadas en esta parcela</p>
-        </div>
-
-        <!-- Lista de Aplicaciones -->
-        <div *ngIf="aplicaciones.length > 0" class="items-list">
-          <div *ngFor="let aplicacion of aplicaciones" class="item-card">
-            
-            <div class="item-header">
-              <div class="item-header-left">
-                <h3 class="item-title">{{ aplicacion.tipoAplicacion }}</h3>
-                <span class="item-date">{{ formatearFecha(aplicacion.fecha) }}</span>
-              </div>
-              <span class="item-badge item-badge-blue">
-                {{ formatearHectareas(aplicacion.hectareasAplicadas) }}
-              </span>
-            </div>
-
-            <div class="insumos-section">
-              <span class="insumos-title">Insumos aplicados:</span>
-              <ul class="insumos-list">
-                <li *ngFor="let insumo of aplicacion.insumos">
-                  {{ insumo.insumo?.nombre }}: {{ insumo.cantidad }} {{ insumo.unidadMedida }}
-                </li>
-              </ul>
-            </div>
-
-            <div class="item-footer">
-              <span class="item-responsible" *ngIf="aplicacion.responsable">
-                <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z"/>
-                </svg>
-                {{ aplicacion.responsable }}
-              </span>
-              <span class="item-cost">{{ formatearCosto(aplicacion.costoTotal) }}</span>
-            </div>
-
+          <div class="stat-content">
+            <span class="stat-label">Total Aplicaciones</span>
+            <span class="stat-value">{{ totalAplicaciones }}</span>
           </div>
         </div>
-
+        <div class="stat-card stat-yellow">
+          <svg class="stat-icon" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8c-1.657 0-3 .895-3 2s1.343 2 3 2 3 .895 3 2-1.343 2-3 2m0-8c1.11 0 2.08.402 2.599 1M12 8V7m0 1v8m0 0v1m0-1c-1.11 0-2.08-.402-2.599-1M21 12a9 9 0 11-18 0 9 9 0 0118 0z"/>
+          </svg>
+          <div class="stat-content">
+            <span class="stat-label">Costo Total</span>
+            <span class="stat-value">{{ formatearCosto(costoTotal) }}</span>
+          </div>
+        </div>
       </div>
-
-      <!-- Trazabilidad Tab -->
-      <div *ngIf="tabActiva === 'trazabilidad'" class="tab-panel">
-        <app-trazabilidad [parcelaId]="parcela.id"></app-trazabilidad>
+      <!-- Acciones Rápidas -->
+      <div class="actions-row">
+        <button
+          (click)="abrirFormPeriodo()"
+          class="btn-action btn-action-green">
+          <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 21a4 4 0 01-4-4V5a2 2 0 012-2h4a2 2 0 012 2v12a4 4 0 01-4 4zm0 0h12a2 2 0 002-2v-4a2 2 0 00-2-2h-2.343M11 7.343l1.657-1.657a2 2 0 012.828 0l2.829 2.829a2 2 0 010 2.828l-8.486 8.485M7 17h.01"/>
+          </svg>
+          <span>Iniciar Período</span>
+        </button>
+        <button
+          (click)="abrirFormAplicacion()"
+          [disabled]="periodosActivos === 0"
+          class="btn-action btn-action-blue">
+          <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M20 7l-8-4-8 4m16 0l-8 4m8-4v10l-8 4m0-10L4 7m8 4v10M4 7v10l8 4"/>
+          </svg>
+          <span>Registrar Aplicación</span>
+        </button>
       </div>
-
     </div>
-
+    <!-- Tabs Container -->
+    <div class="tabs-container">
+      <!-- Tab Headers -->
+      <div class="tabs-header">
+        <button
+          (click)="cambiarTab('periodos')"
+          [class.tab-active]="tabActiva === 'periodos'"
+          class="tab-button">
+          <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z"/>
+          </svg>
+          <span>Períodos de Siembra</span>
+        </button>
+        <button
+          (click)="cambiarTab('aplicaciones')"
+          [class.tab-active]="tabActiva === 'aplicaciones'"
+          class="tab-button">
+          <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M20 7l-8-4-8 4m16 0l-8 4m8-4v10l-8 4m0-10L4 7m8 4v10M4 7v10l8 4"/>
+          </svg>
+          <span>Aplicaciones</span>
+        </button>
+        <button
+          (click)="cambiarTab('trazabilidad')"
+          [class.tab-active]="tabActiva === 'trazabilidad'"
+          class="tab-button">
+          <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z"/>
+          </svg>
+          <span>Trazabilidad</span>
+        </button>
+      </div>
+      <!-- Tab Content -->
+      <div class="tabs-content">
+        <!-- Períodos Tab -->
+        @if (tabActiva === 'periodos') {
+          <div class="tab-panel">
+            <!-- Empty State -->
+            @if (periodos.length === 0) {
+              <div class="empty-state">
+                <svg class="empty-icon" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 21a4 4 0 01-4-4V5a2 2 0 012-2h4a2 2 0 012 2v12a4 4 0 01-4 4zm0 0h12a2 2 0 002-2v-4a2 2 0 00-2-2h-2.343M11 7.343l1.657-1.657a2 2 0 012.828 0l2.829 2.829a2 2 0 010 2.828l-8.486 8.485M7 17h.01"/>
+                </svg>
+                <h3 class="empty-title">No hay períodos de siembra</h3>
+                <p class="empty-description">Inicia tu primer período de siembra para comenzar a registrar las actividades de esta parcela</p>
+              </div>
+            }
+            <!-- Lista de Períodos -->
+            @if (periodos.length > 0) {
+              <div class="items-list">
+                @for (periodo of periodos; track periodo) {
+                  <div class="item-card">
+                    <div class="item-header">
+                      <div class="item-header-left">
+                        <h3 class="item-title">{{ typeof periodo.cultivo === 'string' ? periodo.cultivo : periodo.cultivo?.nombre }}</h3>
+                        <span class="item-date">{{ formatearFecha(periodo.fechaInicio) }}</span>
+                      </div>
+                      <span class="item-badge" [ngClass]="getEstadoPeriodoColor(periodo.estado)">
+                        {{ periodo.estado }}
+                      </span>
+                    </div>
+                    <div class="item-stats">
+                      <div class="item-stat">
+                        <span class="item-stat-label">Hectáreas</span>
+                        <span class="item-stat-value">{{ formatearHectareas(periodo.hectareasSembradas) }}</span>
+                      </div>
+                      <div class="item-stat">
+                        <span class="item-stat-label">Rend. Esperado</span>
+                        <span class="item-stat-value">{{ periodo.rendimientoEsperado || 0 }} ton</span>
+                      </div>
+                      @if (periodo.rendimientoReal) {
+                        <div class="item-stat">
+                          <span class="item-stat-label">Rend. Real</span>
+                          <span class="item-stat-value">{{ periodo.rendimientoReal }} ton</span>
+                        </div>
+                      }
+                      <div class="item-stat">
+                        <span class="item-stat-label">Costo Total</span>
+                        <span class="item-stat-value item-stat-cost">{{ formatearCosto(periodo.costoTotal) }}</span>
+                      </div>
+                    </div>
+                  </div>
+                }
+              </div>
+            }
+          </div>
+        }
+        <!-- Aplicaciones Tab -->
+        @if (tabActiva === 'aplicaciones') {
+          <div class="tab-panel">
+            <!-- Empty State -->
+            @if (aplicaciones.length === 0) {
+              <div class="empty-state">
+                <svg class="empty-icon" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M20 7l-8-4-8 4m16 0l-8 4m8-4v10l-8 4m0-10L4 7m8 4v10M4 7v10l8 4"/>
+                </svg>
+                <h3 class="empty-title">No hay aplicaciones registradas</h3>
+                <p class="empty-description">Registra las aplicaciones de insumos realizadas en esta parcela</p>
+              </div>
+            }
+            <!-- Lista de Aplicaciones -->
+            @if (aplicaciones.length > 0) {
+              <div class="items-list">
+                @for (aplicacion of aplicaciones; track aplicacion) {
+                  <div class="item-card">
+                    <div class="item-header">
+                      <div class="item-header-left">
+                        <h3 class="item-title">{{ aplicacion.tipoAplicacion }}</h3>
+                        <span class="item-date">{{ formatearFecha(aplicacion.fecha) }}</span>
+                      </div>
+                      <span class="item-badge item-badge-blue">
+                        {{ formatearHectareas(aplicacion.hectareasAplicadas) }}
+                      </span>
+                    </div>
+                    <div class="insumos-section">
+                      <span class="insumos-title">Insumos aplicados:</span>
+                      <ul class="insumos-list">
+                        @for (insumo of aplicacion.insumos; track insumo) {
+                          <li>
+                            {{ insumo.insumo?.nombre }}: {{ insumo.cantidad }} {{ insumo.unidadMedida }}
+                          </li>
+                        }
+                      </ul>
+                    </div>
+                    <div class="item-footer">
+                      @if (aplicacion.responsable) {
+                        <span class="item-responsible">
+                          <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z"/>
+                          </svg>
+                          {{ aplicacion.responsable }}
+                        </span>
+                      }
+                      <span class="item-cost">{{ formatearCosto(aplicacion.costoTotal) }}</span>
+                    </div>
+                  </div>
+                }
+              </div>
+            }
+          </div>
+        }
+        <!-- Trazabilidad Tab -->
+        @if (tabActiva === 'trazabilidad') {
+          <div class="tab-panel">
+            <app-trazabilidad [parcelaId]="parcela.id"></app-trazabilidad>
+          </div>
+        }
+      </div>
+    </div>
   </div>
-
-</div>
+}
 
 <!-- Loading -->
-<div *ngIf="loading" class="loading-page">
-  <svg class="loading-spinner" fill="none" viewBox="0 0 24 24">
-    <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
-    <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
-  </svg>
-  <p class="loading-text">Cargando detalles...</p>
-</div>
+@if (loading) {
+  <div class="loading-page">
+    <svg class="loading-spinner" fill="none" viewBox="0 0 24 24">
+      <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
+      <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+    </svg>
+    <p class="loading-text">Cargando detalles...</p>
+  </div>
+}
 
 <!-- Modales -->
-<app-form-periodo
-  *ngIf="mostrarFormPeriodo"
-  [parcelaId]="parcela?.id"
-  (onClose)="cerrarFormPeriodo()"
-  (onSave)="cerrarFormPeriodo()">
-</app-form-periodo>
+@if (mostrarFormPeriodo) {
+  <app-form-periodo
+    [parcelaId]="parcela?.id"
+    (onClose)="cerrarFormPeriodo()"
+    (onSave)="cerrarFormPeriodo()">
+  </app-form-periodo>
+}
 
-<app-form-aplicacion
-  *ngIf="mostrarFormAplicacion"
-  [parcelaId]="parcela?.id"
-  (onClose)="cerrarFormAplicacion()"
-  (onSave)="cerrarFormAplicacion()">
-</app-form-aplicacion>
+@if (mostrarFormAplicacion) {
+  <app-form-aplicacion
+    [parcelaId]="parcela?.id"
+    (onClose)="cerrarFormAplicacion()"
+    (onSave)="cerrarFormAplicacion()">
+  </app-form-aplicacion>
+}

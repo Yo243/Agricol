@@ -84,7 +84,7 @@
               <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"/>
             </svg>
             <span>
-              Mostrando <strong>{{ alertasFiltradas.length }}</strong> 
+              Mostrando <strong>{{ alertasFiltradas.length }}</strong>
               {{ filtroActual === 'todas' ? 'de todas las alertas' : 'alertas filtradas' }}
             </span>
           </div>
@@ -101,71 +101,71 @@
       <main class="alerts-list flex-1 overflow-y-auto">
 
         <!-- Empty State -->
-        <div *ngIf="alertasFiltradas.length === 0" class="empty-state">
-          <svg class="empty-icon" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"/>
-          </svg>
-          <h3 class="empty-title">Sin alertas activas</h3>
-          <p class="empty-description">
-            {{ filtroActual === 'todas' 
-              ? 'No hay alertas registradas en este momento.' 
+        @if (alertasFiltradas.length === 0) {
+          <div class="empty-state">
+            <svg class="empty-icon" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"/>
+            </svg>
+            <h3 class="empty-title">Sin alertas activas</h3>
+            <p class="empty-description">
+              {{ filtroActual === 'todas'
+              ? 'No hay alertas registradas en este momento.'
               : 'No hay alertas de este tipo en este momento.' }}
-          </p>
-        </div>
+            </p>
+          </div>
+        }
 
         <!-- Alertas -->
-        <div class="alerts-container" *ngIf="alertasFiltradas.length > 0">
-          <article *ngFor="let alerta of alertasFiltradas" class="alert-card" [ngClass]="[getColorAlerta(alerta.tipoAlerta), alerta.leida ? 'alert-read' : 'alert-unread']">
-            
-            <div class="alert-content">
-              
-              <!-- Icono -->
-              <div class="alert-icon">{{ getIconoAlerta(alerta.tipoAlerta) }}</div>
-
-              <!-- Información principal -->
-              <div class="alert-main">
-                <div class="alert-header">
-                  <div class="alert-title-group">
-                    <h4 class="alert-title" [ngClass]="getColorTexto(alerta.tipoAlerta)">
-                      {{ alerta.itemNombre }}
-                    </h4>
-                    <p class="alert-message">{{ alerta.mensaje }}</p>
+        @if (alertasFiltradas.length > 0) {
+          <div class="alerts-container">
+            @for (alerta of alertasFiltradas; track alerta) {
+              <article class="alert-card" [ngClass]="[getColorAlerta(alerta.tipoAlerta), alerta.leida ? 'alert-read' : 'alert-unread']">
+                <div class="alert-content">
+                  <!-- Icono -->
+                  <div class="alert-icon">{{ getIconoAlerta(alerta.tipoAlerta) }}</div>
+                  <!-- Información principal -->
+                  <div class="alert-main">
+                    <div class="alert-header">
+                      <div class="alert-title-group">
+                        <h4 class="alert-title" [ngClass]="getColorTexto(alerta.tipoAlerta)">
+                          {{ alerta.itemNombre }}
+                        </h4>
+                        <p class="alert-message">{{ alerta.mensaje }}</p>
+                      </div>
+                      <!-- Badge de prioridad -->
+                      <span class="priority-badge" [ngClass]="getPrioridadClass(alerta.prioridad)">
+                        {{ alerta.prioridad }}
+                      </span>
+                    </div>
+                    <!-- Footer de alerta -->
+                    <div class="alert-footer">
+                      <div class="alert-meta">
+                        <span class="meta-item">
+                          <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"/>
+                          </svg>
+                          {{ alerta.fecha | date:'dd/MM/yyyy HH:mm' }}
+                        </span>
+                        <span class="status-badge" [ngClass]="alerta.leida ? 'status-read' : 'status-unread'">
+                          {{ alerta.leida ? '✓ Leída' : '● No leída' }}
+                        </span>
+                      </div>
+                      <!-- Botón Marcar Leída -->
+                      @if (!alerta.leida) {
+                        <button type="button" (click)="marcarComoLeida(alerta)" [disabled]="loading" class="btn-mark-read">
+                          <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"/>
+                          </svg>
+                          <span>Marcar como leída</span>
+                        </button>
+                      }
+                    </div>
                   </div>
-
-                  <!-- Badge de prioridad -->
-                  <span class="priority-badge" [ngClass]="getPrioridadClass(alerta.prioridad)">
-                    {{ alerta.prioridad }}
-                  </span>
                 </div>
-
-                <!-- Footer de alerta -->
-                <div class="alert-footer">
-                  <div class="alert-meta">
-                    <span class="meta-item">
-                      <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"/>
-                      </svg>
-                      {{ alerta.fecha | date:'dd/MM/yyyy HH:mm' }}
-                    </span>
-
-                    <span class="status-badge" [ngClass]="alerta.leida ? 'status-read' : 'status-unread'">
-                      {{ alerta.leida ? '✓ Leída' : '● No leída' }}
-                    </span>
-                  </div>
-
-                  <!-- Botón Marcar Leída -->
-                  <button *ngIf="!alerta.leida" type="button" (click)="marcarComoLeida(alerta)" [disabled]="loading" class="btn-mark-read">
-                    <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                      <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"/>
-                    </svg>
-                    <span>Marcar como leída</span>
-                  </button>
-                </div>
-              </div>
-
-            </div>
-          </article>
-        </div>
+              </article>
+            }
+          </div>
+        }
 
       </main>
 

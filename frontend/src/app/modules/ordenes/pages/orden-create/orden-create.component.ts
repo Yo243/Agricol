@@ -13,6 +13,8 @@ import {
   OrdenDetalle
 } from '../../../../models/orden-aplicacion.model';
 
+type ConfirmAction = 'crearSinValidar' | 'crearConStockInsuficiente' | null;
+
 @Component({
   selector: 'app-orden-create',
   standalone: true,
@@ -37,6 +39,9 @@ export class OrdenCreateComponent implements OnInit {
     observaciones: ''
   };
 
+  /** String para el input date (YYYY-MM-DD) */
+  fechaAplicacionStr = '';
+
   detallesCalculados: OrdenDetalle[] = [];
   costoTotal = 0;
 
@@ -47,12 +52,23 @@ export class OrdenCreateComponent implements OnInit {
   error = '';
   success = '';
 
+  // ======== Modal de confirmación (para reemplazar confirm() feo) ========
+  confirmModalVisible = false;
+  confirmTitle = '';
+  confirmMessage = '';
+  confirmDanger = false;
+  confirmPrimaryLabel = 'Confirmar';
+  confirmAction: ConfirmAction = null;
+
   ngOnInit(): void {
     this.loadParcelas();
     this.loadRecetas();
 
     // fecha hoy por defecto
-    this.orden.fechaAplicacion = new Date();
+    const hoy = new Date();
+    hoy.setHours(0, 0, 0, 0);
+    this.orden.fechaAplicacion = hoy;
+    this.fechaAplicacionStr = hoy.toISOString().split('T')[0];
   }
 
   // ================= CARGA DE PARCELAS Y RECETAS =================
@@ -60,8 +76,6 @@ export class OrdenCreateComponent implements OnInit {
   loadParcelas(): void {
     this.ordenService.getParcelas().subscribe({
       next: (resp: any) => {
-        console.log('Parcelas (respuesta cruda):', resp);
-
         let parcelas: Parcela[] = [];
 
         if (Array.isArray(resp)) {
@@ -75,7 +89,6 @@ export class OrdenCreateComponent implements OnInit {
         }
 
         this.parcelas = parcelas.filter(p => p.activo !== false);
-        console.log('Parcelas procesadas:', this.parcelas);
       },
       error: (err: any) => {
         console.error('Error al cargar parcelas:', err);
@@ -88,8 +101,6 @@ export class OrdenCreateComponent implements OnInit {
   loadRecetas(): void {
     this.ordenService.getRecetas().subscribe({
       next: (resp: any) => {
-        console.log('Recetas (respuesta cruda):', resp);
-
         let recetas: Receta[] = [];
 
         if (Array.isArray(resp)) {
@@ -103,7 +114,6 @@ export class OrdenCreateComponent implements OnInit {
         }
 
         this.recetas = recetas.filter(r => r.activo !== false);
-        console.log('Recetas procesadas:', this.recetas);
       },
       error: (err: any) => {
         console.error('Error al cargar recetas:', err);
@@ -116,6 +126,9 @@ export class OrdenCreateComponent implements OnInit {
   // ================= LÓGICA DE RECETA / DETALLES =================
 
   onRecetaChange(): void {
+    this.error = '';
+    this.success = '';
+
     if (this.orden.recetaId === 0) {
       this.recetaSeleccionada = undefined;
       this.detallesCalculados = [];
@@ -136,7 +149,46 @@ export class OrdenCreateComponent implements OnInit {
   }
 
   onHectareasChange(): void {
+    this.error = '';
+    this.success = '';
+
+    if (this.orden.hectareasAplicadas < 0) {
+      this.orden.hectareasAplicadas = 0;
+      this.error = 'Las hectáreas no pueden ser negativas.';
+      this.detallesCalculados = [];
+      this.costoTotal = 0;
+      return;
+    }
+
+    const superficieParcela = this.getParcelaSuperficie(this.orden.parcelaId);
+    if (this.orden.parcelaId && superficieParcela > 0 &&
+        this.orden.hectareasAplicadas > superficieParcela) {
+      this.error = `Las hectáreas aplicadas (${this.orden.hectareasAplicadas} ha) no pueden ser mayores que la superficie de la parcela (${superficieParcela} ha).`;
+      this.detallesCalculados = [];
+      this.costoTotal = 0;
+      return;
+    }
+
     this.calcularDetalles();
+  }
+
+  onFechaChange(value: string): void {
+    this.fechaAplicacionStr = value;
+    this.error = '';
+    this.success = '';
+
+    if (!value) {
+      return;
+    }
+
+    const fecha = new Date(value + 'T00:00:00');
+    if (Number.isNaN(fecha.getTime())) {
+      this.error = 'Fecha de aplicación inválida.';
+      return;
+    }
+
+    // Guardamos como Date en el DTO
+    this.orden.fechaAplicacion = fecha;
   }
 
   calcularDetalles(): void {
@@ -149,10 +201,10 @@ export class OrdenCreateComponent implements OnInit {
     this.detallesCalculados = this.ordenService.calcularDetallesOrden(
       this.recetaSeleccionada,
       this.orden.hectareasAplicadas
-    );
+    ) || [];
 
     this.costoTotal = this.detallesCalculados.reduce(
-      (total, detalle) => total + detalle.costoTotal,
+      (total, detalle) => total + (detalle.costoTotal ?? 0),
       0
     );
   }
@@ -160,8 +212,21 @@ export class OrdenCreateComponent implements OnInit {
   // ================= VALIDAR STOCK =================
 
   validarStock(): void {
-    if (this.orden.recetaId === 0 || this.orden.hectareasAplicadas <= 0) {
-      alert('Por favor selecciona una receta y especifica las hectáreas');
+    this.error = '';
+    this.success = '';
+
+    if (this.orden.parcelaId === 0) {
+      this.error = 'Debes seleccionar una parcela antes de validar el stock.';
+      return;
+    }
+
+    if (this.orden.recetaId === 0) {
+      this.error = 'Debes seleccionar una receta antes de validar el stock.';
+      return;
+    }
+
+    if (this.orden.hectareasAplicadas <= 0) {
+      this.error = 'Las hectáreas deben ser mayores a 0 para calcular los insumos.';
       return;
     }
 
@@ -191,45 +256,126 @@ export class OrdenCreateComponent implements OnInit {
       });
   }
 
-  // ================= CREAR ORDEN =================
+  // ================= VALIDACIONES GENERALES FORM =================
 
-  onSubmit(): void {
+  private validarFormularioBasico(): boolean {
+    this.error = '';
+    this.success = '';
+
     if (this.orden.parcelaId === 0) {
-      this.error = 'Debes seleccionar una parcela';
-      return;
+      this.error = 'Debes seleccionar una parcela.';
+      return false;
     }
 
     if (this.orden.recetaId === 0) {
-      this.error = 'Debes seleccionar una receta';
-      return;
+      this.error = 'Debes seleccionar una receta.';
+      return false;
     }
 
     if (this.orden.hectareasAplicadas <= 0) {
-      this.error = 'Las hectáreas deben ser mayor a 0';
+      this.error = 'Las hectáreas deben ser mayor a 0.';
+      return false;
+    }
+
+    const superficie = this.getParcelaSuperficie(this.orden.parcelaId);
+    if (superficie > 0 && this.orden.hectareasAplicadas > superficie) {
+      this.error = `Las hectáreas aplicadas no pueden ser mayores que la superficie de la parcela (${superficie} ha).`;
+      return false;
+    }
+
+    if (!this.fechaAplicacionStr) {
+      this.error = 'Debes seleccionar una fecha de aplicación.';
+      return false;
+    }
+
+    const fecha = new Date(this.fechaAplicacionStr + 'T00:00:00');
+    if (Number.isNaN(fecha.getTime())) {
+      this.error = 'Fecha de aplicación inválida.';
+      return false;
+    }
+
+    // Por si acaso, actualizamos el DTO
+    this.orden.fechaAplicacion = fecha;
+    return true;
+  }
+
+  // ================= MODAL DE CONFIRMACIÓN =================
+
+  private openConfirm(
+    action: ConfirmAction,
+    opts: { title: string; message: string; danger?: boolean; primaryLabel?: string }
+  ) {
+    this.confirmAction = action;
+    this.confirmTitle = opts.title;
+    this.confirmMessage = opts.message;
+    this.confirmDanger = !!opts.danger;
+    this.confirmPrimaryLabel = opts.primaryLabel || 'Confirmar';
+    this.confirmModalVisible = true;
+  }
+
+  closeConfirmModal(): void {
+    this.confirmModalVisible = false;
+    this.confirmAction = null;
+  }
+
+  onConfirmModal(): void {
+    if (!this.confirmAction) {
+      this.closeConfirmModal();
       return;
     }
 
+    // En todos los casos, si llegó aquí, creamos la orden
+    this.closeConfirmModal();
+    this.ejecutarCrearOrden();
+  }
+
+  // ================= CREAR ORDEN =================
+
+  onSubmit(): void {
+    if (!this.validarFormularioBasico()) {
+      return;
+    }
+
+    // Caso 1: nunca se llamó a validarStock => pedir confirmación
     if (!this.validacionStock) {
-      const confirmar = confirm(
-        'No has validado el stock disponible. ¿Deseas continuar de todos modos?'
-      );
-      if (!confirmar) return;
+      this.openConfirm('crearSinValidar', {
+        title: 'Crear orden sin validar stock',
+        message:
+          'No has validado el stock disponible.\n\n' +
+          '¿Deseas crear la orden de todos modos?',
+        danger: false,
+        primaryLabel: 'Crear orden'
+      });
+      return;
     }
 
+    // Caso 2: se validó, pero el stock es insuficiente => confirmación fuerte
     if (this.validacionStock && !this.validacionStock.esValido) {
-      const confirmar = confirm(
-        'El stock es insuficiente para algunos insumos. ¿Deseas crear la orden de todos modos?\n\n' +
-          'Nota: La orden quedará pendiente y no se podrá aplicar hasta tener stock suficiente.'
-      );
-      if (!confirmar) return;
+      this.openConfirm('crearConStockInsuficiente', {
+        title: 'Stock insuficiente',
+        message:
+          'El stock es insuficiente para algunos insumos.\n\n' +
+          'Puedes crear la orden, pero quedará pendiente y no se podrá aplicar ' +
+          'hasta tener stock suficiente.\n\n¿Deseas continuar?',
+        danger: true,
+        primaryLabel: 'Crear de todos modos'
+      });
+      return;
     }
 
+    // Caso 3: todo OK y stock validado => crear directo
+    this.ejecutarCrearOrden();
+  }
+
+  private ejecutarCrearOrden(): void {
     this.loading = true;
     this.error = '';
+    this.success = '';
 
     this.ordenService.createOrden(this.orden).subscribe({
       next: (ordenCreada) => {
-        alert(`Orden #${ordenCreada.id} creada exitosamente`);
+        this.loading = false;
+        // Sin alert feo, simplemente navegamos al detalle
         this.router.navigate(['/ordenes', ordenCreada.id]);
       },
       error: (err: any) => {

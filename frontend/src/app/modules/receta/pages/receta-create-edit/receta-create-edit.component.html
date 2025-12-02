@@ -1,168 +1,196 @@
 <!-- Crear/Editar Receta - Mejorado y Responsive -->
 
 <div class="page-container">
-  
+
   <!-- Header -->
   <div class="page-header">
     <div class="header-content">
       <h1 class="page-title">
         <svg class="title-icon" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"/>
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"/>
         </svg>
         {{ isEditMode ? 'Editar Receta' : 'Nueva Receta' }}
       </h1>
-      <p class="page-subtitle">{{ isEditMode ? 'Modifica la información de la receta' : 'Completa la información para crear una nueva receta' }}</p>
+      <p class="page-subtitle">
+        {{ isEditMode ? 'Modifica la información de la receta' : 'Completa la información para crear una nueva receta' }}
+      </p>
     </div>
   </div>
 
-  <!-- Alertas -->
-  <div *ngIf="error" class="alert alert-error">
-    <svg class="alert-icon" fill="currentColor" viewBox="0 0 20 20">
-      <path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zM8.707 7.293a1 1 0 00-1.414 1.414L8.586 10l-1.293 1.293a1 1 0 101.414 1.414L10 11.414l1.293 1.293a1 1 0 001.414-1.414L11.414 10l1.293-1.293a1 1 0 00-1.414-1.414L10 8.586 8.707 7.293z" clip-rule="evenodd"/>
-    </svg>
-    <span>{{ error }}</span>
-  </div>
+  <!-- Alertas de error global -->
+  @if (error) {
+    <div class="alert alert-error">
+      <svg class="alert-icon" fill="currentColor" viewBox="0 0 20 20">
+        <path fill-rule="evenodd"
+              d="M10 18a8 8 0 100-16 8 8 0 000 16zM8.707 7.293a1 1 0 00-1.414 1.414L8.586 10l-1.293 1.293a1 1 0 101.414 1.414L10 11.414l1.293 1.293a1 1 0 001.414-1.414L11.414 10l1.293-1.293a1 1 0 00-1.414-1.414L10 8.586 8.707 7.293z"
+              clip-rule="evenodd"/>
+      </svg>
+      <span>{{ error }}</span>
+    </div>
+  }
+
+  <!-- Feedback tipo "localhost" -->
+  @if (feedbackMessage) {
+    <div class="alert"
+         [ngClass]="{
+           'alert-success': feedbackType === 'success',
+           'alert-error'  : feedbackType === 'error',
+           'alert-info'   : feedbackType === 'info'
+         }">
+      <svg class="alert-icon" fill="currentColor" viewBox="0 0 20 20">
+        <path *ngIf="feedbackType === 'success'"
+              fill-rule="evenodd"
+              d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z"
+              clip-rule="evenodd"/>
+        <path *ngIf="feedbackType !== 'success'"
+              fill-rule="evenodd"
+              d="M10 18a8 8 0 100-16 8 8 0 000 16zM8.707 7.293a1 1 0 00-1.414 1.414L8.586 10l-1.293 1.293a1 1 0 101.414 1.414L10 11.414l1.293 1.293a1 1 0 001.414-1.414L11.414 10l1.293-1.293a1 1 0 00-1.414-1.414L10 8.586 8.707 7.293z"
+              clip-rule="evenodd"/>
+      </svg>
+      <span>{{ feedbackMessage }}</span>
+    </div>
+  }
 
   <!-- Loading -->
-  <div *ngIf="loading" class="loading-card">
-    <svg class="loading-spinner" fill="none" viewBox="0 0 24 24">
-      <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
-      <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
-    </svg>
-    <p class="loading-text">Cargando...</p>
-  </div>
+  @if (loading) {
+    <div class="loading-card">
+      <svg class="loading-spinner" fill="none" viewBox="0 0 24 24">
+        <circle class="opacity-25" cx="12" cy="12" r="10"
+                stroke="currentColor" stroke-width="4"></circle>
+        <path class="opacity-75" fill="currentColor"
+              d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+      </svg>
+      <p class="loading-text">Cargando...</p>
+    </div>
+  }
 
   <!-- Formulario -->
-  <form (ngSubmit)="onSubmit()" *ngIf="!loading" class="form-container">
-
-    <div class="form-layout">
-      
-      <!-- Columna Principal -->
-      <div class="form-main">
-
-        <!-- Sección 1: Información Básica -->
-        <div class="form-section">
-          <div class="section-header">
-            <div class="section-badge">1</div>
-            <h2 class="section-title">Información Básica</h2>
-          </div>
-
-          <div class="section-body">
-            
-            <!-- Nombre -->
-            <div class="form-group">
-              <label class="form-label" for="nombre">
-                Nombre de la Receta <span class="required">*</span>
-              </label>
-              <input 
-                type="text" 
-                id="nombre" 
-                [(ngModel)]="receta.nombre" 
-                name="nombre" 
-                placeholder="Ej: Fertilización Inicial Tomate" 
-                required 
-                class="form-input">
+  @if (!loading) {
+    <form (ngSubmit)="onSubmit()" class="form-container">
+      <div class="form-layout">
+        <!-- Columna Principal -->
+        <div class="form-main">
+          <!-- Sección 1: Información Básica -->
+          <div class="form-section">
+            <div class="section-header">
+              <div class="section-badge">1</div>
+              <h2 class="section-title">Información Básica</h2>
             </div>
-
-            <!-- Grid: Cultivo y Etapa -->
-            <div class="form-row">
-              
-              <!-- Cultivo -->
+            <div class="section-body">
+              <!-- Nombre -->
               <div class="form-group">
-                <label class="form-label" for="cultivo">
-                  Cultivo <span class="required">*</span>
+                <label class="form-label" for="nombre">
+                  Nombre de la Receta <span class="required">*</span>
                 </label>
-                <div class="select-wrapper">
-                  <select 
-                    id="cultivo" 
-                    [(ngModel)]="receta.cultivoId" 
-                    name="cultivoId" 
-                    required 
-                    class="form-select">
-                    <option [value]="0">Selecciona un cultivo</option>
-                    <option *ngFor="let cultivo of cultivos" [value]="cultivo.id">
-                      {{ cultivo.nombre }}
-                    </option>
-                  </select>
-                  <svg class="select-icon" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"/>
-                  </svg>
-                </div>
-              </div>
-
-              <!-- Etapa -->
-              <div class="form-group">
-                <label class="form-label" for="etapa">
-                  Etapa del Cultivo
-                </label>
-                <input 
-                  type="text" 
-                  id="etapa" 
-                  [(ngModel)]="receta.etapaCultivo" 
-                  name="etapaCultivo" 
-                  placeholder="Ej: Vegetativa, Floración" 
+                <input
+                  type="text"
+                  id="nombre"
+                  [(ngModel)]="receta.nombre"
+                  name="nombre"
+                  placeholder="Ej: Fertilización Inicial Tomate"
+                  required
                   class="form-input">
               </div>
 
-            </div>
-
-            <!-- Descripción -->
-            <div class="form-group">
-              <label class="form-label" for="descripcion">
-                Descripción
-              </label>
-              <textarea 
-                id="descripcion" 
-                [(ngModel)]="receta.descripcion" 
-                name="descripcion"
-                rows="3" 
-                placeholder="Descripción detallada de la receta, objetivos, recomendaciones, etc." 
-                class="form-textarea"></textarea>
-            </div>
-
-          </div>
-        </div>
-
-        <!-- Sección 2: Insumos -->
-        <div class="form-section">
-          <div class="section-header">
-            <div class="section-info">
-              <div class="section-badge">2</div>
-              <h2 class="section-title">Insumos de la Receta</h2>
-              <span class="section-count">{{ receta.detalles.length }} producto(s)</span>
-            </div>
-          </div>
-
-          <div class="section-body">
-            
-            <!-- Agregar Insumo -->
-            <div class="add-insumo-card">
-              <div class="add-insumo-header">
-                <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"/>
-                </svg>
-                <h3 class="add-insumo-title">Agregar Insumo</h3>
+              <!-- Grid: Cultivo y Etapa -->
+              <div class="form-row">
+                <!-- Cultivo -->
+                <div class="form-group">
+                  <label class="form-label" for="cultivo">
+                    Cultivo <span class="required">*</span>
+                  </label>
+                  <div class="select-wrapper">
+                    <select
+                      id="cultivo"
+                      [(ngModel)]="receta.cultivoId"
+                      name="cultivoId"
+                      required
+                      class="form-select">
+                      <option [value]="0">Selecciona un cultivo</option>
+                      @for (cultivo of cultivos; track cultivo) {
+                        <option [value]="cultivo.id">
+                          {{ cultivo.nombre }}
+                        </option>
+                      }
+                    </select>
+                    <svg class="select-icon" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                            d="M19 9l-7 7-7-7"/>
+                    </svg>
+                  </div>
+                </div>
+                <!-- Etapa -->
+                <div class="form-group">
+                  <label class="form-label" for="etapa">
+                    Etapa del Cultivo
+                  </label>
+                  <input
+                    type="text"
+                    id="etapa"
+                    [(ngModel)]="receta.etapaCultivo"
+                    name="etapaCultivo"
+                    placeholder="Ej: Vegetativa, Floración"
+                    class="form-input">
+                </div>
               </div>
 
+              <!-- Descripción -->
+              <div class="form-group">
+                <label class="form-label" for="descripcion">
+                  Descripción
+                </label>
+                <textarea
+                  id="descripcion"
+                  [(ngModel)]="receta.descripcion"
+                  name="descripcion"
+                  rows="3"
+                  placeholder="Descripción detallada de la receta, objetivos, recomendaciones, etc."
+                  class="form-textarea"></textarea>
+              </div>
+            </div>
+          </div>
+
+          <!-- Sección 2: Insumos -->
+          <div class="form-section">
+            <div class="section-header">
+              <div class="section-info">
+                <div class="section-badge">2</div>
+                <h2 class="section-title">Insumos de la Receta</h2>
+                <span class="section-count">{{ receta.detalles.length }} producto(s)</span>
+              </div>
+            </div>
+            <div class="section-body">
+              <!-- Agregar Insumo -->
+              <div class="add-insumo-card">
+                <div class="add-insumo-header">
+                  <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                          d="M12 4v16m8-8H4"/>
+                  </svg>
+                <h3 class="add-insumo-title">Agregar Insumo</h3>
+              </div>
               <div class="add-insumo-body">
                 <div class="add-insumo-grid">
-                  
                   <!-- Insumo -->
                   <div class="form-group col-span-2">
                     <label class="form-label">Insumo</label>
                     <div class="select-wrapper">
-                      <select 
-                        [(ngModel)]="nuevoDetalle.insumoId" 
-                        name="insumoId" 
+                      <select
+                        [(ngModel)]="nuevoDetalle.insumoId"
+                        name="insumoId"
                         class="form-select"
                         [disabled]="insumosDisponibles.length === 0">
                         <option [value]="0">Selecciona un insumo</option>
-                        <option *ngFor="let insumo of insumosDisponibles" [value]="insumo.id">
-                          {{ insumo.nombre }} ({{ insumo.unidadMedida }})
-                        </option>
+                        @for (insumo of insumosDisponibles; track insumo) {
+                          <option [value]="insumo.id">
+                            {{ insumo.nombre }} ({{ insumo.unidadMedida }})
+                          </option>
+                        }
                       </select>
                       <svg class="select-icon" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"/>
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                              d="M19 9l-7 7-7-7"/>
                       </svg>
                     </div>
                   </div>
@@ -170,13 +198,13 @@
                   <!-- Dosis -->
                   <div class="form-group">
                     <label class="form-label">Dosis por Hectárea</label>
-                    <input 
-                      type="number" 
-                      [(ngModel)]="nuevoDetalle.dosisPorHectarea" 
+                    <input
+                      type="number"
+                      [(ngModel)]="nuevoDetalle.dosisPorHectarea"
                       name="dosis"
-                      min="0" 
+                      min="0"
                       step="0.001"
-                      placeholder="0.00" 
+                      placeholder="0.00"
                       class="form-input">
                   </div>
 
@@ -191,20 +219,21 @@
                         <option value="ml">Mililitros (ml)</option>
                       </select>
                       <svg class="select-icon" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"/>
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                              d="M19 9l-7 7-7-7"/>
                       </svg>
                     </div>
                   </div>
-
                 </div>
 
-                <button 
-                  type="button" 
-                  class="btn-add-insumo" 
+                <button
+                  type="button"
+                  class="btn-add-insumo"
                   (click)="agregarInsumo()"
                   [disabled]="nuevoDetalle.insumoId === 0">
                   <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"/>
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                          d="M12 4v16m8-8H4"/>
                   </svg>
                   <span>Agregar a la Receta</span>
                 </button>
@@ -212,159 +241,170 @@
             </div>
 
             <!-- Lista de Insumos -->
-            <div *ngIf="receta.detalles.length > 0" class="insumos-list">
-              <div class="table-responsive">
-                <table class="insumos-table">
-                  <thead>
-                    <tr>
-                      <th class="th-orden">#</th>
-                      <th class="th-insumo">Insumo</th>
-                      <th class="th-dosis">Dosis/ha</th>
-                      <th class="th-unidad">Unidad</th>
-                      <th class="th-costo-unit">Costo Unit.</th>
-                      <th class="th-subtotal">Subtotal</th>
-                      <th class="th-acciones">Acciones</th>
-                    </tr>
-                  </thead>
-                  <tbody>
-                    <tr *ngFor="let detalle of receta.detalles; let i = index" class="table-row">
-                      <td class="td-orden" data-label="#">{{ i + 1 }}</td>
-                      <td class="td-insumo" data-label="Insumo">
-                        <strong>{{ getInsumoNombre(detalle.insumoId) }}</strong>
-                      </td>
-                      <td class="td-dosis" data-label="Dosis/ha">
-                        {{ detalle.dosisPorHectarea }}
-                      </td>
-                      <td class="td-unidad" data-label="Unidad">
-                        {{ detalle.unidadMedida }}
-                      </td>
-                      <td class="td-costo-unit" data-label="Costo Unit.">
-                        ${{ getInsumoCosto(detalle.insumoId).toFixed(2) }}
-                      </td>
-                      <td class="td-subtotal" data-label="Subtotal">
-                        <strong>${{ (getInsumoCosto(detalle.insumoId) * detalle.dosisPorHectarea).toFixed(2) }}</strong>
-                      </td>
-                      <td class="td-acciones" data-label="Acciones">
-                        <div class="action-buttons">
-                          <button 
-                            type="button" 
-                            (click)="moverInsumo(i, 'arriba')" 
-                            [disabled]="i === 0" 
-                            class="btn-icon btn-up"
-                            title="Mover arriba">
-                            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 15l7-7 7 7"/>
-                            </svg>
-                          </button>
-                          <button 
-                            type="button" 
-                            (click)="moverInsumo(i, 'abajo')" 
-                            [disabled]="i === receta.detalles.length - 1" 
-                            class="btn-icon btn-down"
-                            title="Mover abajo">
-                            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"/>
-                            </svg>
-                          </button>
-                          <button 
-                            type="button" 
-                            (click)="eliminarInsumo(i)" 
-                            class="btn-icon btn-delete"
-                            title="Eliminar">
-                            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"/>
-                            </svg>
-                          </button>
-                        </div>
-                      </td>
-                    </tr>
-                  </tbody>
-                  <tfoot>
-                    <tr class="total-row">
-                      <td colspan="5" class="td-total-label">Costo Total por Hectárea:</td>
-                      <td colspan="2" class="td-total-value">${{ costoTotal.toFixed(2) }}</td>
-                    </tr>
-                  </tfoot>
-                </table>
+            @if (receta.detalles.length > 0) {
+              <div class="insumos-list">
+                <div class="table-responsive">
+                  <table class="insumos-table">
+                    <thead>
+                      <tr>
+                        <th class="th-orden">#</th>
+                        <th class="th-insumo">Insumo</th>
+                        <th class="th-dosis">Dosis/ha</th>
+                        <th class="th-unidad">Unidad</th>
+                        <th class="th-costo-unit">Costo Unit.</th>
+                        <th class="th-subtotal">Subtotal</th>
+                        <th class="th-acciones">Acciones</th>
+                      </tr>
+                    </thead>
+                    <tbody>
+                      @for (detalle of receta.detalles; track detalle; let i = $index) {
+                        <tr class="table-row">
+                          <td class="td-orden" data-label="#">{{ i + 1 }}</td>
+                          <td class="td-insumo" data-label="Insumo">
+                            <strong>{{ getInsumoNombre(detalle.insumoId) }}</strong>
+                          </td>
+                          <td class="td-dosis" data-label="Dosis/ha">
+                            {{ detalle.dosisPorHectarea }}
+                          </td>
+                          <td class="td-unidad" data-label="Unidad">
+                            {{ detalle.unidadMedida }}
+                          </td>
+                          <td class="td-costo-unit" data-label="Costo Unit.">
+                            ${{ getInsumoCosto(detalle.insumoId).toFixed(2) }}
+                          </td>
+                          <td class="td-subtotal" data-label="Subtotal">
+                            <strong>
+                              ${{ (getInsumoCosto(detalle.insumoId) * detalle.dosisPorHectarea).toFixed(2) }}
+                            </strong>
+                          </td>
+                          <td class="td-acciones" data-label="Acciones">
+                            <div class="action-buttons">
+                              <button
+                                type="button"
+                                (click)="moverInsumo(i, 'arriba')"
+                                [disabled]="i === 0"
+                                class="btn-icon btn-up"
+                                title="Mover arriba">
+                                <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                        d="M5 15l7-7 7 7"/>
+                                </svg>
+                              </button>
+                              <button
+                                type="button"
+                                (click)="moverInsumo(i, 'abajo')"
+                                [disabled]="i === receta.detalles.length - 1"
+                                class="btn-icon btn-down"
+                                title="Mover abajo">
+                                <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                        d="M19 9l-7 7-7-7"/>
+                                </svg>
+                              </button>
+                              <button
+                                type="button"
+                                (click)="eliminarInsumo(i)"
+                                class="btn-icon btn-delete"
+                                title="Eliminar">
+                                <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                        d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"/>
+                                </svg>
+                              </button>
+                            </div>
+                          </td>
+                        </tr>
+                      }
+                    </tbody>
+                    <tfoot>
+                      <tr class="total-row">
+                        <td colspan="5" class="td-total-label">Costo Total por Hectárea:</td>
+                        <td colspan="2" class="td-total-value">${{ costoTotal.toFixed(2) }}</td>
+                      </tr>
+                    </tfoot>
+                  </table>
+                </div>
               </div>
-            </div>
+            }
 
             <!-- Empty State -->
-            <div *ngIf="receta.detalles.length === 0" class="empty-state">
-              <div class="empty-icon">
-                <svg fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M20 7l-8-4-8 4m16 0l-8 4m8-4v10l-8 4m0-10L4 7m8 4v10M4 7v10l8 4"/>
-                </svg>
+            @if (receta.detalles.length === 0) {
+              <div class="empty-state">
+                <div class="empty-icon">
+                  <svg fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                          d="M20 7l-8-4-8 4m16 0l-8 4m8-4v10l-8 4m0-10L4 7m8 4v10M4 7v10l8 4"/>
+                  </svg>
+                </div>
+                <p class="empty-text">No hay insumos agregados todavía</p>
+                <p class="empty-hint">
+                  Usa el formulario de arriba para agregar productos a esta receta
+                </p>
               </div>
-              <p class="empty-text">No hay insumos agregados todavía</p>
-              <p class="empty-hint">Usa el formulario de arriba para agregar productos a esta receta</p>
-            </div>
-
+            }
           </div>
         </div>
-
       </div>
 
       <!-- Sidebar -->
       <div class="form-sidebar">
-
         <!-- Resumen -->
         <div class="summary-card">
           <div class="summary-header">
             <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 7h6m0 10v-3m-3 3h.01M9 17h.01M9 14h.01M12 14h.01M15 11h.01M12 11h.01M9 11h.01M7 21h10a2 2 0 002-2V5a2 2 0 00-2-2H7a2 2 0 00-2 2v14a2 2 0 002 2z"/>
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                    d="M9 7h6m0 10v-3m-3 3h.01M9 17h.01M9 14h.01M12 14h.01M15 11h.01M12 11h.01M9 11h.01M7 21h10a2 2 0 002-2V5a2 2 0 00-2-2H7a2 2 0 00-2 2v14a2 2 0 002 2z"/>
             </svg>
             <h3 class="summary-title">Resumen</h3>
           </div>
-
           <div class="summary-body">
             <div class="summary-item">
               <span class="summary-label">Total de Insumos</span>
               <span class="summary-value">{{ receta.detalles.length }}</span>
             </div>
-
             <div class="summary-divider"></div>
-
             <div class="summary-total">
               <span class="summary-total-label">Costo por Hectárea</span>
               <span class="summary-total-value">${{ costoTotal.toFixed(2) }}</span>
             </div>
-
             <div class="summary-note">
               <svg class="note-icon" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"/>
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                      d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"/>
               </svg>
-              <p class="note-text">Este es el costo estimado de aplicación por cada hectárea basado en las dosis configuradas.</p>
+              <p class="note-text">
+                Este es el costo estimado de aplicación por cada hectárea basado en las dosis configuradas.
+              </p>
             </div>
           </div>
         </div>
 
         <!-- Acciones -->
         <div class="actions-card">
-          <button 
-            type="button" 
-            class="btn-action btn-cancel" 
+          <button
+            type="button"
+            class="btn-action btn-cancel"
             (click)="onCancel()">
             <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/>
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                    d="M6 18L18 6M6 6l12 12"/>
             </svg>
             <span>Cancelar</span>
           </button>
-          <button 
-            type="submit" 
-            class="btn-action btn-submit" 
+          <button
+            type="submit"
+            class="btn-action btn-submit"
             [disabled]="receta.detalles.length === 0">
             <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"/>
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                    d="M5 13l4 4L19 7"/>
             </svg>
             <span>{{ isEditMode ? 'Actualizar Receta' : 'Guardar Receta' }}</span>
           </button>
         </div>
-
       </div>
-
     </div>
-
   </form>
+}
 
 </div>

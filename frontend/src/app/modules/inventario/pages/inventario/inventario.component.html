@@ -22,10 +22,12 @@
           (click)="openAlertsModal()"
           class="bg-orange-600 hover:bg-orange-700 text-white px-4 py-2 rounded-lg font-medium flex items-center gap-2 transition-all shadow-sm hover:shadow-md text-sm relative">
           Alertas
-          <span *ngIf="alertas.length > 0"
-                class="absolute -top-1 -right-1 bg-red-500 text-white text-xs font-bold rounded-full w-5 h-5 flex items-center justify-center">
-            {{ alertas.length }}
-          </span>
+          @if (alertas.length > 0) {
+            <span
+              class="absolute -top-1 -right-1 bg-red-500 text-white text-xs font-bold rounded-full w-5 h-5 flex items-center justify-center">
+              {{ alertas.length }}
+            </span>
+          }
         </button>
       </div>
     </div>
@@ -87,7 +89,7 @@
     <div class="bg-white rounded-lg shadow-sm p-4 border border-gray-200">
 
       <div class="grid grid-cols-1 md:grid-cols-4 gap-4">
-        
+
         <!-- Buscar -->
         <div class="md:col-span-2">
           <label for="searchTerm" class="text-sm font-medium text-gray-700">Buscar</label>
@@ -100,226 +102,224 @@
               (ngModelChange)="onSearchChange()"
               placeholder="Buscar por nombre o código..."
               class="w-full pl-4 pr-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-green-500"
-            />
+              />
+            </div>
           </div>
-        </div>
 
-        <!-- Categoría -->
-        <div>
-          <label for="categoriaFiltro" class="text-sm font-medium text-gray-700">Categoría</label>
-          <select
-            id="categoriaFiltro"
-            name="categoriaFiltro"
-            [(ngModel)]="categoriaFiltro"
-            (ngModelChange)="onCategoriaChange()"
-            class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-green-500"
-          >
-            <option value="TODAS">Todas las categorías</option>
-            <option *ngFor="let cat of categorias" [value]="cat">{{ cat }}</option>
-          </select>
-        </div>
-
-        <!-- Estado -->
-        <div>
-          <label for="estadoFiltro" class="text-sm font-medium text-gray-700">Estado</label>
-          <select
-            id="estadoFiltro"
-            name="estadoFiltro"
-            [(ngModel)]="estadoFiltro"
-            (ngModelChange)="onEstadoChange()"
-            class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-green-500"
-          >
-            <option value="TODOS">Todos los estados</option>
-            <option *ngFor="let est of estados" [value]="est">{{ est }}</option>
-          </select>
-        </div>
-      </div>
-
-      <!-- Vista -->
-      <div class="flex items-center gap-4 mt-6 pt-4 border-t">
-        <span class="text-sm text-gray-600">Vista:</span>
-
-        <button (click)="cambiarVista('tabla')"
-                [class.bg-green-100]="vistaActual === 'tabla'"
-                class="px-3 py-1.5 rounded-lg flex items-center gap-2 text-sm">
-          Tabla
-        </button>
-
-        <button (click)="cambiarVista('tarjetas')"
-                [class.bg-green-100]="vistaActual === 'tarjetas'"
-                class="px-3 py-1.5 rounded-lg flex items-center gap-2 text-sm">
-          Tarjetas
-        </button>
-      </div>
-    </div>
-  </div>
-
-  <!-- TABLA -->
-  <div *ngIf="vistaActual === 'tabla'" class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 pb-8">
-    <div class="bg-white shadow-sm rounded-lg border">
-
-      <div class="overflow-x-auto">
-        <table class="min-w-full divide-y divide-gray-200">
-
-          <thead class="bg-gray-50">
-            <tr>
-              <th class="px-4 py-3 text-left text-xs font-semibold text-gray-700">Código</th>
-              <th class="px-4 py-3 text-left text-xs font-semibold text-gray-700">Producto</th>
-              <th class="px-4 py-3 text-left text-xs font-semibold text-gray-700">Categoría</th>
-              <th class="px-4 py-3 text-left text-xs font-semibold text-gray-700">Stock</th>
-              <th class="px-4 py-3 text-left text-xs font-semibold text-gray-700">Ubicación</th>
-              <th class="px-4 py-3 text-left text-xs font-semibold text-gray-700">Valor</th>
-              <th class="px-4 py-3 text-left text-xs font-semibold text-gray-700">Estado</th>
-              <th class="px-4 py-3 text-left text-xs font-semibold text-gray-700">Vencimiento</th>
-              <th class="px-4 py-3 text-left text-xs font-semibold text-gray-700">Acciones</th>
-            </tr>
-          </thead>
-
-          <tbody class="divide-y divide-gray-200 bg-white">
-            <tr *ngFor="let item of itemsFiltrados" class="hover:bg-gray-50">
-
-              <td class="px-4 py-3 font-mono text-sm font-semibold">{{ item.codigo }}</td>
-
-              <td class="px-4 py-3">
-                <div class="flex items-center gap-2">
-                  <div>
-                    <p class="text-sm font-medium">{{ item.nombre }}</p>
-                    <p class="text-xs text-gray-400">{{ item.marca }}</p>
-                  </div>
-                </div>
-              </td>
-
-              <td class="px-4 py-3 text-sm">{{ item.categoria }}</td>
-
-              <td class="px-4 py-3 text-sm">
-                <span class="font-semibold"
-                      [class.text-green-600]="item.stockActual > item.stockMinimo"
-                      [class.text-orange-600]="item.stockActual <= item.stockMinimo && item.stockActual > 0"
-                      [class.text-red-600]="item.stockActual === 0">
-                  {{ item.stockActual }} {{ item.unidadMedida }}
-                </span>
-                <p class="text-xs text-gray-500">Min: {{ item.stockMinimo }}</p>
-              </td>
-
-              <td class="px-4 py-3 text-sm">
-                {{ item.ubicacion }}
-                <p class="text-xs text-gray-500" *ngIf="item.almacen">{{ item.almacen }}</p>
-              </td>
-
-              <td class="px-4 py-3 text-sm font-semibold">
-                {{ item.valorTotal | currency:'MXN':'symbol':'1.0-0' }}
-                <p class="text-xs text-gray-500">
-                  {{ item.costoUnitario | currency:'MXN':'symbol':'1.2-2' }}/{{ item.unidadMedida }}
-                </p>
-              </td>
-
-              <td class="px-4 py-3 whitespace-nowrap">
-                <span [class]="getBadgeClass(item.estado)"
-                      class="px-3 py-1 text-xs font-semibold rounded-full">
-                  {{ item.estado }}
-                </span>
-              </td>
-
-              <td class="px-4 py-3 text-sm">
-                <p>{{ item.fechaVencimiento | date:'dd/MM/yyyy' }}</p>
-              </td>
-
-              <td class="px-4 py-3">
-                <div class="flex gap-2">
-                  <button (click)="openEditItemModal(item)" class="text-blue-600 hover:bg-blue-50 p-2 rounded">
-                    Editar
-                  </button>
-                  <button (click)="openNewMovementModal(item)" class="text-green-600 hover:bg-green-50 p-2 rounded">
-                    Movimiento
-                  </button>
-                </div>
-              </td>
-
-            </tr>
-          </tbody>
-        </table>
-      </div>
-    </div>
-
-
-    <!-- Empty -->
-    <div *ngIf="itemsFiltrados.length === 0" class="text-center py-12">
-      <h3 class="mt-3 text-lg font-medium text-gray-900">No hay items</h3>
-      <p class="text-gray-500">No se encontraron items con los filtros aplicados.</p>
-    </div>
-  </div>
-
-  <!-- TARJETAS -->
-  <div *ngIf="vistaActual === 'tarjetas'" class="max-w-7xl mx-auto grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 px-4 sm:px-6 lg:px-8 pb-8">
-
-    <div *ngFor="let item of itemsFiltrados" class="bg-white border rounded-lg shadow-sm hover:shadow-md transition duration-150">
-
-      <!-- Header -->
-      <div class="flex justify-between items-center px-4 py-3 border-b bg-green-50">
-        <div class="flex items-center gap-2">
+          <!-- Categoría -->
           <div>
-            <h3 class="font-semibold">{{ item.nombre }}</h3>
-            <p class="text-xs text-gray-500">{{ item.codigo }}</p>
+            <label for="categoriaFiltro" class="text-sm font-medium text-gray-700">Categoría</label>
+            <select
+              id="categoriaFiltro"
+              name="categoriaFiltro"
+              [(ngModel)]="categoriaFiltro"
+              (ngModelChange)="onCategoriaChange()"
+              class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-green-500"
+              >
+              <option value="TODAS">Todas las categorías</option>
+              @for (cat of categorias; track cat) {
+                <option [value]="cat">{{ cat }}</option>
+              }
+            </select>
+          </div>
+
+          <!-- Estado -->
+          <div>
+            <label for="estadoFiltro" class="text-sm font-medium text-gray-700">Estado</label>
+            <select
+              id="estadoFiltro"
+              name="estadoFiltro"
+              [(ngModel)]="estadoFiltro"
+              (ngModelChange)="onEstadoChange()"
+              class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-green-500"
+              >
+              <option value="TODOS">Todos los estados</option>
+              @for (est of estados; track est) {
+                <option [value]="est">{{ est }}</option>
+              }
+            </select>
           </div>
         </div>
 
-        <span [class]="getBadgeClass(item.estado)"
-              class="px-3 py-1 text-xs font-semibold rounded-full">
-          {{ item.estado }}
-        </span>
+        <!-- Vista -->
+        <div class="flex items-center gap-4 mt-6 pt-4 border-t">
+          <span class="text-sm text-gray-600">Vista:</span>
+
+          <button (click)="cambiarVista('tabla')"
+            [class.bg-green-100]="vistaActual === 'tabla'"
+            class="px-3 py-1.5 rounded-lg flex items-center gap-2 text-sm">
+            Tabla
+          </button>
+
+          <button (click)="cambiarVista('tarjetas')"
+            [class.bg-green-100]="vistaActual === 'tarjetas'"
+            class="px-3 py-1.5 rounded-lg flex items-center gap-2 text-sm">
+            Tarjetas
+          </button>
+        </div>
       </div>
+    </div>
 
-      <!-- Body -->
-      <div class="p-4 space-y-2">
-        <p class="text-sm text-gray-600">Stock Actual</p>
-        <p class="font-bold">{{ item.stockActual }} {{ item.unidadMedida }}</p>
-
-        <p class="text-sm text-gray-600">Ubicación</p>
-        <p class="font-medium">{{ item.ubicacion }}</p>
-
-        <p class="text-sm text-gray-600">Valor Total</p>
-        <p class="font-bold text-green-700">{{ item.valorTotal | currency:'MXN' }}</p>
-
-        <p class="text-sm text-gray-600">Vencimiento</p>
-        <p class="font-medium">{{ item.fechaVencimiento | date:'dd/MM/yyyy' }}</p>
+    <!-- TABLA -->
+    @if (vistaActual === 'tabla') {
+      <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 pb-8">
+        <div class="bg-white shadow-sm rounded-lg border">
+          <div class="overflow-x-auto">
+            <table class="min-w-full divide-y divide-gray-200">
+              <thead class="bg-gray-50">
+                <tr>
+                  <th class="px-4 py-3 text-left text-xs font-semibold text-gray-700">Código</th>
+                  <th class="px-4 py-3 text-left text-xs font-semibold text-gray-700">Producto</th>
+                  <th class="px-4 py-3 text-left text-xs font-semibold text-gray-700">Categoría</th>
+                  <th class="px-4 py-3 text-left text-xs font-semibold text-gray-700">Stock</th>
+                  <th class="px-4 py-3 text-left text-xs font-semibold text-gray-700">Ubicación</th>
+                  <th class="px-4 py-3 text-left text-xs font-semibold text-gray-700">Valor</th>
+                  <th class="px-4 py-3 text-left text-xs font-semibold text-gray-700">Estado</th>
+                  <th class="px-4 py-3 text-left text-xs font-semibold text-gray-700">Vencimiento</th>
+                  <th class="px-4 py-3 text-left text-xs font-semibold text-gray-700">Acciones</th>
+                </tr>
+              </thead>
+              <tbody class="divide-y divide-gray-200 bg-white">
+                @for (item of itemsFiltrados; track item) {
+                  <tr class="hover:bg-gray-50">
+                    <td class="px-4 py-3 font-mono text-sm font-semibold">{{ item.codigo }}</td>
+                    <td class="px-4 py-3">
+                      <div class="flex items-center gap-2">
+                        <div>
+                          <p class="text-sm font-medium">{{ item.nombre }}</p>
+                          <p class="text-xs text-gray-400">{{ item.marca }}</p>
+                        </div>
+                      </div>
+                    </td>
+                    <td class="px-4 py-3 text-sm">{{ item.categoria }}</td>
+                    <td class="px-4 py-3 text-sm">
+                      <span class="font-semibold"
+                        [class.text-green-600]="item.stockActual > item.stockMinimo"
+                        [class.text-orange-600]="item.stockActual <= item.stockMinimo && item.stockActual > 0"
+                        [class.text-red-600]="item.stockActual === 0">
+                        {{ item.stockActual }} {{ item.unidadMedida }}
+                      </span>
+                      <p class="text-xs text-gray-500">Min: {{ item.stockMinimo }}</p>
+                    </td>
+                    <td class="px-4 py-3 text-sm">
+                      {{ item.ubicacion }}
+                      @if (item.almacen) {
+                        <p class="text-xs text-gray-500">{{ item.almacen }}</p>
+                      }
+                    </td>
+                    <td class="px-4 py-3 text-sm font-semibold">
+                      {{ item.valorTotal | currency:'MXN':'symbol':'1.0-0' }}
+                      <p class="text-xs text-gray-500">
+                        {{ item.costoUnitario | currency:'MXN':'symbol':'1.2-2' }}/{{ item.unidadMedida }}
+                      </p>
+                    </td>
+                    <td class="px-4 py-3 whitespace-nowrap">
+                      <span [class]="getBadgeClass(item.estado)"
+                        class="px-3 py-1 text-xs font-semibold rounded-full">
+                        {{ item.estado }}
+                      </span>
+                    </td>
+                    <td class="px-4 py-3 text-sm">
+                      <p>{{ item.fechaVencimiento | date:'dd/MM/yyyy' }}</p>
+                    </td>
+                    <td class="px-4 py-3">
+                      <div class="flex gap-2">
+                        <button (click)="openEditItemModal(item)" class="text-blue-600 hover:bg-blue-50 p-2 rounded">
+                          Editar
+                        </button>
+                        <button (click)="openNewMovementModal(item)" class="text-green-600 hover:bg-green-50 p-2 rounded">
+                          Movimiento
+                        </button>
+                      </div>
+                    </td>
+                  </tr>
+                }
+              </tbody>
+            </table>
+          </div>
+        </div>
+        <!-- Empty -->
+        @if (itemsFiltrados.length === 0) {
+          <div class="text-center py-12">
+            <h3 class="mt-3 text-lg font-medium text-gray-900">No hay items</h3>
+            <p class="text-gray-500">No se encontraron items con los filtros aplicados.</p>
+          </div>
+        }
       </div>
+    }
 
-      <!-- Footer -->
-      <div class="px-4 py-3 bg-gray-50 border-t flex gap-2">
-        <button (click)="openEditItemModal(item)"
+    <!-- TARJETAS -->
+    @if (vistaActual === 'tarjetas') {
+      <div class="max-w-7xl mx-auto grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 px-4 sm:px-6 lg:px-8 pb-8">
+        @for (item of itemsFiltrados; track item) {
+          <div class="bg-white border rounded-lg shadow-sm hover:shadow-md transition duration-150">
+            <!-- Header -->
+            <div class="flex justify-between items-center px-4 py-3 border-b bg-green-50">
+              <div class="flex items-center gap-2">
+                <div>
+                  <h3 class="font-semibold">{{ item.nombre }}</h3>
+                  <p class="text-xs text-gray-500">{{ item.codigo }}</p>
+                </div>
+              </div>
+              <span [class]="getBadgeClass(item.estado)"
+                class="px-3 py-1 text-xs font-semibold rounded-full">
+                {{ item.estado }}
+              </span>
+            </div>
+            <!-- Body -->
+            <div class="p-4 space-y-2">
+              <p class="text-sm text-gray-600">Stock Actual</p>
+              <p class="font-bold">{{ item.stockActual }} {{ item.unidadMedida }}</p>
+              <p class="text-sm text-gray-600">Ubicación</p>
+              <p class="font-medium">{{ item.ubicacion }}</p>
+              <p class="text-sm text-gray-600">Valor Total</p>
+              <p class="font-bold text-green-700">{{ item.valorTotal | currency:'MXN' }}</p>
+              <p class="text-sm text-gray-600">Vencimiento</p>
+              <p class="font-medium">{{ item.fechaVencimiento | date:'dd/MM/yyyy' }}</p>
+            </div>
+            <!-- Footer -->
+            <div class="px-4 py-3 bg-gray-50 border-t flex gap-2">
+              <button (click)="openEditItemModal(item)"
                 class="flex-1 bg-blue-600 hover:bg-blue-700 text-white py-2 rounded-lg text-sm flex items-center justify-center gap-2">
-          Editar
-        </button>
-
-        <button (click)="openNewMovementModal(item)"
+                Editar
+              </button>
+              <button (click)="openNewMovementModal(item)"
                 class="flex-1 bg-green-600 hover:bg-green-700 text-white py-2 rounded-lg text-sm flex items-center justify-center gap-2">
-          Movimiento
-        </button>
+                Movimiento
+              </button>
+            </div>
+          </div>
+        }
+        @if (itemsFiltrados.length === 0) {
+          <div class="col-span-full text-center py-12">
+            <h3 class="mt-3 text-lg font-medium text-gray-900">No hay items</h3>
+            <p class="text-gray-500">No se encontraron items con los filtros aplicados.</p>
+          </div>
+        }
       </div>
-    </div>
-
-    <div *ngIf="itemsFiltrados.length === 0" class="col-span-full text-center py-12">
-      <h3 class="mt-3 text-lg font-medium text-gray-900">No hay items</h3>
-      <p class="text-gray-500">No se encontraron items con los filtros aplicados.</p>
-    </div>
+    }
 
   </div>
 
-</div>
+  <!-- Modales -->
+  @if (showNewMovementModal) {
+    <app-new-movement
+      [item]="selectedItem"
+      (closed)="closeNewMovementModal()"
+      (newItemRequested)="onNewItemFromMovement()">
+    </app-new-movement>
+  }
 
-<!-- Modales -->
-<app-new-movement *ngIf="showNewMovementModal" 
-                  [item]="selectedItem" 
-                  (closed)="closeNewMovementModal()"
-                  (newItemRequested)="onNewItemFromMovement()">
-</app-new-movement>
+  @if (showEditItemModal) {
+    <app-edit-item
+      [item]="selectedItem"
+      (closed)="closeEditItemModal()">
+    </app-edit-item>
+  }
 
-<app-edit-item *ngIf="showEditItemModal" 
-               [item]="selectedItem"
-               (closed)="closeEditItemModal()">
-</app-edit-item>
-
-<app-alerts *ngIf="showAlertsModal"
-            [alertas]="alertas"
-            (closed)="closeAlertsModal()">
-</app-alerts>
+  @if (showAlertsModal) {
+    <app-alerts
+      [alertas]="alertas"
+      (closed)="closeAlertsModal()">
+    </app-alerts>
+  }

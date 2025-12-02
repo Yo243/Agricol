@@ -3,238 +3,230 @@
 <div class="page-container">
 
   <!-- Loading -->
-  <div *ngIf="loading" class="loading-card">
-    <svg class="loading-spinner" fill="none" viewBox="0 0 24 24">
-      <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
-      <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
-    </svg>
-    <p class="loading-text">Cargando trazabilidad...</p>
-  </div>
-
-  <div *ngIf="!loading && trazabilidad">
-
-    <!-- Sin datos -->
-    <div *ngIf="trazabilidad.trazabilidad.length === 0" class="empty-state">
-      <div class="empty-icon">
-        <svg fill="none" stroke="currentColor" viewBox="0 0 24 24">
-          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2m-3 7h3m-3 4h3m-6-4h.01M9 16h.01"/>
-        </svg>
-      </div>
-      <h3 class="empty-title">Sin eventos registrados</h3>
-      <p class="empty-description">No hay eventos de trazabilidad para esta parcela</p>
+  @if (loading) {
+    <div class="loading-card">
+      <svg class="loading-spinner" fill="none" viewBox="0 0 24 24">
+        <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
+        <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+      </svg>
+      <p class="loading-text">Cargando trazabilidad...</p>
     </div>
+  }
 
-    <!-- Contenido -->
-    <div *ngIf="trazabilidad.trazabilidad.length > 0" class="content-layout">
-
-      <!-- Períodos -->
-      <div class="periods-container">
-        <div *ngFor="let item of trazabilidad.trazabilidad" class="period-section">
-
-          <!-- Header del Período -->
-          <div class="period-header">
-            <div class="period-header-content">
-              <div class="period-icon-wrapper">
-                <svg class="period-icon" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 21a4 4 0 01-4-4V5a2 2 0 012-2h4a2 2 0 012 2v12a4 4 0 01-4 4zm0 0h12a2 2 0 002-2v-4a2 2 0 00-2-2h-2.343M11 7.343l1.657-1.657a2 2 0 012.828 0l2.829 2.829a2 2 0 010 2.828l-8.486 8.485M7 17h.01"/>
-                </svg>
-              </div>
-              <div class="period-info">
-                <h3 class="period-title">{{ item.periodo.cultivo }}</h3>
-                <p class="period-dates">
-                  {{ formatearFecha(item.periodo.fechaInicio) }}
-                  <span *ngIf="item.periodo.fechaFin" class="date-separator">
-                    <svg class="date-arrow" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                      <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M14 5l7 7m0 0l-7 7m7-7H3"/>
-                    </svg>
-                    {{ formatearFecha(item.periodo.fechaFin) }}
-                  </span>
-                </p>
-              </div>
-            </div>
-
+  @if (!loading && trazabilidad) {
+    <div>
+      <!-- Sin datos -->
+      @if (trazabilidad.trazabilidad.length === 0) {
+        <div class="empty-state">
+          <div class="empty-icon">
+            <svg fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2m-3 7h3m-3 4h3m-6-4h.01M9 16h.01"/>
+            </svg>
+          </div>
+          <h3 class="empty-title">Sin eventos registrados</h3>
+          <p class="empty-description">No hay eventos de trazabilidad para esta parcela</p>
+        </div>
+      }
+      <!-- Contenido -->
+      @if (trazabilidad.trazabilidad.length > 0) {
+        <div class="content-layout">
+          <!-- Períodos -->
+          <div class="periods-container">
+            @for (item of trazabilidad.trazabilidad; track item) {
+              <div class="period-section">
+                <!-- Header del Período -->
+                <div class="period-header">
+                  <div class="period-header-content">
+                    <div class="period-icon-wrapper">
+                      <svg class="period-icon" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 21a4 4 0 01-4-4V5a2 2 0 012-2h4a2 2 0 012 2v12a4 4 0 01-4 4zm0 0h12a2 2 0 002-2v-4a2 2 0 00-2-2h-2.343M11 7.343l1.657-1.657a2 2 0 012.828 0l2.829 2.829a2 2 0 010 2.828l-8.486 8.485M7 17h.01"/>
+                      </svg>
+                    </div>
+                    <div class="period-info">
+                      <h3 class="period-title">{{ item.periodo.cultivo }}</h3>
+                      <p class="period-dates">
+                        {{ formatearFecha(item.periodo.fechaInicio) }}
+                        @if (item.periodo.fechaFin) {
+                          <span class="date-separator">
+                            <svg class="date-arrow" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M14 5l7 7m0 0l-7 7m7-7H3"/>
+                            </svg>
+                            {{ formatearFecha(item.periodo.fechaFin) }}
+                          </span>
+                        }
+                      </p>
+                    </div>
+                  </div>
             <span class="period-status" [ngClass]="{
               'status-active': item.periodo.estado === 'En Curso',
               'status-completed': item.periodo.estado === 'Finalizado',
               'status-cancelled': item.periodo.estado === 'Cancelado'
             }">
-              {{ item.periodo.estado }}
-            </span>
-          </div>
-
-          <!-- Stats del Período -->
-          <div class="period-stats">
-            
-            <div class="stat-item">
-              <svg class="stat-icon" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 5a1 1 0 011-1h14a1 1 0 011 1v2a1 1 0 01-1 1H5a1 1 0 01-1-1V5zM4 13a1 1 0 011-1h6a1 1 0 011 1v6a1 1 0 01-1 1H5a1 1 0 01-1-1v-6zM16 13a1 1 0 011-1h2a1 1 0 011 1v6a1 1 0 01-1 1h-2a1 1 0 01-1-1v-6z"/>
-              </svg>
-              <div class="stat-content">
-                <span class="stat-label">Hectáreas</span>
-                <span class="stat-value">{{ formatearHectareas(item.periodo.hectareas) }}</span>
-              </div>
-            </div>
-
-            <div class="stat-item">
-              <svg class="stat-icon" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 6l3 1m0 0l-3 9a5.002 5.002 0 006.001 0M6 7l3 9M6 7l6-2m6 2l3-1m-3 1l-3 9a5.002 5.002 0 006.001 0M18 7l3 9m-3-9l-6-2m0-2v2m0 16V5m0 16H9m3 0h3"/>
-              </svg>
-              <div class="stat-content">
-                <span class="stat-label">Rendimiento</span>
-                <span class="stat-value">{{ item.periodo.rendimiento || 0 }} ton</span>
-              </div>
-            </div>
-
-            <div class="stat-item">
-              <svg class="stat-icon" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2m-3 7h3m-3 4h3m-6-4h.01M9 16h.01"/>
-              </svg>
-              <div class="stat-content">
-                <span class="stat-label">Eventos</span>
-                <span class="stat-value stat-value-accent">{{ item.eventos.length }}</span>
-              </div>
-            </div>
-
-            <div class="stat-item">
-              <svg class="stat-icon" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8c-1.657 0-3 .895-3 2s1.343 2 3 2 3 .895 3 2-1.343 2-3 2m0-8c1.11 0 2.08.402 2.599 1M12 8V7m0 1v8m0 0v1m0-1c-1.11 0-2.08-.402-2.599-1M21 12a9 9 0 11-18 0 9 9 0 0118 0z"/>
-              </svg>
-              <div class="stat-content">
-                <span class="stat-label">Costo Total</span>
-                <span class="stat-value stat-value-success">{{ formatearCosto(item.periodo.costoTotal) }}</span>
-              </div>
-            </div>
-
-          </div>
-
-          <!-- Timeline de Eventos -->
-          <div class="timeline-container">
-            
-            <!-- Evento -->
-            <div *ngFor="let ev of item.eventos; let last = last" class="timeline-item">
-              
-              <!-- Línea vertical -->
-              <div class="timeline-line" *ngIf="!last"></div>
-              
-              <!-- Punto del timeline -->
-              <div class="timeline-dot"></div>
-
-              <!-- Card del evento -->
-              <div class="event-card">
-                
-                <div class="event-header">
-                  <div class="event-icon-wrapper">
-                    <svg class="event-icon" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                      <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M20 7l-8-4-8 4m16 0l-8 4m8-4v10l-8 4m0-10L4 7m8 4v10M4 7v10l8 4"/>
-                    </svg>
-                  </div>
-
-                  <div class="event-info">
-                    <h4 class="event-title">{{ ev.tipoAplicacion || ev.nombre }}</h4>
-                    <p class="event-date">{{ formatearFecha(ev.fecha) }}</p>
-                  </div>
-
-                  <span *ngIf="ev.hectareas" class="event-badge">
-                    {{ formatearHectareas(ev.hectareas) }}
+                    {{ item.periodo.estado }}
                   </span>
                 </div>
-
-                <!-- Insumos -->
-                <div *ngIf="ev.insumos && ev.insumos.length > 0" class="event-insumos">
-                  <div class="insumos-header">
-                    <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                      <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M20 7l-8-4-8 4m16 0l-8 4m8-4v10l-8 4m0-10L4 7m8 4v10M4 7v10l8 4"/>
+                <!-- Stats del Período -->
+                <div class="period-stats">
+                  <div class="stat-item">
+                    <svg class="stat-icon" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 5a1 1 0 011-1h14a1 1 0 011 1v2a1 1 0 01-1 1H5a1 1 0 01-1-1V5zM4 13a1 1 0 011-1h6a1 1 0 011 1v6a1 1 0 01-1 1H5a1 1 0 01-1-1v-6zM16 13a1 1 0 011-1h2a1 1 0 011 1v6a1 1 0 01-1 1h-2a1 1 0 01-1-1v-6z"/>
                     </svg>
-                    <span class="insumos-title">Insumos Aplicados</span>
+                    <div class="stat-content">
+                      <span class="stat-label">Hectáreas</span>
+                      <span class="stat-value">{{ formatearHectareas(item.periodo.hectareas) }}</span>
+                    </div>
                   </div>
-
-                  <div class="insumos-list">
-                    <div *ngFor="let i of ev.insumos" class="insumo-item">
-                      <div class="insumo-info">
-                        <span class="insumo-name">{{ i.nombre }}</span>
-                        <span class="insumo-dose">({{ i.dosis }} {{ i.unidad }}/ha)</span>
-                      </div>
-                      <span class="insumo-quantity">{{ i.cantidad }} {{ i.unidad }}</span>
+                  <div class="stat-item">
+                    <svg class="stat-icon" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 6l3 1m0 0l-3 9a5.002 5.002 0 006.001 0M6 7l3 9M6 7l6-2m6 2l3-1m-3 1l-3 9a5.002 5.002 0 006.001 0M18 7l3 9m-3-9l-6-2m0-2v2m0 16V5m0 16H9m3 0h3"/>
+                    </svg>
+                    <div class="stat-content">
+                      <span class="stat-label">Rendimiento</span>
+                      <span class="stat-value">{{ item.periodo.rendimiento || 0 }} ton</span>
+                    </div>
+                  </div>
+                  <div class="stat-item">
+                    <svg class="stat-icon" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2m-3 7h3m-3 4h3m-6-4h.01M9 16h.01"/>
+                    </svg>
+                    <div class="stat-content">
+                      <span class="stat-label">Eventos</span>
+                      <span class="stat-value stat-value-accent">{{ item.eventos.length }}</span>
+                    </div>
+                  </div>
+                  <div class="stat-item">
+                    <svg class="stat-icon" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8c-1.657 0-3 .895-3 2s1.343 2 3 2 3 .895 3 2-1.343 2-3 2m0-8c1.11 0 2.08.402 2.599 1M12 8V7m0 1v8m0 0v1m0-1c-1.11 0-2.08-.402-2.599-1M21 12a9 9 0 11-18 0 9 9 0 0118 0z"/>
+                    </svg>
+                    <div class="stat-content">
+                      <span class="stat-label">Costo Total</span>
+                      <span class="stat-value stat-value-success">{{ formatearCosto(item.periodo.costoTotal) }}</span>
                     </div>
                   </div>
                 </div>
-
-                <!-- Footer del evento -->
-                <div class="event-footer">
-                  <span *ngIf="ev.responsable" class="event-responsible">
-                    <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                      <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z"/>
-                    </svg>
-                    {{ ev.responsable }}
-                  </span>
-                  <span *ngIf="ev.costo" class="event-cost">{{ formatearCosto(ev.costo) }}</span>
+                <!-- Timeline de Eventos -->
+                <div class="timeline-container">
+                  <!-- Evento -->
+                  @for (ev of item.eventos; track ev; let last = $last) {
+                    <div class="timeline-item">
+                      <!-- Línea vertical -->
+                      @if (!last) {
+                        <div class="timeline-line"></div>
+                      }
+                      <!-- Punto del timeline -->
+                      <div class="timeline-dot"></div>
+                      <!-- Card del evento -->
+                      <div class="event-card">
+                        <div class="event-header">
+                          <div class="event-icon-wrapper">
+                            <svg class="event-icon" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M20 7l-8-4-8 4m16 0l-8 4m8-4v10l-8 4m0-10L4 7m8 4v10M4 7v10l8 4"/>
+                            </svg>
+                          </div>
+                          <div class="event-info">
+                            <h4 class="event-title">{{ ev.tipoAplicacion || ev.nombre }}</h4>
+                            <p class="event-date">{{ formatearFecha(ev.fecha) }}</p>
+                          </div>
+                          @if (ev.hectareas) {
+                            <span class="event-badge">
+                              {{ formatearHectareas(ev.hectareas) }}
+                            </span>
+                          }
+                        </div>
+                        <!-- Insumos -->
+                        @if (ev.insumos && ev.insumos.length > 0) {
+                          <div class="event-insumos">
+                            <div class="insumos-header">
+                              <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M20 7l-8-4-8 4m16 0l-8 4m8-4v10l-8 4m0-10L4 7m8 4v10M4 7v10l8 4"/>
+                              </svg>
+                              <span class="insumos-title">Insumos Aplicados</span>
+                            </div>
+                            <div class="insumos-list">
+                              @for (i of ev.insumos; track i) {
+                                <div class="insumo-item">
+                                  <div class="insumo-info">
+                                    <span class="insumo-name">{{ i.nombre }}</span>
+                                    <span class="insumo-dose">({{ i.dosis }} {{ i.unidad }}/ha)</span>
+                                  </div>
+                                  <span class="insumo-quantity">{{ i.cantidad }} {{ i.unidad }}</span>
+                                </div>
+                              }
+                            </div>
+                          </div>
+                        }
+                        <!-- Footer del evento -->
+                        <div class="event-footer">
+                          @if (ev.responsable) {
+                            <span class="event-responsible">
+                              <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z"/>
+                              </svg>
+                              {{ ev.responsable }}
+                            </span>
+                          }
+                          @if (ev.costo) {
+                            <span class="event-cost">{{ formatearCosto(ev.costo) }}</span>
+                          }
+                        </div>
+                      </div>
+                    </div>
+                  }
+                  <!-- Sin eventos -->
+                  @if (item.eventos.length === 0) {
+                    <div class="no-events">
+                      <svg class="no-events-icon" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M20 13V6a2 2 0 00-2-2H6a2 2 0 00-2 2v7m16 0v5a2 2 0 01-2 2H6a2 2 0 01-2-2v-5m16 0h-2.586a1 1 0 00-.707.293l-2.414 2.414a1 1 0 01-.707.293h-3.172a1 1 0 01-.707-.293l-2.414-2.414A1 1 0 006.586 13H4"/>
+                      </svg>
+                      <p class="no-events-text">No hay eventos en este período</p>
+                    </div>
+                  }
                 </div>
-
               </div>
-
-            </div>
-
-            <!-- Sin eventos -->
-            <div *ngIf="item.eventos.length === 0" class="no-events">
-              <svg class="no-events-icon" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M20 13V6a2 2 0 00-2-2H6a2 2 0 00-2 2v7m16 0v5a2 2 0 01-2 2H6a2 2 0 01-2-2v-5m16 0h-2.586a1 1 0 00-.707.293l-2.414 2.414a1 1 0 01-.707.293h-3.172a1 1 0 01-.707-.293l-2.414-2.414A1 1 0 006.586 13H4"/>
+            }
+          </div>
+          <!-- Resumen -->
+          <div class="summary-card">
+            <div class="summary-header">
+              <svg class="summary-icon" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z"/>
               </svg>
-              <p class="no-events-text">No hay eventos en este período</p>
+              <h3 class="summary-title">Resumen de Trazabilidad</h3>
             </div>
-
+            <div class="summary-stats">
+              <div class="summary-stat summary-stat-blue">
+                <svg class="summary-stat-icon" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z"/>
+                </svg>
+                <span class="summary-stat-label">Períodos</span>
+                <span class="summary-stat-value">{{ totalPeriodos }}</span>
+              </div>
+              <div class="summary-stat summary-stat-purple">
+                <svg class="summary-stat-icon" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2m-3 7h3m-3 4h3m-6-4h.01M9 16h.01"/>
+                </svg>
+                <span class="summary-stat-label">Eventos</span>
+                <span class="summary-stat-value">{{ totalEventos }}</span>
+              </div>
+              <div class="summary-stat summary-stat-green">
+                <svg class="summary-stat-icon" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8c-1.657 0-3 .895-3 2s1.343 2 3 2 3 .895 3 2-1.343 2-3 2m0-8c1.11 0 2.08.402 2.599 1M12 8V7m0 1v8m0 0v1m0-1c-1.11 0-2.08-.402-2.599-1M21 12a9 9 0 11-18 0 9 9 0 0118 0z"/>
+                </svg>
+                <span class="summary-stat-label">Costo Total</span>
+                <span class="summary-stat-value summary-stat-value-sm">{{ formatearCosto(totalCosto) }}</span>
+              </div>
+              <div class="summary-stat summary-stat-yellow">
+                <svg class="summary-stat-icon" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 6l3 1m0 0l-3 9a5.002 5.002 0 006.001 0M6 7l3 9M6 7l6-2m6 2l3-1m-3 1l-3 9a5.002 5.002 0 006.001 0M18 7l3 9m-3-9l-6-2m0-2v2m0 16V5m0 16H9m3 0h3"/>
+                </svg>
+                <span class="summary-stat-label">Producción</span>
+                <span class="summary-stat-value">{{ totalProduccion }} <span class="summary-stat-unit">ton</span></span>
+              </div>
+            </div>
           </div>
-
         </div>
-      </div>
-
-      <!-- Resumen -->
-      <div class="summary-card">
-        <div class="summary-header">
-          <svg class="summary-icon" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z"/>
-          </svg>
-          <h3 class="summary-title">Resumen de Trazabilidad</h3>
-        </div>
-
-        <div class="summary-stats">
-          
-          <div class="summary-stat summary-stat-blue">
-            <svg class="summary-stat-icon" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z"/>
-            </svg>
-            <span class="summary-stat-label">Períodos</span>
-            <span class="summary-stat-value">{{ totalPeriodos }}</span>
-          </div>
-
-          <div class="summary-stat summary-stat-purple">
-            <svg class="summary-stat-icon" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2m-3 7h3m-3 4h3m-6-4h.01M9 16h.01"/>
-            </svg>
-            <span class="summary-stat-label">Eventos</span>
-            <span class="summary-stat-value">{{ totalEventos }}</span>
-          </div>
-
-          <div class="summary-stat summary-stat-green">
-            <svg class="summary-stat-icon" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8c-1.657 0-3 .895-3 2s1.343 2 3 2 3 .895 3 2-1.343 2-3 2m0-8c1.11 0 2.08.402 2.599 1M12 8V7m0 1v8m0 0v1m0-1c-1.11 0-2.08-.402-2.599-1M21 12a9 9 0 11-18 0 9 9 0 0118 0z"/>
-            </svg>
-            <span class="summary-stat-label">Costo Total</span>
-            <span class="summary-stat-value summary-stat-value-sm">{{ formatearCosto(totalCosto) }}</span>
-          </div>
-
-          <div class="summary-stat summary-stat-yellow">
-            <svg class="summary-stat-icon" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 6l3 1m0 0l-3 9a5.002 5.002 0 006.001 0M6 7l3 9M6 7l6-2m6 2l3-1m-3 1l-3 9a5.002 5.002 0 006.001 0M18 7l3 9m-3-9l-6-2m0-2v2m0 16V5m0 16H9m3 0h3"/>
-            </svg>
-            <span class="summary-stat-label">Producción</span>
-            <span class="summary-stat-value">{{ totalProduccion }} <span class="summary-stat-unit">ton</span></span>
-          </div>
-
-        </div>
-      </div>
-
+      }
     </div>
-
-  </div>
+  }
 
 </div>

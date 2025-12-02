@@ -1,5 +1,5 @@
 import { Component, inject, OnInit } from '@angular/core';
-import { CommonModule } from '@angular/common';
+
 import { FormsModule } from '@angular/forms';
 import { Router, RouterModule } from '@angular/router';
 import { UsuariosService } from '../../services/usuarios.service';
@@ -9,7 +9,7 @@ import { AuthService } from '../../../../core/services/auth.service';
 @Component({
   selector: 'app-crear-usuario',
   standalone: true,
-  imports: [CommonModule, FormsModule, RouterModule],
+  imports: [FormsModule, RouterModule],
   templateUrl: './crear-usuario.component.html',
   styleUrls: ['./crear-usuario.component.css']
 })

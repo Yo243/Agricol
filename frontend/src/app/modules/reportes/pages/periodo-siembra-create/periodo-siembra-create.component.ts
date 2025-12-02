@@ -1,5 +1,5 @@
 import { Component, OnInit, inject } from '@angular/core';
-import { CommonModule, NgIf, NgFor } from '@angular/common';
+
 import { Router, RouterModule } from '@angular/router';
 import { FormsModule, ReactiveFormsModule, FormBuilder, FormGroup, Validators } from '@angular/forms';
 import { PeriodosSiembraService } from '../../services/periodos-siembra.service';
@@ -8,13 +8,10 @@ import { PeriodosSiembraService } from '../../services/periodos-siembra.service'
   selector: 'app-periodo-siembra-create',
   standalone: true,
   imports: [
-    CommonModule,
     RouterModule,
     FormsModule,
-    ReactiveFormsModule,
-    NgIf,
-    NgFor
-  ],
+    ReactiveFormsModule
+],
   templateUrl: './periodo-siembra-create.component.html',
   styleUrls: ['./periodo-siembra-create.component.css']
 })

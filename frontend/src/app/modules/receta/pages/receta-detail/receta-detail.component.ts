@@ -27,6 +27,14 @@ export class RecetaDetailComponent implements OnInit {
   error = '';
   hectareasSimulacion = 10;
 
+  // ✅ Feedback tipo "localhost" pero bonito
+  feedbackMessage = '';
+  feedbackType: 'success' | 'error' | 'info' | '' = '';
+
+  // ✅ Modal de confirmación de borrado
+  confirmModalVisible = false;
+  deleteLoading = false;
+
   ngOnInit(): void {
     const id = Number(this.route.snapshot.paramMap.get('id'));
     if (id) this.loadReceta(id);
@@ -34,6 +42,7 @@ export class RecetaDetailComponent implements OnInit {
 
   loadReceta(id: number): void {
     this.loading = true;
+    this.error = '';
 
     this.recetaService.getRecetaById(id).subscribe({
       next: (data) => {
@@ -43,6 +52,7 @@ export class RecetaDetailComponent implements OnInit {
       error: (err) => {
         console.error('Error al cargar receta:', err);
         this.error = 'No se pudo cargar la receta';
+        this.showFeedback('No se pudo cargar la receta', 'error');
         this.loading = false;
       }
     });
@@ -66,20 +76,58 @@ export class RecetaDetailComponent implements OnInit {
     this.router.navigate(['/receta']);
   }
 
-  deleteReceta(): void {
+  // ======================
+  //  MODAL ELIMINAR
+  // ======================
+
+  openDeleteModal(): void {
+    if (!this.receta?.id) return;
+    this.confirmModalVisible = true;
+  }
+
+  closeDeleteModal(): void {
+    this.confirmModalVisible = false;
+    this.deleteLoading = false;
+  }
+
+  confirmDeleteReceta(): void {
     if (!this.receta?.id) return;
 
-    if (confirm(`¿Seguro que deseas eliminar "${this.receta.nombre}"?`)) {
-      this.recetaService.deleteReceta(this.receta.id).subscribe({
-        next: () => {
-          alert('Receta eliminada exitosamente');
-          this.router.navigate(['/receta']);
-        },
-        error: (err) => {
-          console.error('Error al eliminar:', err);
-          alert('No se pudo eliminar la receta');
-        }
-      });
-    }
+    this.deleteLoading = true;
+
+    this.recetaService.deleteReceta(this.receta.id).subscribe({
+      next: () => {
+        this.deleteLoading = false;
+        this.confirmModalVisible = false;
+        this.showFeedback('Receta eliminada exitosamente', 'success');
+
+        // Navegamos al listado
+        this.router.navigate(['/receta']);
+      },
+      error: (err) => {
+        console.error('Error al eliminar:', err);
+        this.deleteLoading = false;
+        this.confirmModalVisible = false;
+        this.showFeedback('No se pudo eliminar la receta', 'error');
+      }
+    });
+  }
+
+  // ======================
+  //  FEEDBACK HELPER
+  // ======================
+
+  private showFeedback(
+    message: string,
+    type: 'success' | 'error' | 'info' = 'info'
+  ): void {
+    this.feedbackMessage = message;
+    this.feedbackType = type;
+
+    // Se desvanece solo después de unos segundos
+    setTimeout(() => {
+      this.feedbackMessage = '';
+      this.feedbackType = '';
+    }, 3500);
   }
 }

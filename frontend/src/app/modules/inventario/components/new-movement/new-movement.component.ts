@@ -1,6 +1,13 @@
 import { Component, Input, Output, EventEmitter, OnInit } from '@angular/core';
 import { CommonModule } from '@angular/common';
-import { FormBuilder, FormGroup, Validators, ReactiveFormsModule } from '@angular/forms';
+import {
+  FormBuilder,
+  FormGroup,
+  Validators,
+  ReactiveFormsModule,
+  AbstractControl,
+  ValidatorFn,
+} from '@angular/forms';
 import { InventarioService } from '../../services/inventario.service';
 import { InventarioItem, TipoMovimiento } from '../../../../models/inventario.model';
 
@@ -15,7 +22,7 @@ export class NewMovementComponent implements OnInit {
   @Input() item: InventarioItem | null = null;
   @Output() closed = new EventEmitter<void>();
 
-  // 👉 para que el padre pueda abrir el modal de nuevo producto
+  // para abrir modal de nuevo producto desde el padre
   @Output() newItemRequested = new EventEmitter<void>();
 
   movimientoForm: FormGroup;
@@ -30,36 +37,123 @@ export class NewMovementComponent implements OnInit {
     private fb: FormBuilder,
     private inventarioService: InventarioService
   ) {
-    this.movimientoForm = this.fb.group({
-      itemId: ['', Validators.required],
-      tipo: [TipoMovimiento.ENTRADA, Validators.required],
-      cantidad: [0, [Validators.required, Validators.min(0.01)]],
-      costoUnitario: [0],
-      fecha: [new Date().toISOString().split('T')[0], Validators.required],
-      razon: ['', Validators.required],
-      referencia: [''],
-      destino: [''],
-      observaciones: ['']
-    });
+    const hoy = this.today;
+
+    this.movimientoForm = this.fb.group(
+      {
+        itemId: ['', Validators.required],
+
+        tipo: [TipoMovimiento.ENTRADA, Validators.required],
+
+        cantidad: [
+          null,
+          [
+            Validators.required,
+            Validators.min(0.01),
+          ],
+        ],
+
+        costoUnitario: [
+          0,
+          [
+            Validators.min(0),
+          ],
+        ],
+
+        fecha: [
+          hoy,
+          [
+            Validators.required,
+            this.fechaNoPasadaValidator,
+          ],
+        ],
+
+        razon: [
+          '',
+          [
+            Validators.required,
+            Validators.minLength(5),
+            Validators.maxLength(200),
+          ],
+        ],
+
+        referencia: ['', [Validators.maxLength(100)]],
+        destino: ['', [Validators.maxLength(100)]],
+        observaciones: ['', [Validators.maxLength(500)]],
+      },
+      {
+        validators: [this.validarCostoSegunTipo()],
+      }
+    );
   }
 
   ngOnInit(): void {
     if (this.item) {
-      // Cuando vienes desde un item específico
       this.movimientoForm.patchValue({
         itemId: this.item.id,
-        costoUnitario: this.item.costoUnitario
+        costoUnitario: this.item.costoUnitario ?? 0,
       });
     } else {
-      // Cuando es "nuevo movimiento" general, cargar todos
       this.cargarItems();
     }
 
-    // Actualizar costo total cuando cambia cantidad o costo unitario
     this.movimientoForm.get('cantidad')?.valueChanges
       .subscribe(() => this.actualizarCostoTotal());
     this.movimientoForm.get('costoUnitario')?.valueChanges
       .subscribe(() => this.actualizarCostoTotal());
+  }
+
+  /** ✅ No permite fechas pasadas */
+  fechaNoPasadaValidator = (control: AbstractControl) => {
+    const value = control.value;
+    if (!value) return null;
+
+    const controlDate = new Date(value);
+    const today = new Date();
+
+    controlDate.setHours(0, 0, 0, 0);
+    today.setHours(0, 0, 0, 0);
+
+    if (controlDate < today) {
+      return { fechaPasada: true };
+    }
+
+    return null;
+  };
+
+  /** ✅ Si es ENTRADA, el costo es obligatorio y > 0 */
+  validarCostoSegunTipo(): ValidatorFn {
+    return (group: AbstractControl) => {
+      const tipo = group.get('tipo')?.value as TipoMovimiento;
+      const costoUnitario = Number(group.get('costoUnitario')?.value || 0);
+
+      const costoCtrl = group.get('costoUnitario');
+      if (!costoCtrl) return null;
+
+      if (tipo === TipoMovimiento.ENTRADA) {
+        if (!costoUnitario || costoUnitario <= 0) {
+          costoCtrl.setErrors({
+            ...(costoCtrl.errors || {}),
+            costoRequerido: true,
+          });
+        } else {
+          const errors = costoCtrl.errors;
+          if (errors && errors['costoRequerido']) {
+            delete errors['costoRequerido'];
+            costoCtrl.setErrors(Object.keys(errors).length ? errors : null);
+          }
+        }
+      } else {
+        // si cambiaron a SALIDA u otro tipo, quitamos ese error
+        const errors = costoCtrl.errors;
+        if (errors && errors['costoRequerido']) {
+          delete errors['costoRequerido'];
+          costoCtrl.setErrors(Object.keys(errors).length ? errors : null);
+        }
+      }
+
+      return null;
+    };
   }
 
   cargarItems(): void {
@@ -71,11 +165,6 @@ export class NewMovementComponent implements OnInit {
     });
   }
 
-  /**
-   * Al seleccionar un producto:
-   * - Si tiene costoUnitario > 0 → rellenamos el campo.
-   * - Si no tiene, dejamos 0 para que el usuario lo capture.
-   */
   onItemChange(): void {
     const itemId = Number(this.movimientoForm.get('itemId')?.value);
     if (!itemId) return;
@@ -97,7 +186,7 @@ export class NewMovementComponent implements OnInit {
   actualizarCostoTotal(): void {
     const cantidad = this.movimientoForm.get('cantidad')?.value || 0;
     const costoUnitario = this.movimientoForm.get('costoUnitario')?.value || 0;
-    // Solo para exponerlo al template; el backend igual lo recalcula
+    // solo recalculamos el getter
   }
 
   onSubmit(): void {
@@ -112,6 +201,7 @@ export class NewMovementComponent implements OnInit {
     this.inventarioService.registrarMovimiento(this.movimientoForm.value).subscribe({
       next: () => {
         this.success = true;
+        this.loading = false;
         setTimeout(() => this.close(), 1500);
       },
       error: (error) => {
@@ -125,7 +215,6 @@ export class NewMovementComponent implements OnInit {
     this.closed.emit();
   }
 
-  // 👉 botón "Nuevo producto"
   onNewItem(): void {
     this.newItemRequested.emit();
   }
@@ -135,4 +224,19 @@ export class NewMovementComponent implements OnInit {
     const costoUnitario = this.movimientoForm.get('costoUnitario')?.value || 0;
     return cantidad * costoUnitario;
   }
+
+  /** para usar en [min] del input date */
+  get today(): string {
+    return new Date().toISOString().split('T')[0];
+  }
+
+  // Getters para no ensuciar el HTML
+  get itemIdCtrl() { return this.movimientoForm.get('itemId'); }
+  get fechaCtrl() { return this.movimientoForm.get('fecha'); }
+  get cantidadCtrl() { return this.movimientoForm.get('cantidad'); }
+  get costoUnitarioCtrl() { return this.movimientoForm.get('costoUnitario'); }
+  get razonCtrl() { return this.movimientoForm.get('razon'); }
+  get referenciaCtrl() { return this.movimientoForm.get('referencia'); }
+  get destinoCtrl() { return this.movimientoForm.get('destino'); }
+  get observacionesCtrl() { return this.movimientoForm.get('observaciones'); }
 }

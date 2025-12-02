@@ -1,5 +1,5 @@
 import { Component, EventEmitter, Input, OnInit, Output, inject } from '@angular/core';
-import { CommonModule } from '@angular/common';
+
 import { FormsModule } from '@angular/forms';
 import { HttpClient } from '@angular/common/http';
 import { ParcelasService } from '../../services/parcela.service';
@@ -43,7 +43,7 @@ interface SugerenciaIA {
 @Component({
   selector: 'app-form-aplicacion',
   standalone: true,
-  imports: [CommonModule, FormsModule],
+  imports: [FormsModule],
   templateUrl: './form-aplicacion.html',
   styleUrls: ['./form-aplicacion.css']
 })

@@ -1,5 +1,5 @@
 import { Component, EventEmitter, Input, OnInit, Output, inject } from '@angular/core';
-import { CommonModule } from '@angular/common';
+
 import { FormsModule } from '@angular/forms';
 import { ParcelasService } from '../../services/parcela.service';
 import {
@@ -15,7 +15,7 @@ import {
 @Component({
   selector: 'app-form-parcela',
   standalone: true,
-  imports: [CommonModule, FormsModule],
+  imports: [FormsModule],
   templateUrl: './form-parcela.html',
   styleUrls: ['./form-parcela.css']
 })

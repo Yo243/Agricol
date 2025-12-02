@@ -22,12 +22,14 @@
   </div>
 
   <!-- Alert de Error -->
-  <div *ngIf="errorMessage" class="alert-error">
-    <svg class="alert-icon" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-      <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"/>
-    </svg>
-    <span>{{ errorMessage }}</span>
-  </div>
+  @if (errorMessage) {
+    <div class="alert-error">
+      <svg class="alert-icon" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"/>
+      </svg>
+      <span>{{ errorMessage }}</span>
+    </div>
+  }
 
   <!-- Formulario -->
   <form [formGroup]="periodoForm" (ngSubmit)="onSubmit()">
@@ -40,7 +42,7 @@
       </div>
 
       <div class="form-grid">
-        
+
         <div class="form-group">
           <label class="form-label">
             <svg class="label-icon" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -50,24 +52,28 @@
             <span class="required">*</span>
           </label>
           <div class="select-wrapper">
-            <select 
+            <select
               formControlName="parcelaId"
               (change)="onParcelaChange()"
               class="form-input"
               [class.input-error]="periodoForm.get('parcelaId')?.invalid && periodoForm.get('parcelaId')?.touched">
               <option value="">Seleccione una parcela</option>
-              <option *ngFor="let parcela of parcelas" [value]="parcela.id">
-                {{ parcela.nombre }} ({{ parcela.superficieHa }} ha)
-              </option>
+              @for (parcela of parcelas; track parcela) {
+                <option [value]="parcela.id">
+                  {{ parcela.nombre }} ({{ parcela.superficieHa }} ha)
+                </option>
+              }
             </select>
             <svg class="select-icon" fill="none" stroke="currentColor" viewBox="0 0 24 24">
               <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"/>
             </svg>
           </div>
-          <span *ngIf="periodoForm.get('parcelaId')?.invalid && periodoForm.get('parcelaId')?.touched" 
-                class="error-message">
-            La parcela es obligatoria
-          </span>
+          @if (periodoForm.get('parcelaId')?.invalid && periodoForm.get('parcelaId')?.touched) {
+            <span
+              class="error-message">
+              La parcela es obligatoria
+            </span>
+          }
         </div>
 
         <div class="form-group">
@@ -79,24 +85,28 @@
             <span class="required">*</span>
           </label>
           <div class="select-wrapper">
-            <select 
+            <select
               formControlName="cultivoId"
               (change)="onCultivoChange()"
               class="form-input"
               [class.input-error]="periodoForm.get('cultivoId')?.invalid && periodoForm.get('cultivoId')?.touched">
               <option value="">Seleccione un cultivo</option>
-              <option *ngFor="let cultivo of cultivos" [value]="cultivo.id">
-                {{ cultivo.nombre }} {{ cultivo.variedad ? '- ' + cultivo.variedad : '' }}
-              </option>
+              @for (cultivo of cultivos; track cultivo) {
+                <option [value]="cultivo.id">
+                  {{ cultivo.nombre }} {{ cultivo.variedad ? '- ' + cultivo.variedad : '' }}
+                </option>
+              }
             </select>
             <svg class="select-icon" fill="none" stroke="currentColor" viewBox="0 0 24 24">
               <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"/>
             </svg>
           </div>
-          <span *ngIf="periodoForm.get('cultivoId')?.invalid && periodoForm.get('cultivoId')?.touched" 
-                class="error-message">
-            El cultivo es obligatorio
-          </span>
+          @if (periodoForm.get('cultivoId')?.invalid && periodoForm.get('cultivoId')?.touched) {
+            <span
+              class="error-message">
+              El cultivo es obligatorio
+            </span>
+          }
         </div>
 
       </div>
@@ -110,7 +120,7 @@
       </div>
 
       <div class="form-grid">
-        
+
         <div class="form-group">
           <label class="form-label">
             <svg class="label-icon" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -119,172 +129,184 @@
             Fecha de Siembra
             <span class="required">*</span>
           </label>
-          <input 
-            type="date" 
+          <input
+            type="date"
             formControlName="fechaInicio"
             class="form-input"
             [class.input-error]="periodoForm.get('fechaInicio')?.invalid && periodoForm.get('fechaInicio')?.touched">
-          <span *ngIf="periodoForm.get('fechaInicio')?.invalid && periodoForm.get('fechaInicio')?.touched" 
+            @if (periodoForm.get('fechaInicio')?.invalid && periodoForm.get('fechaInicio')?.touched) {
+              <span
                 class="error-message">
-            La fecha de siembra es obligatoria
-          </span>
-        </div>
+                La fecha de siembra es obligatoria
+              </span>
+            }
+          </div>
 
-        <div class="form-group">
-          <label class="form-label">
-            <svg class="label-icon" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z"/>
-            </svg>
-            Fecha de Cosecha Esperada
-            <span class="required">*</span>
-          </label>
-          <input 
-            type="date" 
-            formControlName="fechaCosechaEsperada"
-            class="form-input"
-            [class.input-error]="periodoForm.get('fechaCosechaEsperada')?.invalid && periodoForm.get('fechaCosechaEsperada')?.touched">
-          <span *ngIf="periodoForm.get('fechaCosechaEsperada')?.invalid && periodoForm.get('fechaCosechaEsperada')?.touched" 
-                class="error-message">
-            La fecha de cosecha esperada es obligatoria
-          </span>
-          <p class="form-hint">Se calcula automáticamente según el ciclo del cultivo</p>
-        </div>
-
-      </div>
-    </div>
-
-    <!-- Sección 3: Datos de Producción -->
-    <div class="form-card">
-      <div class="section-header">
-        <div class="section-badge">3</div>
-        <h2 class="section-title">Datos de Producción</h2>
-      </div>
-
-      <div class="form-grid">
-        
-        <div class="form-group">
-          <label class="form-label">
-            <svg class="label-icon" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 5a1 1 0 011-1h14a1 1 0 011 1v2a1 1 0 01-1 1H5a1 1 0 01-1-1V5zM4 13a1 1 0 011-1h6a1 1 0 011 1v6a1 1 0 01-1 1H5a1 1 0 01-1-1v-6zM16 13a1 1 0 011-1h2a1 1 0 011 1v6a1 1 0 01-1 1h-2a1 1 0 01-1-1v-6z"/>
-            </svg>
-            Hectáreas Sembradas
-            <span class="required">*</span>
-          </label>
-          <div class="input-with-unit">
-            <input 
-              type="number" 
-              formControlName="hectareasSembradas"
-              step="0.1"
-              min="0.1"
-              placeholder="0.0"
+          <div class="form-group">
+            <label class="form-label">
+              <svg class="label-icon" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z"/>
+              </svg>
+              Fecha de Cosecha Esperada
+              <span class="required">*</span>
+            </label>
+            <input
+              type="date"
+              formControlName="fechaCosechaEsperada"
               class="form-input"
-              [class.input-error]="periodoForm.get('hectareasSembradas')?.invalid && periodoForm.get('hectareasSembradas')?.touched">
-            <span class="input-unit">ha</span>
+              [class.input-error]="periodoForm.get('fechaCosechaEsperada')?.invalid && periodoForm.get('fechaCosechaEsperada')?.touched">
+              @if (periodoForm.get('fechaCosechaEsperada')?.invalid && periodoForm.get('fechaCosechaEsperada')?.touched) {
+                <span
+                  class="error-message">
+                  La fecha de cosecha esperada es obligatoria
+                </span>
+              }
+              <p class="form-hint">Se calcula automáticamente según el ciclo del cultivo</p>
+            </div>
+
           </div>
-          <span *ngIf="periodoForm.get('hectareasSembradas')?.invalid && periodoForm.get('hectareasSembradas')?.touched" 
-                class="error-message">
-            Las hectáreas sembradas son obligatorias (mínimo 0.1)
-          </span>
-          <p class="form-hint">Se autocompleta con el tamaño de la parcela seleccionada</p>
         </div>
 
-        <div class="form-group">
-          <label class="form-label">
-            <svg class="label-icon" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 6l3 1m0 0l-3 9a5.002 5.002 0 006.001 0M6 7l3 9M6 7l6-2m6 2l3-1m-3 1l-3 9a5.002 5.002 0 006.001 0M18 7l3 9m-3-9l-6-2m0-2v2m0 16V5m0 16H9m3 0h3"/>
-            </svg>
-            Rendimiento Esperado (ton/ha)
-          </label>
-          <div class="input-with-unit">
-            <input 
-              type="number" 
-              formControlName="rendimientoEsperado"
-              step="0.1"
-              min="0"
-              placeholder="0.0"
-              class="form-input">
-            <span class="input-unit">ton</span>
+        <!-- Sección 3: Datos de Producción -->
+        <div class="form-card">
+          <div class="section-header">
+            <div class="section-badge">3</div>
+            <h2 class="section-title">Datos de Producción</h2>
           </div>
-          <p class="form-hint">Toneladas por hectárea que esperas cosechar</p>
+
+          <div class="form-grid">
+
+            <div class="form-group">
+              <label class="form-label">
+                <svg class="label-icon" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 5a1 1 0 011-1h14a1 1 0 011 1v2a1 1 0 01-1 1H5a1 1 0 01-1-1V5zM4 13a1 1 0 011-1h6a1 1 0 011 1v6a1 1 0 01-1 1H5a1 1 0 01-1-1v-6zM16 13a1 1 0 011-1h2a1 1 0 011 1v6a1 1 0 01-1 1h-2a1 1 0 01-1-1v-6z"/>
+                </svg>
+                Hectáreas Sembradas
+                <span class="required">*</span>
+              </label>
+              <div class="input-with-unit">
+                <input
+                  type="number"
+                  formControlName="hectareasSembradas"
+                  step="0.1"
+                  min="0.1"
+                  placeholder="0.0"
+                  class="form-input"
+                  [class.input-error]="periodoForm.get('hectareasSembradas')?.invalid && periodoForm.get('hectareasSembradas')?.touched">
+                  <span class="input-unit">ha</span>
+                </div>
+                @if (periodoForm.get('hectareasSembradas')?.invalid && periodoForm.get('hectareasSembradas')?.touched) {
+                  <span
+                    class="error-message">
+                    Las hectáreas sembradas son obligatorias (mínimo 0.1)
+                  </span>
+                }
+                <p class="form-hint">Se autocompleta con el tamaño de la parcela seleccionada</p>
+              </div>
+
+              <div class="form-group">
+                <label class="form-label">
+                  <svg class="label-icon" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 6l3 1m0 0l-3 9a5.002 5.002 0 006.001 0M6 7l3 9M6 7l6-2m6 2l3-1m-3 1l-3 9a5.002 5.002 0 006.001 0M18 7l3 9m-3-9l-6-2m0-2v2m0 16V5m0 16H9m3 0h3"/>
+                  </svg>
+                  Rendimiento Esperado (ton/ha)
+                </label>
+                <div class="input-with-unit">
+                  <input
+                    type="number"
+                    formControlName="rendimientoEsperado"
+                    step="0.1"
+                    min="0"
+                    placeholder="0.0"
+                    class="form-input">
+                    <span class="input-unit">ton</span>
+                  </div>
+                  <p class="form-hint">Toneladas por hectárea que esperas cosechar</p>
+                </div>
+
+              </div>
+            </div>
+
+            <!-- Sección 4: Observaciones -->
+            <div class="form-card">
+              <div class="section-header">
+                <div class="section-badge">4</div>
+                <h2 class="section-title">Notas y Observaciones</h2>
+              </div>
+
+              <div class="form-group">
+                <label class="form-label">
+                  <svg class="label-icon" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"/>
+                  </svg>
+                  Notas Adicionales
+                </label>
+                <textarea
+                  formControlName="observaciones"
+                  rows="4"
+                  placeholder="Escribe cualquier observación sobre este período de siembra..."
+                class="form-textarea"></textarea>
+                <p class="form-hint">Ejemplo: Tipo de semilla, condiciones especiales, etc.</p>
+              </div>
+            </div>
+
+            <!-- Actions -->
+            <div class="form-actions">
+              <button type="button" class="btn-secondary" (click)="cancel()" [disabled]="loading">
+                <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/>
+                </svg>
+                <span>Cancelar</span>
+              </button>
+              <button type="submit" class="btn-primary" [disabled]="loading || periodoForm.invalid">
+                @if (!loading) {
+                  <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"/>
+                  </svg>
+                }
+                @if (loading) {
+                  <svg class="w-4 h-4 animate-spin" fill="none" viewBox="0 0 24 24">
+                    <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
+                    <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+                  </svg>
+                }
+                <span>{{ loading ? 'Creando...' : 'Crear Período de Siembra' }}</span>
+              </button>
+            </div>
+
+          </form>
+
+          <!-- Preview Card -->
+          @if (periodoForm.valid) {
+            <div class="preview-card">
+              <div class="preview-header">
+                <svg class="preview-icon" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"/>
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z"/>
+                </svg>
+                <h3 class="preview-title">Vista Previa</h3>
+              </div>
+              <div class="preview-grid">
+                <div class="preview-item">
+                  <span class="preview-label">Parcela:</span>
+                  <span class="preview-value">{{ getNombreParcela() }}</span>
+                </div>
+                <div class="preview-item">
+                  <span class="preview-label">Cultivo:</span>
+                  <span class="preview-value">{{ getNombreCultivo() }}</span>
+                </div>
+                <div class="preview-item">
+                  <span class="preview-label">Hectáreas:</span>
+                  <span class="preview-value">{{ periodoForm.get('hectareasSembradas')?.value }} ha</span>
+                </div>
+                <div class="preview-item">
+                  <span class="preview-label">Duración Estimada:</span>
+                  <span class="preview-value">
+                    {{ calcularDiferenciaDias(periodoForm.get('fechaInicio')?.value, periodoForm.get('fechaCosechaEsperada')?.value) }} días
+                  </span>
+                </div>
+              </div>
+            </div>
+          }
+
         </div>
-
-      </div>
-    </div>
-
-    <!-- Sección 4: Observaciones -->
-    <div class="form-card">
-      <div class="section-header">
-        <div class="section-badge">4</div>
-        <h2 class="section-title">Notas y Observaciones</h2>
-      </div>
-
-      <div class="form-group">
-        <label class="form-label">
-          <svg class="label-icon" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"/>
-          </svg>
-          Notas Adicionales
-        </label>
-        <textarea 
-          formControlName="observaciones"
-          rows="4"
-          placeholder="Escribe cualquier observación sobre este período de siembra..."
-          class="form-textarea"></textarea>
-        <p class="form-hint">Ejemplo: Tipo de semilla, condiciones especiales, etc.</p>
-      </div>
-    </div>
-
-    <!-- Actions -->
-    <div class="form-actions">
-      <button type="button" class="btn-secondary" (click)="cancel()" [disabled]="loading">
-        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/>
-        </svg>
-        <span>Cancelar</span>
-      </button>
-      <button type="submit" class="btn-primary" [disabled]="loading || periodoForm.invalid">
-        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24" *ngIf="!loading">
-          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"/>
-        </svg>
-        <svg class="w-4 h-4 animate-spin" fill="none" viewBox="0 0 24 24" *ngIf="loading">
-          <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
-          <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
-        </svg>
-        <span>{{ loading ? 'Creando...' : 'Crear Período de Siembra' }}</span>
-      </button>
-    </div>
-
-  </form>
-
-  <!-- Preview Card -->
-  <div class="preview-card" *ngIf="periodoForm.valid">
-    <div class="preview-header">
-      <svg class="preview-icon" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"/>
-        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z"/>
-      </svg>
-      <h3 class="preview-title">Vista Previa</h3>
-    </div>
-    <div class="preview-grid">
-      <div class="preview-item">
-        <span class="preview-label">Parcela:</span>
-        <span class="preview-value">{{ getNombreParcela() }}</span>
-      </div>
-      <div class="preview-item">
-        <span class="preview-label">Cultivo:</span>
-        <span class="preview-value">{{ getNombreCultivo() }}</span>
-      </div>
-      <div class="preview-item">
-        <span class="preview-label">Hectáreas:</span>
-        <span class="preview-value">{{ periodoForm.get('hectareasSembradas')?.value }} ha</span>
-      </div>
-      <div class="preview-item">
-        <span class="preview-label">Duración Estimada:</span>
-        <span class="preview-value">
-          {{ calcularDiferenciaDias(periodoForm.get('fechaInicio')?.value, periodoForm.get('fechaCosechaEsperada')?.value) }} días
-        </span>
-      </div>
-    </div>
-  </div>
-
-</div>

@@ -1,426 +1,434 @@
 <!-- ============================================================
-     FORMULARIO DE APLICACIÓN DE INSUMOS CON IA - AgriCol
-     ============================================================ -->
+FORMULARIO DE APLICACIÓN DE INSUMOS CON IA - AgriCol
+============================================================ -->
 
-<div class="modal-overlay" *ngIf="true" (click)="cerrar()">
-  <div class="modal-container modal-wide" (click)="$event.stopPropagation()">
-    
-    <!-- Header del Modal -->
-    <div class="modal-header">
-      <h2 class="modal-title">Registrar Aplicación de Insumos</h2>
-      <button type="button" class="btn-close" (click)="cerrar()" aria-label="Cerrar">
-        <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/>
-        </svg>
-      </button>
-    </div>
-
-    <!-- Body del Modal -->
-    <div class="modal-body">
-      
-      <!-- Indicador de Carga -->
-      <div *ngIf="loadingData" class="loading-overlay">
-        <svg class="animate-spin w-8 h-8 text-primary" fill="none" viewBox="0 0 24 24">
-          <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
-          <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
-        </svg>
-        <p>Cargando datos...</p>
+@if (true) {
+  <div class="modal-overlay" (click)="cerrar()">
+    <div class="modal-container modal-wide" (click)="$event.stopPropagation()">
+      <!-- Header del Modal -->
+      <div class="modal-header">
+        <h2 class="modal-title">Registrar Aplicación de Insumos</h2>
+        <button type="button" class="btn-close" (click)="cerrar()" aria-label="Cerrar">
+          <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/>
+          </svg>
+        </button>
       </div>
-
-      <form *ngIf="!loadingData">
-        
-        <!-- Sección 1: Información General con Botón IA -->
-        <div class="form-section">
-          <div class="section-header">
-            <svg class="w-5 h-5 text-primary" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"/>
+      <!-- Body del Modal -->
+      <div class="modal-body">
+        <!-- Indicador de Carga -->
+        @if (loadingData) {
+          <div class="loading-overlay">
+            <svg class="animate-spin w-8 h-8 text-primary" fill="none" viewBox="0 0 24 24">
+              <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
+              <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
             </svg>
-            <h3 class="section-title">Información General</h3>
-            
-            <!-- Botón de IA -->
-            <button 
-              type="button" 
-              class="btn-ia ml-auto"
-              (click)="obtenerSugerenciaIA()"
-              [disabled]="loadingIA || !formData.periodoSiembraId"
-              title="Obtener sugerencias de IA">
-              <svg *ngIf="!loadingIA" class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9.663 17h4.673M12 3v1m6.364 1.636l-.707.707M21 12h-1M4 12H3m3.343-5.657l-.707-.707m2.828 9.9a5 5 0 117.072 0l-.548.547A3.374 3.374 0 0014 18.469V19a2 2 0 11-4 0v-.531c0-.895-.356-1.754-.988-2.386l-.548-.547z"/>
-              </svg>
-              <svg *ngIf="loadingIA" class="animate-spin w-4 h-4" fill="none" viewBox="0 0 24 24">
-                <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
-                <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
-              </svg>
-              <span>{{ loadingIA ? 'Generando...' : 'Sugerencia IA' }}</span>
-            </button>
+            <p>Cargando datos...</p>
           </div>
-
-          <div class="form-grid-2">
-            
-            <!-- Período de Siembra -->
-            <div class="form-group">
-              <label class="form-label required">Período de Siembra</label>
-              <select 
-                class="form-input"
-                [(ngModel)]="formData.periodoSiembraId"
-                name="periodoSiembra"
-                (change)="onPeriodoChange()"
-                required>
-                <option value="0">Seleccionar período...</option>
-                <option *ngFor="let periodo of periodos" [value]="periodo.id">
-                  {{ getPeriodoNombre(periodo) }}
-                </option>
-              </select>
-            </div>
-
-            <!-- Tipo de Aplicación -->
-            <div class="form-group">
-              <label class="form-label required">Tipo de Aplicación</label>
-              <select 
-                class="form-input"
-                [(ngModel)]="formData.tipoAplicacion"
-                name="tipoAplicacion"
-                required>
-                <option *ngFor="let tipo of TIPOS_APLICACION" [value]="tipo">
-                  {{tipo}}
-                </option>
-              </select>
-            </div>
-
-            <!-- Fecha de Aplicación -->
-            <div class="form-group">
-              <label class="form-label required">Fecha de Aplicación</label>
-              <input 
-                type="date"
-                class="form-input"
-                [(ngModel)]="formData.fecha"
-                name="fecha"
-                required>
-            </div>
-
-            <!-- Hectáreas Aplicadas -->
-            <div class="form-group">
-              <label class="form-label required">Hectáreas Aplicadas</label>
-              <div class="input-with-unit">
-                <input 
-                  type="number"
-                  class="form-input"
-                  [(ngModel)]="formData.hectareasAplicadas"
-                  name="hectareasAplicadas"
-                  step="0.01"
-                  min="0"
-                  placeholder="0"
-                  required>
-                <span class="input-unit">ha</span>
-              </div>
-            </div>
-
-            <!-- Responsable de la Aplicación -->
-            <div class="form-group full-width">
-              <label class="form-label">Responsable de la Aplicación</label>
-              <input 
-                type="text"
-                class="form-input"
-                [(ngModel)]="formData.responsable"
-                name="responsable"
-                placeholder="Nombre del responsable o aplicador">
-            </div>
-          </div>
-        </div>
-
-        <!-- Sección 2: Insumos Aplicados -->
-        <div class="form-section">
-          <div class="section-header">
-            <svg class="w-5 h-5 text-primary" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M20 7l-8-4-8 4m16 0l-8 4m8-4v10l-8 4m0-10L4 7m8 4v10M4 7v10l8 4"/>
-            </svg>
-            <h3 class="section-title">Insumos Aplicados</h3>
-            
-            <div class="section-actions">
-              <select 
-                class="form-input select-insumo"
-                [(ngModel)]="insumoSeleccionado"
-                name="insumoSeleccionado">
-                <option value="0">Seleccionar insumo...</option>
-                <option *ngFor="let insumo of insumos" [value]="insumo.id">
-                  {{insumo.nombre}} - Stock: {{insumo.stockActual}} {{insumo.unidadMedida}}
-                </option>
-              </select>
-              
-              <button 
-                type="button" 
-                class="btn-add-insumo"
-                (click)="agregarInsumo()"
-                [disabled]="!insumoSeleccionado || insumoSeleccionado === 0">
-                <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"/>
+        }
+        @if (!loadingData) {
+          <form>
+            <!-- Sección 1: Información General con Botón IA -->
+            <div class="form-section">
+              <div class="section-header">
+                <svg class="w-5 h-5 text-primary" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"/>
                 </svg>
-                <span>Agregar</span>
-              </button>
-            </div>
-          </div>
-
-          <!-- Empty State -->
-          <div *ngIf="insumosSeleccionados.length === 0" class="empty-state-insumos">
-            <svg class="empty-icon-insumos" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M20 7l-8-4-8 4m16 0l-8 4m8-4v10l-8 4m0-10L4 7m8 4v10M4 7v10l8 4"/>
-            </svg>
-            <p class="empty-title-insumos">No hay insumos agregados</p>
-            <p class="empty-text-insumos">Selecciona un insumo y haz clic en "Agregar" para comenzar</p>
-          </div>
-
-          <!-- Tabla de Insumos - Desktop -->
-          <div *ngIf="insumosSeleccionados.length > 0" class="table-container">
-            <table class="insumos-table">
-              <thead>
-                <tr>
-                  <th>Insumo</th>
-                  <th class="text-center">Dosis/ha</th>
-                  <th class="text-center">Cantidad Total</th>
-                  <th class="text-center">Stock Disponible</th>
-                  <th class="text-center">Acciones</th>
-                </tr>
-              </thead>
-              <tbody>
-                <tr *ngFor="let insumo of insumosSeleccionados; let i = index">
-                  <td>
-                    <div class="insumo-info">
-                      <span class="insumo-name">{{insumo.nombre}}</span>
-                      <span class="insumo-unit">{{insumo.unidadMedida}}</span>
-                    </div>
-                  </td>
-                  <td class="text-center">
-                    <input 
-                      type="number"
-                      class="table-input"
-                      [(ngModel)]="insumo.dosisPorHectarea"
-                      [name]="'dosis-' + i"
-                      (ngModelChange)="calcularCantidad(insumo)"
-                      step="0.01"
-                      min="0"
-                      placeholder="0">
-                  </td>
-                  <td class="text-center">
-                    <input 
-                      type="number"
-                      class="table-input"
-                      [class.input-error]="insumo.cantidad > (insumo.stockDisponible || 0)"
-                      [(ngModel)]="insumo.cantidad"
-                      [name]="'cantidad-' + i"
-                      step="0.01"
-                      min="0"
-                      placeholder="0">
-                  </td>
-                  <td class="text-center">
-                    <span 
-                      class="stock-value"
-                      [class.stock-error]="insumo.cantidad > (insumo.stockDisponible || 0)">
-                      {{insumo.stockDisponible}}
-                    </span>
-                  </td>
-                  <td class="text-center">
-                    <button 
-                      type="button"
-                      class="btn-delete"
-                      (click)="eliminarInsumo(i)"
-                      title="Eliminar insumo">
-                      <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"/>
-                      </svg>
-                    </button>
-                  </td>
-                </tr>
-              </tbody>
-            </table>
-          </div>
-
-          <!-- Cards de Insumos - Mobile -->
-          <div *ngIf="insumosSeleccionados.length > 0" class="insumos-cards">
-            <div *ngFor="let insumo of insumosSeleccionados; let i = index" class="insumo-card">
-              <div class="card-header-insumo">
-                <div>
-                  <div class="insumo-name">{{insumo.nombre}}</div>
-                  <div class="insumo-unit">{{insumo.unidadMedida}}</div>
-                </div>
-                <button 
+                <h3 class="section-title">Información General</h3>
+                <!-- Botón de IA -->
+                <button
                   type="button"
-                  class="btn-delete"
-                  (click)="eliminarInsumo(i)"
-                  title="Eliminar insumo">
-                  <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"/>
-                  </svg>
+                  class="btn-ia ml-auto"
+                  (click)="obtenerSugerenciaIA()"
+                  [disabled]="loadingIA || !formData.periodoSiembraId"
+                  title="Obtener sugerencias de IA">
+                  @if (!loadingIA) {
+                    <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9.663 17h4.673M12 3v1m6.364 1.636l-.707.707M21 12h-1M4 12H3m3.343-5.657l-.707-.707m2.828 9.9a5 5 0 117.072 0l-.548.547A3.374 3.374 0 0014 18.469V19a2 2 0 11-4 0v-.531c0-.895-.356-1.754-.988-2.386l-.548-.547z"/>
+                    </svg>
+                  }
+                  @if (loadingIA) {
+                    <svg class="animate-spin w-4 h-4" fill="none" viewBox="0 0 24 24">
+                      <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
+                      <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+                    </svg>
+                  }
+                  <span>{{ loadingIA ? 'Generando...' : 'Sugerencia IA' }}</span>
                 </button>
               </div>
-
-              <div class="card-body-insumo">
-                <div class="card-field">
-                  <label class="card-label">Dosis por hectárea</label>
-                  <input 
-                    type="number"
+              <div class="form-grid-2">
+                <!-- Período de Siembra -->
+                <div class="form-group">
+                  <label class="form-label required">Período de Siembra</label>
+                  <select
                     class="form-input"
-                    [(ngModel)]="insumo.dosisPorHectarea"
-                    [name]="'dosis-mobile-' + i"
-                    (ngModelChange)="calcularCantidad(insumo)"
-                    step="0.01"
-                    min="0"
-                    placeholder="0">
+                    [(ngModel)]="formData.periodoSiembraId"
+                    name="periodoSiembra"
+                    (change)="onPeriodoChange()"
+                    required>
+                    <option value="0">Seleccionar período...</option>
+                    @for (periodo of periodos; track periodo) {
+                      <option [value]="periodo.id">
+                        {{ getPeriodoNombre(periodo) }}
+                      </option>
+                    }
+                  </select>
                 </div>
-
-                <div class="card-field">
-                  <label class="card-label">Cantidad total</label>
-                  <input 
-                    type="number"
+                <!-- Tipo de Aplicación -->
+                <div class="form-group">
+                  <label class="form-label required">Tipo de Aplicación</label>
+                  <select
                     class="form-input"
-                    [class.input-error]="insumo.cantidad > (insumo.stockDisponible || 0)"
-                    [(ngModel)]="insumo.cantidad"
-                    [name]="'cantidad-mobile-' + i"
-                    step="0.01"
-                    min="0"
-                    placeholder="0">
+                    [(ngModel)]="formData.tipoAplicacion"
+                    name="tipoAplicacion"
+                    required>
+                    @for (tipo of TIPOS_APLICACION; track tipo) {
+                      <option [value]="tipo">
+                        {{tipo}}
+                      </option>
+                    }
+                  </select>
                 </div>
-
-                <div class="stock-info" [class.stock-warning]="insumo.cantidad > (insumo.stockDisponible || 0)">
-                  <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"/>
-                  </svg>
-                  <span>Stock disponible: {{insumo.stockDisponible}} {{insumo.unidadMedida}}</span>
+                <!-- Fecha de Aplicación -->
+                <div class="form-group">
+                  <label class="form-label required">Fecha de Aplicación</label>
+                  <input
+                    type="date"
+                    class="form-input"
+                    [(ngModel)]="formData.fecha"
+                    name="fecha"
+                    required>
+                  </div>
+                  <!-- Hectáreas Aplicadas -->
+                  <div class="form-group">
+                    <label class="form-label required">Hectáreas Aplicadas</label>
+                    <div class="input-with-unit">
+                      <input
+                        type="number"
+                        class="form-input"
+                        [(ngModel)]="formData.hectareasAplicadas"
+                        name="hectareasAplicadas"
+                        step="0.01"
+                        min="0"
+                        placeholder="0"
+                        required>
+                        <span class="input-unit">ha</span>
+                      </div>
+                    </div>
+                    <!-- Responsable de la Aplicación -->
+                    <div class="form-group full-width">
+                      <label class="form-label">Responsable de la Aplicación</label>
+                      <input
+                        type="text"
+                        class="form-input"
+                        [(ngModel)]="formData.responsable"
+                        name="responsable"
+                        placeholder="Nombre del responsable o aplicador">
+                      </div>
+                    </div>
+                  </div>
+                  <!-- Sección 2: Insumos Aplicados -->
+                  <div class="form-section">
+                    <div class="section-header">
+                      <svg class="w-5 h-5 text-primary" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M20 7l-8-4-8 4m16 0l-8 4m8-4v10l-8 4m0-10L4 7m8 4v10M4 7v10l8 4"/>
+                      </svg>
+                      <h3 class="section-title">Insumos Aplicados</h3>
+                      <div class="section-actions">
+                        <select
+                          class="form-input select-insumo"
+                          [(ngModel)]="insumoSeleccionado"
+                          name="insumoSeleccionado">
+                          <option value="0">Seleccionar insumo...</option>
+                          @for (insumo of insumos; track insumo) {
+                            <option [value]="insumo.id">
+                              {{insumo.nombre}} - Stock: {{insumo.stockActual}} {{insumo.unidadMedida}}
+                            </option>
+                          }
+                        </select>
+                        <button
+                          type="button"
+                          class="btn-add-insumo"
+                          (click)="agregarInsumo()"
+                          [disabled]="!insumoSeleccionado || insumoSeleccionado === 0">
+                          <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"/>
+                          </svg>
+                          <span>Agregar</span>
+                        </button>
+                      </div>
+                    </div>
+                    <!-- Empty State -->
+                    @if (insumosSeleccionados.length === 0) {
+                      <div class="empty-state-insumos">
+                        <svg class="empty-icon-insumos" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M20 7l-8-4-8 4m16 0l-8 4m8-4v10l-8 4m0-10L4 7m8 4v10M4 7v10l8 4"/>
+                        </svg>
+                        <p class="empty-title-insumos">No hay insumos agregados</p>
+                        <p class="empty-text-insumos">Selecciona un insumo y haz clic en "Agregar" para comenzar</p>
+                      </div>
+                    }
+                    <!-- Tabla de Insumos - Desktop -->
+                    @if (insumosSeleccionados.length > 0) {
+                      <div class="table-container">
+                        <table class="insumos-table">
+                          <thead>
+                            <tr>
+                              <th>Insumo</th>
+                              <th class="text-center">Dosis/ha</th>
+                              <th class="text-center">Cantidad Total</th>
+                              <th class="text-center">Stock Disponible</th>
+                              <th class="text-center">Acciones</th>
+                            </tr>
+                          </thead>
+                          <tbody>
+                            @for (insumo of insumosSeleccionados; track insumo; let i = $index) {
+                              <tr>
+                                <td>
+                                  <div class="insumo-info">
+                                    <span class="insumo-name">{{insumo.nombre}}</span>
+                                    <span class="insumo-unit">{{insumo.unidadMedida}}</span>
+                                  </div>
+                                </td>
+                                <td class="text-center">
+                                  <input
+                                    type="number"
+                                    class="table-input"
+                                    [(ngModel)]="insumo.dosisPorHectarea"
+                                    [name]="'dosis-' + i"
+                                    (ngModelChange)="calcularCantidad(insumo)"
+                                    step="0.01"
+                                    min="0"
+                                    placeholder="0">
+                                  </td>
+                                  <td class="text-center">
+                                    <input
+                                      type="number"
+                                      class="table-input"
+                                      [class.input-error]="insumo.cantidad > (insumo.stockDisponible || 0)"
+                                      [(ngModel)]="insumo.cantidad"
+                                      [name]="'cantidad-' + i"
+                                      step="0.01"
+                                      min="0"
+                                      placeholder="0">
+                                    </td>
+                                    <td class="text-center">
+                                      <span
+                                        class="stock-value"
+                                        [class.stock-error]="insumo.cantidad > (insumo.stockDisponible || 0)">
+                                        {{insumo.stockDisponible}}
+                                      </span>
+                                    </td>
+                                    <td class="text-center">
+                                      <button
+                                        type="button"
+                                        class="btn-delete"
+                                        (click)="eliminarInsumo(i)"
+                                        title="Eliminar insumo">
+                                        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"/>
+                                        </svg>
+                                      </button>
+                                    </td>
+                                  </tr>
+                                }
+                              </tbody>
+                            </table>
+                          </div>
+                        }
+                        <!-- Cards de Insumos - Mobile -->
+                        @if (insumosSeleccionados.length > 0) {
+                          <div class="insumos-cards">
+                            @for (insumo of insumosSeleccionados; track insumo; let i = $index) {
+                              <div class="insumo-card">
+                                <div class="card-header-insumo">
+                                  <div>
+                                    <div class="insumo-name">{{insumo.nombre}}</div>
+                                    <div class="insumo-unit">{{insumo.unidadMedida}}</div>
+                                  </div>
+                                  <button
+                                    type="button"
+                                    class="btn-delete"
+                                    (click)="eliminarInsumo(i)"
+                                    title="Eliminar insumo">
+                                    <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                      <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"/>
+                                    </svg>
+                                  </button>
+                                </div>
+                                <div class="card-body-insumo">
+                                  <div class="card-field">
+                                    <label class="card-label">Dosis por hectárea</label>
+                                    <input
+                                      type="number"
+                                      class="form-input"
+                                      [(ngModel)]="insumo.dosisPorHectarea"
+                                      [name]="'dosis-mobile-' + i"
+                                      (ngModelChange)="calcularCantidad(insumo)"
+                                      step="0.01"
+                                      min="0"
+                                      placeholder="0">
+                                    </div>
+                                    <div class="card-field">
+                                      <label class="card-label">Cantidad total</label>
+                                      <input
+                                        type="number"
+                                        class="form-input"
+                                        [class.input-error]="insumo.cantidad > (insumo.stockDisponible || 0)"
+                                        [(ngModel)]="insumo.cantidad"
+                                        [name]="'cantidad-mobile-' + i"
+                                        step="0.01"
+                                        min="0"
+                                        placeholder="0">
+                                      </div>
+                                      <div class="stock-info" [class.stock-warning]="insumo.cantidad > (insumo.stockDisponible || 0)">
+                                        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"/>
+                                        </svg>
+                                        <span>Stock disponible: {{insumo.stockDisponible}} {{insumo.unidadMedida}}</span>
+                                      </div>
+                                    </div>
+                                  </div>
+                                }
+                              </div>
+                            }
+                          </div>
+                          <!-- Sección 3: Observaciones -->
+                          <div class="form-section">
+                            <div class="form-group">
+                              <label class="form-label">Observaciones</label>
+                              <textarea
+                                class="form-textarea"
+                                [(ngModel)]="formData.observaciones"
+                                name="observaciones"
+                                rows="3"
+                              placeholder="Notas adicionales sobre la aplicación (opcional)"></textarea>
+                            </div>
+                          </div>
+                        </form>
+                      }
+                    </div>
+                    <!-- Footer del Modal -->
+                    <div class="modal-footer">
+                      <button
+                        type="button"
+                        class="btn-secondary"
+                        (click)="cerrar()"
+                        [disabled]="loading">
+                        Cancelar
+                      </button>
+                      <button
+                        type="button"
+                        class="btn-primary"
+                        (click)="guardar()"
+                        [disabled]="loading || loadingData">
+                        @if (loading) {
+                          <svg class="animate-spin w-4 h-4" fill="none" viewBox="0 0 24 24">
+                            <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
+                            <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+                          </svg>
+                        }
+                        <span>{{ loading ? 'Guardando...' : 'Registrar Aplicación' }}</span>
+                      </button>
+                    </div>
+                  </div>
                 </div>
-              </div>
-            </div>
-          </div>
-        </div>
+              }
 
-        <!-- Sección 3: Observaciones -->
-        <div class="form-section">
-          <div class="form-group">
-            <label class="form-label">Observaciones</label>
-            <textarea 
-              class="form-textarea"
-              [(ngModel)]="formData.observaciones"
-              name="observaciones"
-              rows="3"
-              placeholder="Notas adicionales sobre la aplicación (opcional)"></textarea>
-          </div>
-        </div>
-
-      </form>
-    </div>
-
-    <!-- Footer del Modal -->
-    <div class="modal-footer">
-      <button 
-        type="button" 
-        class="btn-secondary" 
-        (click)="cerrar()"
-        [disabled]="loading">
-        Cancelar
-      </button>
-      <button 
-        type="button" 
-        class="btn-primary" 
-        (click)="guardar()"
-        [disabled]="loading || loadingData">
-        <svg *ngIf="loading" class="animate-spin w-4 h-4" fill="none" viewBox="0 0 24 24">
-          <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
-          <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
-        </svg>
-        <span>{{ loading ? 'Guardando...' : 'Registrar Aplicación' }}</span>
-      </button>
-    </div>
-
-  </div>
-</div>
-
-<!-- Modal de Sugerencia IA -->
-<div class="modal-overlay" *ngIf="mostrarSugerencia" (click)="cerrarSugerencia()">
-  <div class="modal-sugerencia-ia" (click)="$event.stopPropagation()">
-    
-    <div class="sugerencia-header">
-      <div class="sugerencia-title-container">
-        <svg class="w-6 h-6 text-ia" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9.663 17h4.673M12 3v1m6.364 1.636l-.707.707M21 12h-1M4 12H3m3.343-5.657l-.707-.707m2.828 9.9a5 5 0 117.072 0l-.548.547A3.374 3.374 0 0014 18.469V19a2 2 0 11-4 0v-.531c0-.895-.356-1.754-.988-2.386l-.548-.547z"/>
-        </svg>
-        <h3 class="sugerencia-title">Sugerencia de IA</h3>
-      </div>
-      <button type="button" class="btn-close-sugerencia" (click)="cerrarSugerencia()">
-        <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/>
-        </svg>
-      </button>
-    </div>
-
-    <div class="sugerencia-body" *ngIf="sugerenciaIA">
-      
-      <!-- Insumos Recomendados -->
-      <div class="sugerencia-section">
-        <h4 class="sugerencia-subtitle">
-          <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M20 7l-8-4-8 4m16 0l-8 4m8-4v10l-8 4m0-10L4 7m8 4v10M4 7v10l8 4"/>
-          </svg>
-          Insumos Recomendados
-        </h4>
-        <div class="insumos-sugeridos">
-          <div *ngFor="let insumo of sugerenciaIA.insumos" class="insumo-sugerido">
-            <div class="insumo-sugerido-header">
-              <span class="insumo-sugerido-nombre">{{insumo.nombre}}</span>
-              <span class="insumo-sugerido-dosis">{{insumo.dosisHectarea}} {{insumo.unidad}}/ha</span>
-            </div>
-            <p class="insumo-sugerido-razon">{{insumo.razon}}</p>
-          </div>
-        </div>
-      </div>
-
-      <!-- Momento Óptimo -->
-      <div class="sugerencia-section">
-        <h4 class="sugerencia-subtitle">
-          <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"/>
-          </svg>
-          Momento Óptimo
-        </h4>
-        <p class="momento-optimo">{{sugerenciaIA.momentoOptimo}}</p>
-      </div>
-
-      <!-- Observaciones -->
-      <div class="sugerencia-section" *ngIf="sugerenciaIA?.observaciones && sugerenciaIA.observaciones.length > 0">
-        <h4 class="sugerencia-subtitle">
-          <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"/>
-          </svg>
-          Observaciones
-        </h4>
-        <ul class="lista-sugerencias">
-          <li *ngFor="let obs of sugerenciaIA.observaciones">{{obs}}</li>
-        </ul>
-      </div>
-
-      <!-- Precauciones -->
-      <div class="sugerencia-section precauciones" *ngIf="sugerenciaIA?.precauciones && sugerenciaIA.precauciones.length > 0">
-        <h4 class="sugerencia-subtitle">
-          <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z"/>
-          </svg>
-          Precauciones
-        </h4>
-        <ul class="lista-sugerencias">
-          <li *ngFor="let prec of sugerenciaIA.precauciones">{{prec}}</li>
-        </ul>
-      </div>
-
-    </div>
-
-    <div class="sugerencia-footer">
-      <button type="button" class="btn-secondary" (click)="cerrarSugerencia()">
-        Cerrar
-      </button>
-      <button type="button" class="btn-aplicar-ia" (click)="aplicarSugerenciasIA()">
-        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"/>
-        </svg>
-        Aplicar Sugerencias
-      </button>
-    </div>
-
-  </div>
-</div>
+              <!-- Modal de Sugerencia IA -->
+              @if (mostrarSugerencia) {
+                <div class="modal-overlay" (click)="cerrarSugerencia()">
+                  <div class="modal-sugerencia-ia" (click)="$event.stopPropagation()">
+                    <div class="sugerencia-header">
+                      <div class="sugerencia-title-container">
+                        <svg class="w-6 h-6 text-ia" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9.663 17h4.673M12 3v1m6.364 1.636l-.707.707M21 12h-1M4 12H3m3.343-5.657l-.707-.707m2.828 9.9a5 5 0 117.072 0l-.548.547A3.374 3.374 0 0014 18.469V19a2 2 0 11-4 0v-.531c0-.895-.356-1.754-.988-2.386l-.548-.547z"/>
+                        </svg>
+                        <h3 class="sugerencia-title">Sugerencia de IA</h3>
+                      </div>
+                      <button type="button" class="btn-close-sugerencia" (click)="cerrarSugerencia()">
+                        <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/>
+                        </svg>
+                      </button>
+                    </div>
+                    @if (sugerenciaIA) {
+                      <div class="sugerencia-body">
+                        <!-- Insumos Recomendados -->
+                        <div class="sugerencia-section">
+                          <h4 class="sugerencia-subtitle">
+                            <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M20 7l-8-4-8 4m16 0l-8 4m8-4v10l-8 4m0-10L4 7m8 4v10M4 7v10l8 4"/>
+                            </svg>
+                            Insumos Recomendados
+                          </h4>
+                          <div class="insumos-sugeridos">
+                            @for (insumo of sugerenciaIA.insumos; track insumo) {
+                              <div class="insumo-sugerido">
+                                <div class="insumo-sugerido-header">
+                                  <span class="insumo-sugerido-nombre">{{insumo.nombre}}</span>
+                                  <span class="insumo-sugerido-dosis">{{insumo.dosisHectarea}} {{insumo.unidad}}/ha</span>
+                                </div>
+                                <p class="insumo-sugerido-razon">{{insumo.razon}}</p>
+                              </div>
+                            }
+                          </div>
+                        </div>
+                        <!-- Momento Óptimo -->
+                        <div class="sugerencia-section">
+                          <h4 class="sugerencia-subtitle">
+                            <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"/>
+                            </svg>
+                            Momento Óptimo
+                          </h4>
+                          <p class="momento-optimo">{{sugerenciaIA.momentoOptimo}}</p>
+                        </div>
+                        <!-- Observaciones -->
+                        @if (sugerenciaIA?.observaciones && sugerenciaIA.observaciones.length > 0) {
+                          <div class="sugerencia-section">
+                            <h4 class="sugerencia-subtitle">
+                              <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"/>
+                              </svg>
+                              Observaciones
+                            </h4>
+                            <ul class="lista-sugerencias">
+                              @for (obs of sugerenciaIA.observaciones; track obs) {
+                                <li>{{obs}}</li>
+                              }
+                            </ul>
+                          </div>
+                        }
+                        <!-- Precauciones -->
+                        @if (sugerenciaIA?.precauciones && sugerenciaIA.precauciones.length > 0) {
+                          <div class="sugerencia-section precauciones">
+                            <h4 class="sugerencia-subtitle">
+                              <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z"/>
+                              </svg>
+                              Precauciones
+                            </h4>
+                            <ul class="lista-sugerencias">
+                              @for (prec of sugerenciaIA.precauciones; track prec) {
+                                <li>{{prec}}</li>
+                              }
+                            </ul>
+                          </div>
+                        }
+                      </div>
+                    }
+                    <div class="sugerencia-footer">
+                      <button type="button" class="btn-secondary" (click)="cerrarSugerencia()">
+                        Cerrar
+                      </button>
+                      <button type="button" class="btn-aplicar-ia" (click)="aplicarSugerenciasIA()">
+                        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"/>
+                        </svg>
+                        Aplicar Sugerencias
+                      </button>
+                    </div>
+                  </div>
+                </div>
+              }

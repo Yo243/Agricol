@@ -49,7 +49,14 @@ export class RecetaCreateEditComponent implements OnInit {
 
   isEditMode = false;
   loading = false;
+
+  // Error “formal” del formulario
   error = '';
+
+  // ✅ Feedback tipo localhost pero estilizado
+  feedbackMessage = '';
+  feedbackType: 'success' | 'error' | 'info' | '' = '';
+
   costoTotal = 0;
 
   nuevoDetalle: RecetaDetalle = {
@@ -70,6 +77,10 @@ export class RecetaCreateEditComponent implements OnInit {
     this.cargarCatalogos();
   }
 
+  // ======================
+  //   CARGA DE CATÁLOGOS
+  // ======================
+
   cargarCatalogos(): void {
     // Cargar cultivos
     this.http.get<ApiResponse<Cultivo[]>>(`${environment.apiUrl}/recetas/cultivos`).subscribe({
@@ -78,6 +89,7 @@ export class RecetaCreateEditComponent implements OnInit {
       },
       error: (err) => {
         console.error('Error al cargar cultivos:', err);
+        this.showFeedback('No se pudieron cargar los cultivos', 'error');
       }
     });
 
@@ -91,6 +103,7 @@ export class RecetaCreateEditComponent implements OnInit {
         console.error('Error al cargar insumos:', err);
         this.insumos = [];
         this.insumosDisponibles = [];
+        this.showFeedback('No se pudieron cargar los insumos de inventario', 'error');
       }
     });
   }
@@ -102,8 +115,13 @@ export class RecetaCreateEditComponent implements OnInit {
     );
   }
 
+  // ======================
+  //   CARGAR RECETA (EDIT)
+  // ======================
+
   cargarReceta(id: number): void {
     this.loading = true;
+    this.error = '';
 
     this.http.get<ApiResponse<Receta>>(`${environment.apiUrl}/recetas/${id}`).subscribe({
       next: (response) => {
@@ -116,10 +134,15 @@ export class RecetaCreateEditComponent implements OnInit {
       error: (err) => {
         console.error('Error:', err);
         this.error = 'No se pudo cargar la receta.';
+        this.showFeedback('No se pudo cargar la receta', 'error');
         this.loading = false;
       }
     });
   }
+
+  // ======================
+  //        HELPERS
+  // ======================
 
   getInsumoNombre(id: number): string {
     const insumo = this.insumos.find((i: InsumoInventario) => i.id === id);
@@ -131,14 +154,19 @@ export class RecetaCreateEditComponent implements OnInit {
     return insumo ? insumo.costoUnitario : 0;
   }
 
+  // ======================
+  //   CRUD DE INSUMOS
+  // ======================
+
   agregarInsumo(): void {
+    // ✅ Validaciones sin alert()
     if (this.nuevoDetalle.insumoId === 0) {
-      alert('Por favor selecciona un insumo');
+      this.showFeedback('Selecciona un insumo para agregarlo a la receta', 'error');
       return;
     }
 
     if (this.nuevoDetalle.dosisPorHectarea <= 0) {
-      alert('La dosis debe ser mayor a 0');
+      this.showFeedback('La dosis por hectárea debe ser mayor a 0', 'error');
       return;
     }
 
@@ -147,6 +175,7 @@ export class RecetaCreateEditComponent implements OnInit {
       orden: this.receta.detalles.length + 1
     });
 
+    // Reset campo
     this.nuevoDetalle = {
       insumoId: 0,
       dosisPorHectarea: 0,
@@ -156,26 +185,31 @@ export class RecetaCreateEditComponent implements OnInit {
 
     this.actualizarInsumosDisponibles();
     this.costoTotal = this.calcularCostoTotal();
+    this.showFeedback('Insumo agregado a la receta', 'success');
   }
 
   eliminarInsumo(index: number): void {
     this.receta.detalles.splice(index, 1);
+
+    // Reordenar índices
     this.receta.detalles.forEach((d: RecetaDetalle, i: number) => {
       d.orden = i + 1;
     });
+
     this.actualizarInsumosDisponibles();
     this.costoTotal = this.calcularCostoTotal();
+    this.showFeedback('Insumo eliminado de la receta', 'info');
   }
 
   moverInsumo(index: number, direccion: 'arriba' | 'abajo'): void {
     if (direccion === 'arriba' && index > 0) {
-      [this.receta.detalles[index], this.receta.detalles[index - 1]] = 
-      [this.receta.detalles[index - 1], this.receta.detalles[index]];
+      [this.receta.detalles[index], this.receta.detalles[index - 1]] =
+        [this.receta.detalles[index - 1], this.receta.detalles[index]];
     } else if (direccion === 'abajo' && index < this.receta.detalles.length - 1) {
-      [this.receta.detalles[index], this.receta.detalles[index + 1]] = 
-      [this.receta.detalles[index + 1], this.receta.detalles[index]];
+      [this.receta.detalles[index], this.receta.detalles[index + 1]] =
+        [this.receta.detalles[index + 1], this.receta.detalles[index]];
     }
-    
+
     this.receta.detalles.forEach((d: RecetaDetalle, i: number) => {
       d.orden = i + 1;
     });
@@ -188,9 +222,14 @@ export class RecetaCreateEditComponent implements OnInit {
     }, 0);
   }
 
+  // ======================
+  //    SUBMIT / GUARDAR
+  // ======================
+
   onSubmit(): void {
+    // Validaciones básicas
     if (!this.receta.nombre.trim()) {
-      this.error = 'El nombre es requerido';
+      this.error = 'El nombre de la receta es obligatorio';
       return;
     }
 
@@ -200,7 +239,7 @@ export class RecetaCreateEditComponent implements OnInit {
     }
 
     if (this.receta.detalles.length === 0) {
-      this.error = 'Debes agregar al menos un insumo.';
+      this.error = 'Debes agregar al menos un insumo a la receta.';
       return;
     }
 
@@ -221,28 +260,34 @@ export class RecetaCreateEditComponent implements OnInit {
     };
 
     if (this.isEditMode && this.receta.id) {
+      // UPDATE
       this.http.put(`${environment.apiUrl}/recetas/${this.receta.id}`, payload)
         .subscribe({
           next: () => {
-            alert('Receta actualizada exitosamente');
+            this.loading = false;
+            this.showFeedback('Receta actualizada correctamente', 'success');
             this.router.navigate(['/receta']);
           },
           error: (err) => {
             console.error('Error:', err);
             this.error = 'Error al actualizar la receta.';
+            this.showFeedback('Error al actualizar la receta', 'error');
             this.loading = false;
           }
         });
     } else {
+      // CREATE
       this.http.post(`${environment.apiUrl}/recetas`, payload)
         .subscribe({
           next: () => {
-            alert('Receta creada exitosamente');
+            this.loading = false;
+            this.showFeedback('Receta creada correctamente', 'success');
             this.router.navigate(['/receta']);
           },
           error: (err) => {
             console.error('Error:', err);
             this.error = 'Error al crear la receta.';
+            this.showFeedback('Error al crear la receta', 'error');
             this.loading = false;
           }
         });
@@ -251,5 +296,22 @@ export class RecetaCreateEditComponent implements OnInit {
 
   onCancel(): void {
     this.router.navigate(['/receta']);
+  }
+
+  // ======================
+  //     FEEDBACK HELPER
+  // ======================
+
+  private showFeedback(
+    message: string,
+    type: 'success' | 'error' | 'info' = 'info'
+  ): void {
+    this.feedbackMessage = message;
+    this.feedbackType = type;
+
+    setTimeout(() => {
+      this.feedbackMessage = '';
+      this.feedbackType = '';
+    }, 3500);
   }
 }

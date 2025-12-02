@@ -1,5 +1,5 @@
 import { Component, OnInit, EventEmitter, Output } from '@angular/core';
-import { NgIf, NgFor, UpperCasePipe } from '@angular/common';
+import { UpperCasePipe } from '@angular/common';
 import { Router, RouterModule } from '@angular/router';
 
 interface MenuItem {
@@ -12,7 +12,7 @@ interface MenuItem {
 @Component({
   selector: 'app-sidebar',
   standalone: true,
-  imports: [NgIf, NgFor, UpperCasePipe, RouterModule],
+  imports: [UpperCasePipe, RouterModule],
   templateUrl: './sidebar.component.html',
   styleUrls: ['./sidebar.component.css']
 })

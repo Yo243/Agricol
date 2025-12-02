@@ -177,3 +177,6 @@ select:focus {
   width: 100%;
   margin: 0 auto;
 }
+
+html, body { height: 100%; }
+body { margin: 0; font-family: Roboto, "Helvetica Neue", sans-serif; }

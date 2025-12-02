@@ -1,12 +1,12 @@
 <div class="fixed inset-0 z-50 overflow-y-auto" aria-labelledby="modal-title" role="dialog" aria-modal="true">
   <div class="flex items-center justify-center min-h-screen px-4 pt-4 pb-20 text-center sm:p-0">
-    
+
     <!-- Overlay -->
     <div class="fixed inset-0 bg-gray-500 bg-opacity-75 transition-opacity modal-overlay" (click)="close()"></div>
 
     <!-- Modal -->
     <div class="relative inline-block align-bottom bg-white rounded-lg text-left overflow-hidden shadow-xl transform transition-all sm:my-8 sm:align-middle sm:max-w-5xl sm:w-full max-h-[92vh] flex flex-col modal-container">
-      
+
       <!-- Header fijo -->
       <div class="modal-header">
         <div class="flex items-center justify-between">
@@ -16,9 +16,9 @@
             </svg>
             {{ item ? 'Editar Producto' : 'Nuevo Producto' }}
           </h3>
-          <button 
+          <button
             type="button"
-            (click)="close()" 
+            (click)="close()"
             class="modal-close-btn text-white hover:text-gray-200 transition-colors"
             aria-label="Cerrar modal"
           >
@@ -30,24 +30,28 @@
       </div>
 
       <!-- Mensaje de éxito -->
-      <div *ngIf="success" class="success-box">
-        <svg class="w-6 h-6 flex-shrink-0" fill="currentColor" viewBox="0 0 20 20">
-          <path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clip-rule="evenodd"/>
-        </svg>
-        <p class="font-medium">¡Producto {{ item ? 'actualizado' : 'creado' }} exitosamente!</p>
-      </div>
+      @if (success) {
+        <div class="success-box">
+          <svg class="w-6 h-6 flex-shrink-0" fill="currentColor" viewBox="0 0 20 20">
+            <path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clip-rule="evenodd"/>
+          </svg>
+          <p class="font-medium">¡Producto {{ item ? 'actualizado' : 'creado' }} exitosamente!</p>
+        </div>
+      }
 
       <!-- Mensaje de error -->
-      <div *ngIf="error" class="error-box">
-        <svg class="w-6 h-6 flex-shrink-0" fill="currentColor" viewBox="0 0 20 20">
-          <path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zM8.707 7.293a1 1 0 00-1.414 1.414L8.586 10l-1.293 1.293a1 1 0 101.414 1.414L10 11.414l1.293 1.293a1 1 0 001.414-1.414L11.414 10l1.293-1.293a1 1 0 00-1.414-1.414L10 8.586 8.707 7.293z" clip-rule="evenodd"/>
-        </svg>
-        <p class="font-medium">{{ error }}</p>
-      </div>
+      @if (error) {
+        <div class="error-box">
+          <svg class="w-6 h-6 flex-shrink-0" fill="currentColor" viewBox="0 0 20 20">
+            <path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zM8.707 7.293a1 1 0 00-1.414 1.414L8.586 10l-1.293 1.293a1 1 0 101.414 1.414L10 11.414l1.293 1.293a1 1 0 001.414-1.414L11.414 10l1.293-1.293a1 1 0 00-1.414-1.414L10 8.586 8.707 7.293z" clip-rule="evenodd"/>
+          </svg>
+          <p class="font-medium">{{ error }}</p>
+        </div>
+      }
 
       <!-- Formulario (con scroll) -->
       <form [formGroup]="itemForm" (ngSubmit)="onSubmit()" class="form-section flex-1 overflow-y-auto">
-        
+
         <!-- Sección 1: Información General -->
         <div class="form-group">
           <h4 class="section-title">
@@ -55,18 +59,34 @@
             <span>Información General</span>
           </h4>
           <div class="grid grid-cols-1 md:grid-cols-3 gap-5">
-            
+
             <!-- Código -->
             <div>
               <label class="block text-sm font-semibold text-gray-700 mb-2">
                 Código <span class="text-red-500">*</span>
               </label>
-              <input 
-                type="text" 
-                formControlName="codigo" 
+              <input
+                type="text"
+                formControlName="codigo"
                 placeholder="Ej: FRT-001"
                 class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-all"
+                [ngClass]="{
+                  'border-red-500 focus:ring-red-500 focus:border-red-500':
+                    codigoCtrl?.invalid && codigoCtrl?.touched
+                }"
               />
+              @if (codigoCtrl?.hasError('required') && codigoCtrl?.touched) {
+                <p class="mt-1 text-xs text-red-600">El código es obligatorio.</p>
+              }
+              @if (codigoCtrl?.hasError('minlength') && codigoCtrl?.touched) {
+                <p class="mt-1 text-xs text-red-600">Mínimo 2 caracteres.</p>
+              }
+              @if (codigoCtrl?.hasError('maxlength') && codigoCtrl?.touched) {
+                <p class="mt-1 text-xs text-red-600">Máximo 30 caracteres.</p>
+              }
+              @if (codigoCtrl?.hasError('pattern') && codigoCtrl?.touched) {
+                <p class="mt-1 text-xs text-red-600">Solo letras, números y guiones.</p>
+              }
             </div>
 
             <!-- Nombre -->
@@ -74,12 +94,25 @@
               <label class="block text-sm font-semibold text-gray-700 mb-2">
                 Nombre del Producto <span class="text-red-500">*</span>
               </label>
-              <input 
-                type="text" 
-                formControlName="nombre" 
+              <input
+                type="text"
+                formControlName="nombre"
                 placeholder="Ej: Fertilizante NPK 15-15-15"
                 class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-all"
+                [ngClass]="{
+                  'border-red-500 focus:ring-red-500 focus:border-red-500':
+                    nombreCtrl?.invalid && nombreCtrl?.touched
+                }"
               />
+              @if (nombreCtrl?.hasError('required') && nombreCtrl?.touched) {
+                <p class="mt-1 text-xs text-red-600">El nombre es obligatorio.</p>
+              }
+              @if (nombreCtrl?.hasError('minlength') && nombreCtrl?.touched) {
+                <p class="mt-1 text-xs text-red-600">Mínimo 3 caracteres.</p>
+              }
+              @if (nombreCtrl?.hasError('maxlength') && nombreCtrl?.touched) {
+                <p class="mt-1 text-xs text-red-600">Máximo 120 caracteres.</p>
+              }
             </div>
 
             <!-- Categoría -->
@@ -87,32 +120,47 @@
               <label class="block text-sm font-semibold text-gray-700 mb-2">
                 Categoría <span class="text-red-500">*</span>
               </label>
-              <select 
-                formControlName="categoria" 
+              <select
+                formControlName="categoria"
                 class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-all"
+                [ngClass]="{
+                  'border-red-500 focus:ring-red-500 focus:border-red-500':
+                    categoriaCtrl?.invalid && categoriaCtrl?.touched
+                }"
               >
                 <option value="">Seleccionar categoría...</option>
-                <option *ngFor="let cat of categorias" [value]="cat">{{ cat }}</option>
+                @for (cat of categorias; track cat) {
+                  <option [value]="cat">{{ cat }}</option>
+                }
               </select>
+              @if (categoriaCtrl?.hasError('required') && categoriaCtrl?.touched) {
+                <p class="mt-1 text-xs text-red-600">La categoría es obligatoria.</p>
+              }
 
               <!-- Helper según tipo -->
-              <p *ngIf="esInsumo" class="mt-1 text-xs text-green-700">
-                Se tratará como <span class="font-semibold">insumo consumible</span> (caducidad, lote, etc.).
-              </p>
-              <p *ngIf="esActivo" class="mt-1 text-xs text-blue-700">
-                Se tratará como <span class="font-semibold">activo</span> (herramientas, maquinaria, equipos).
-              </p>
-              <p *ngIf="esEnvase" class="mt-1 text-xs text-amber-700">
-                Se tratará como <span class="font-semibold">material de empaque</span>.
-              </p>
+              @if (esInsumo) {
+                <p class="mt-1 text-xs text-green-700">
+                  Se tratará como <span class="font-semibold">insumo consumible</span> (caducidad, lote, etc.).
+                </p>
+              }
+              @if (esActivo) {
+                <p class="mt-1 text-xs text-blue-700">
+                  Se tratará como <span class="font-semibold">activo</span> (herramientas, maquinaria, equipos).
+                </p>
+              }
+              @if (esEnvase) {
+                <p class="mt-1 text-xs text-amber-700">
+                  Se tratará como <span class="font-semibold">material de empaque</span>.
+                </p>
+              }
             </div>
 
             <!-- Subcategoría -->
             <div>
               <label class="block text-sm font-semibold text-gray-700 mb-2">Subcategoría</label>
-              <input 
-                type="text" 
-                formControlName="subcategoria" 
+              <input
+                type="text"
+                formControlName="subcategoria"
                 placeholder="Ej: Nitrogenado"
                 class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-all"
               />
@@ -121,9 +169,9 @@
             <!-- Marca -->
             <div>
               <label class="block text-sm font-semibold text-gray-700 mb-2">Marca</label>
-              <input 
-                type="text" 
-                formControlName="marca" 
+              <input
+                type="text"
+                formControlName="marca"
                 placeholder="Ej: Yara"
                 class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-all"
               />
@@ -132,41 +180,45 @@
             <!-- Presentación -->
             <div>
               <label class="block text-sm font-semibold text-gray-700 mb-2">Presentación</label>
-              <input 
-                type="text" 
-                formControlName="presentacion" 
+              <input
+                type="text"
+                formControlName="presentacion"
                 placeholder="Ej: Saco de 50kg"
                 class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-all"
               />
             </div>
 
-            <!-- Composición (solo insumos)-->
-            <div *ngIf="esInsumo">
-              <label class="block text-sm font-semibold text-gray-700 mb-2">Composición</label>
-              <input 
-                type="text" 
-                formControlName="composicion" 
-                placeholder="Ej: NPK 15-15-15"
-                class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-all"
-              />
-            </div>
+            <!-- Composición (solo insumos) -->
+            @if (esInsumo) {
+              <div>
+                <label class="block text-sm font-semibold text-gray-700 mb-2">Composición</label>
+                <input
+                  type="text"
+                  formControlName="composicion"
+                  placeholder="Ej: NPK 15-15-15"
+                  class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-all"
+                />
+              </div>
+            }
 
-            <!-- Concentración (solo insumos)-->
-            <div *ngIf="esInsumo">
-              <label class="block text-sm font-semibold text-gray-700 mb-2">Concentración</label>
-              <input 
-                type="text" 
-                formControlName="concentracion" 
-                placeholder="Ej: 45%"
-                class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-all"
-              />
-            </div>
+            <!-- Concentración (solo insumos) -->
+            @if (esInsumo) {
+              <div>
+                <label class="block text-sm font-semibold text-gray-700 mb-2">Concentración</label>
+                <input
+                  type="text"
+                  formControlName="concentracion"
+                  placeholder="Ej: 45%"
+                  class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-all"
+                />
+              </div>
+            }
 
             <!-- Descripción -->
             <div class="md:col-span-3">
               <label class="block text-sm font-semibold text-gray-700 mb-2">Descripción</label>
-              <textarea 
-                formControlName="descripcion" 
+              <textarea
+                formControlName="descripcion"
                 rows="3"
                 placeholder="Descripción detallada del producto, usos recomendados, precauciones..."
                 class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 resize-none transition-all"
@@ -183,19 +235,29 @@
             <span>Stock e Inventario</span>
           </h4>
           <div class="grid grid-cols-1 md:grid-cols-4 gap-5">
-            
+
             <!-- Stock Actual -->
             <div>
               <label class="block text-sm font-semibold text-gray-700 mb-2">
                 Stock Actual <span class="text-red-500">*</span>
               </label>
-              <input 
-                type="number" 
+              <input
+                type="number"
                 step="0.01"
-                formControlName="stockActual" 
+                formControlName="stockActual"
                 placeholder="0.00"
                 class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-green-500 focus:border-green-500 transition-all"
+                [ngClass]="{
+                  'border-red-500 focus:ring-red-500 focus:border-red-500':
+                    stockActualCtrl?.invalid && stockActualCtrl?.touched
+                }"
               />
+              @if (stockActualCtrl?.hasError('required') && stockActualCtrl?.touched) {
+                <p class="mt-1 text-xs text-red-600">El stock actual es obligatorio.</p>
+              }
+              @if (stockActualCtrl?.hasError('min') && stockActualCtrl?.touched) {
+                <p class="mt-1 text-xs text-red-600">No puede ser negativo.</p>
+              }
             </div>
 
             <!-- Unidad de Medida -->
@@ -203,9 +265,13 @@
               <label class="block text-sm font-semibold text-gray-700 mb-2">
                 Unidad de Medida <span class="text-red-500">*</span>
               </label>
-              <select 
-                formControlName="unidadMedida" 
+              <select
+                formControlName="unidadMedida"
                 class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-green-500 focus:border-green-500 transition-all"
+                [ngClass]="{
+                  'border-red-500 focus:ring-red-500 focus:border-red-500':
+                    unidadMedidaCtrl?.invalid && unidadMedidaCtrl?.touched
+                }"
               >
                 <option value="">Seleccionar...</option>
                 <option value="kg">Kilogramos</option>
@@ -214,30 +280,52 @@
                 <option value="sacos">Sacos</option>
                 <option value="cajas">Cajas</option>
               </select>
+              @if (unidadMedidaCtrl?.hasError('required') && unidadMedidaCtrl?.touched) {
+                <p class="mt-1 text-xs text-red-600">La unidad de medida es obligatoria.</p>
+              }
             </div>
 
             <!-- Stock Mínimo -->
             <div>
               <label class="block text-sm font-semibold text-gray-700 mb-2">Stock Mínimo</label>
-              <input 
-                type="number" 
+              <input
+                type="number"
                 step="0.01"
-                formControlName="stockMinimo" 
+                formControlName="stockMinimo"
                 placeholder="0.00"
                 class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-green-500 focus:border-green-500 transition-all"
+                [ngClass]="{
+                  'border-red-500 focus:ring-red-500 focus:border-red-500':
+                    stockMinimoCtrl?.hasError('min') && stockMinimoCtrl?.touched
+                }"
               />
+              @if (stockMinimoCtrl?.hasError('min') && stockMinimoCtrl?.touched) {
+                <p class="mt-1 text-xs text-red-600">No puede ser negativo.</p>
+              }
             </div>
 
             <!-- Stock Máximo -->
             <div>
               <label class="block text-sm font-semibold text-gray-700 mb-2">Stock Máximo</label>
-              <input 
-                type="number" 
+              <input
+                type="number"
                 step="0.01"
-                formControlName="stockMaximo" 
+                formControlName="stockMaximo"
                 placeholder="0.00"
                 class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-green-500 focus:border-green-500 transition-all"
+                [ngClass]="{
+                  'border-red-500 focus:ring-red-500 focus:border-red-500':
+                    (stockMaximoCtrl?.hasError('min') || stockMaximoCtrl?.hasError('stockRango')) && stockMaximoCtrl?.touched
+                }"
               />
+              @if (stockMaximoCtrl?.hasError('min') && stockMaximoCtrl?.touched) {
+                <p class="mt-1 text-xs text-red-600">No puede ser negativo.</p>
+              }
+              @if (stockMaximoCtrl?.hasError('stockRango') && stockMaximoCtrl?.touched) {
+                <p class="mt-1 text-xs text-red-600">
+                  El stock máximo no puede ser menor que el stock mínimo.
+                </p>
+              }
             </div>
 
           </div>
@@ -250,13 +338,13 @@
             <span>Ubicación</span>
           </h4>
           <div class="grid grid-cols-1 md:grid-cols-2 gap-5">
-            
+
             <!-- Almacén -->
             <div>
               <label class="block text-sm font-semibold text-gray-700 mb-2">Almacén</label>
-              <input 
-                type="text" 
-                formControlName="almacen" 
+              <input
+                type="text"
+                formControlName="almacen"
                 placeholder="Ej: Almacén Principal"
                 class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-purple-500 focus:border-purple-500 transition-all"
               />
@@ -265,9 +353,9 @@
             <!-- Sección -->
             <div>
               <label class="block text-sm font-semibold text-gray-700 mb-2">Sección</label>
-              <input 
-                type="text" 
-                formControlName="seccion" 
+              <input
+                type="text"
+                formControlName="seccion"
                 placeholder="Ej: Pasillo A - Estante 3"
                 class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-purple-500 focus:border-purple-500 transition-all"
               />
@@ -283,7 +371,7 @@
             <span>Precios y Costos</span>
           </h4>
           <div class="grid grid-cols-1 md:grid-cols-3 gap-5">
-            
+
             <!-- Costo Unitario -->
             <div>
               <label class="block text-sm font-semibold text-gray-700 mb-2">
@@ -291,14 +379,24 @@
               </label>
               <div class="relative">
                 <span class="absolute left-4 top-1/2 -translate-y-1/2 text-gray-500 font-medium">$</span>
-                <input 
-                  type="number" 
+                <input
+                  type="number"
                   step="0.01"
-                  formControlName="costoUnitario" 
+                  formControlName="costoUnitario"
                   placeholder="0.00"
                   class="w-full pl-9 pr-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-yellow-500 focus:border-yellow-500 transition-all"
+                  [ngClass]="{
+                    'border-red-500 focus:ring-red-500 focus:border-red-500':
+                      costoUnitarioCtrl?.invalid && costoUnitarioCtrl?.touched
+                  }"
                 />
               </div>
+              @if (costoUnitarioCtrl?.hasError('required') && costoUnitarioCtrl?.touched) {
+                <p class="mt-1 text-xs text-red-600">El costo unitario es obligatorio.</p>
+              }
+              @if (costoUnitarioCtrl?.hasError('min') && costoUnitarioCtrl?.touched) {
+                <p class="mt-1 text-xs text-red-600">No puede ser negativo.</p>
+              }
             </div>
 
             <!-- Precio de Venta -->
@@ -306,14 +404,26 @@
               <label class="block text-sm font-semibold text-gray-700 mb-2">Precio de Venta</label>
               <div class="relative">
                 <span class="absolute left-4 top-1/2 -translate-y-1/2 text-gray-500 font-medium">$</span>
-                <input 
-                  type="number" 
+                <input
+                  type="number"
                   step="0.01"
-                  formControlName="precioVenta" 
+                  formControlName="precioVenta"
                   placeholder="0.00"
                   class="w-full pl-9 pr-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-yellow-500 focus:border-yellow-500 transition-all"
+                  [ngClass]="{
+                    'border-red-500 focus:ring-red-500 focus:border-red-500':
+                      (precioVentaCtrl?.hasError('min') || precioVentaCtrl?.hasError('precioMenorCosto')) && precioVentaCtrl?.touched
+                  }"
                 />
               </div>
+              @if (precioVentaCtrl?.hasError('min') && precioVentaCtrl?.touched) {
+                <p class="mt-1 text-xs text-red-600">No puede ser negativo.</p>
+              }
+              @if (precioVentaCtrl?.hasError('precioMenorCosto') && precioVentaCtrl?.touched) {
+                <p class="mt-1 text-xs text-red-600">
+                  El precio de venta no puede ser menor que el costo unitario.
+                </p>
+              }
             </div>
 
             <!-- Valor Total (calculado) -->
@@ -334,92 +444,118 @@
           </div>
         </div>
 
-        <!-- Sección 5: Proveedor y Lote (diferente según tipo) -->
-        <div class="form-group" *ngIf="esInsumo; else proveedorSimple">
-          <h4 class="section-title">
-            <span class="section-badge section-5">5</span>
-            <span>Proveedor y Trazabilidad</span>
-          </h4>
-          <div class="grid grid-cols-1 md:grid-cols-4 gap-5">
-            
-            <!-- Proveedor -->
-            <div class="md:col-span-2">
-              <label class="block text-sm font-semibold text-gray-700 mb-2">Proveedor</label>
-              <input 
-                type="text" 
-                formControlName="proveedor" 
-                placeholder="Ej: AgroInsumos S.A."
-                class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-orange-500 focus:border-orange-500 transition-all"
-              />
+        <!-- Sección 5: Proveedor y Lote -->
+        @if (esInsumo) {
+          <div class="form-group">
+            <h4 class="section-title">
+              <span class="section-badge section-5">5</span>
+              <span>Proveedor y Trazabilidad</span>
+            </h4>
+            <div class="grid grid-cols-1 md:grid-cols-4 gap-5">
+              <!-- Proveedor -->
+              <div class="md:col-span-2">
+                <label class="block text-sm font-semibold text-gray-700 mb-2">Proveedor</label>
+                <input
+                  type="text"
+                  formControlName="proveedor"
+                  placeholder="Ej: AgroInsumos S.A."
+                  class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-orange-500 focus:border-orange-500 transition-all"
+                />
+              </div>
+              <!-- Número de Lote -->
+              <div class="md:col-span-2">
+                <label class="block text-sm font-semibold text-gray-700 mb-2">Número de Lote</label>
+                <input
+                  type="text"
+                  formControlName="numeroLote"
+                  placeholder="Ej: LOTE-2024-001"
+                  class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-orange-500 focus:border-orange-500 transition-all"
+                />
+              </div>
+              <!-- Fecha de Adquisición -->
+              <div class="md:col-span-2">
+                <label class="block text-sm font-semibold text-gray-700 mb-2">Fecha de Adquisición</label>
+                <input
+                  type="date"
+                  formControlName="fechaAdquisicion"
+                  [attr.max]="today"
+                  class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-orange-500 focus:border-orange-500 transition-all"
+                  [ngClass]="{
+                    'border-red-500 focus:ring-red-500 focus:border-red-500':
+                      fechaAdquisicionCtrl?.hasError('fechaFutura') && fechaAdquisicionCtrl?.touched
+                  }"
+                />
+                @if (fechaAdquisicionCtrl?.hasError('fechaFutura') && fechaAdquisicionCtrl?.touched) {
+                  <p class="mt-1 text-xs text-red-600">
+                    La fecha de adquisición no puede ser futura.
+                  </p>
+                }
+              </div>
+              <!-- Fecha de Vencimiento -->
+              <div class="md:col-span-2">
+                <label class="block text-sm font-semibold text-gray-700 mb-2">Fecha de Vencimiento</label>
+                <input
+                  type="date"
+                  formControlName="fechaVencimiento"
+                  [attr.min]="fechaAdquisicionCtrl?.value || today"
+                  class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-orange-500 focus:border-orange-500 transition-all"
+                  [ngClass]="{
+                    'border-red-500 focus:ring-red-500 focus:border-red-500':
+                      fechaVencimientoCtrl?.invalid && fechaVencimientoCtrl?.touched
+                  }"
+                />
+                @if (fechaVencimientoCtrl?.hasError('vencimientoMenorAdquisicion') && fechaVencimientoCtrl?.touched) {
+                  <p class="mt-1 text-xs text-red-600">
+                    La fecha de vencimiento no puede ser anterior a la fecha de adquisición.
+                  </p>
+                }
+                @if (fechaVencimientoCtrl?.hasError('vencimientoPasado') && fechaVencimientoCtrl?.touched) {
+                  <p class="mt-1 text-xs text-red-600">
+                    El insumo ya está vencido. Revisa la fecha de vencimiento.
+                  </p>
+                }
+              </div>
             </div>
-
-            <!-- Número de Lote -->
-            <div class="md:col-span-2">
-              <label class="block text-sm font-semibold text-gray-700 mb-2">Número de Lote</label>
-              <input 
-                type="text" 
-                formControlName="numeroLote" 
-                placeholder="Ej: LOTE-2024-001"
-                class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-orange-500 focus:border-orange-500 transition-all"
-              />
-            </div>
-
-            <!-- Fecha de Adquisición -->
-            <div class="md:col-span-2">
-              <label class="block text-sm font-semibold text-gray-700 mb-2">Fecha de Adquisición</label>
-              <input 
-                type="date" 
-                formControlName="fechaAdquisicion" 
-                class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-orange-500 focus:border-orange-500 transition-all"
-              />
-            </div>
-
-            <!-- Fecha de Vencimiento -->
-            <div class="md:col-span-2">
-              <label class="block text-sm font-semibold text-gray-700 mb-2">Fecha de Vencimiento</label>
-              <input 
-                type="date" 
-                formControlName="fechaVencimiento" 
-                class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-orange-500 focus:border-orange-500 transition-all"
-              />
-            </div>
-
           </div>
-        </div>
-
-        <!-- Versión simple para maquinaria/herramientas/envases -->
-        <ng-template #proveedorSimple>
+        } @else {
           <div class="form-group">
             <h4 class="section-title">
               <span class="section-badge section-5">5</span>
               <span>Proveedor</span>
             </h4>
             <div class="grid grid-cols-1 md:grid-cols-2 gap-5">
-              
               <!-- Proveedor -->
               <div>
                 <label class="block text-sm font-semibold text-gray-700 mb-2">Proveedor</label>
-                <input 
-                  type="text" 
-                  formControlName="proveedor" 
+                <input
+                  type="text"
+                  formControlName="proveedor"
                   placeholder="Ej: Proveedor principal"
                   class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-orange-500 focus:border-orange-500 transition-all"
                 />
               </div>
-
               <!-- Fecha de Adquisición -->
               <div>
                 <label class="block text-sm font-semibold text-gray-700 mb-2">Fecha de Adquisición</label>
-                <input 
-                  type="date" 
-                  formControlName="fechaAdquisicion" 
+                <input
+                  type="date"
+                  formControlName="fechaAdquisicion"
+                  [attr.max]="today"
                   class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-orange-500 focus:border-orange-500 transition-all"
+                  [ngClass]="{
+                    'border-red-500 focus:ring-red-500 focus:border-red-500':
+                      fechaAdquisicionCtrl?.hasError('fechaFutura') && fechaAdquisicionCtrl?.touched
+                  }"
                 />
+                @if (fechaAdquisicionCtrl?.hasError('fechaFutura') && fechaAdquisicionCtrl?.touched) {
+                  <p class="mt-1 text-xs text-red-600">
+                    La fecha de adquisición no puede ser futura.
+                  </p>
+                }
               </div>
-
             </div>
           </div>
-        </ng-template>
+        }
 
         <!-- Sección 6: Observaciones y Estado -->
         <div class="form-group">
@@ -428,23 +564,32 @@
             <span>Observaciones y Estado</span>
           </h4>
           <div class="space-y-5">
-            
+
             <!-- Observaciones -->
             <div>
               <label class="block text-sm font-semibold text-gray-700 mb-2">Observaciones</label>
-              <textarea 
-                formControlName="observaciones" 
+              <textarea
+                formControlName="observaciones"
                 rows="4"
                 placeholder="Notas adicionales, instrucciones de uso, precauciones, condiciones de almacenamiento..."
                 class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-gray-500 focus:border-gray-500 resize-none transition-all"
+                [ngClass]="{
+                  'border-red-500 focus:ring-red-500 focus:border-red-500':
+                    observacionesCtrl?.hasError('maxlength') && observacionesCtrl?.touched
+                }"
               ></textarea>
+              @if (observacionesCtrl?.hasError('maxlength') && observacionesCtrl?.touched) {
+                <p class="mt-1 text-xs text-red-600">
+                  Máximo 500 caracteres.
+                </p>
+              }
             </div>
 
             <!-- Estado Activo -->
             <div class="checkbox-wrapper">
-              <input 
-                type="checkbox" 
-                id="activo" 
+              <input
+                type="checkbox"
+                id="activo"
                 formControlName="activo"
                 class="w-5 h-5 text-green-600 border-gray-300 rounded focus:ring-2 focus:ring-green-500"
               />
@@ -475,15 +620,19 @@
             type="submit"
             [disabled]="loading || itemForm.invalid"
             (click)="onSubmit()"
-            class="btn-submit flex-1 flex items-center justify-center gap-2"
+            class="btn-submit flex-1 flex items-center justify-center gap-2 disabled:opacity-60 disabled:cursor-not-allowed"
           >
-            <svg *ngIf="!loading" class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"/>
-            </svg>
-            <svg *ngIf="loading" class="animate-spin loading-spinner" fill="none" viewBox="0 0 24 24">
-              <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
-              <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
-            </svg>
+            @if (!loading) {
+              <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"/>
+              </svg>
+            }
+            @if (loading) {
+              <svg class="animate-spin loading-spinner" fill="none" viewBox="0 0 24 24">
+                <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
+                <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+              </svg>
+            }
             <span>{{ loading ? 'Guardando...' : (item ? 'Actualizar Producto' : 'Crear Producto') }}</span>
           </button>
         </div>

@@ -1,5 +1,5 @@
 import { Component, inject, OnInit } from '@angular/core';
-import { CommonModule } from '@angular/common';
+
 import { FormsModule } from '@angular/forms';
 import { ActivatedRoute, Router, RouterModule } from '@angular/router';
 import { UsuariosService } from '../../services/usuarios.service';
@@ -8,7 +8,7 @@ import { RolUsuario } from '../../../../models/usuario.model';
 @Component({
   selector: 'app-editar-usuario',
   standalone: true,
-  imports: [CommonModule, FormsModule, RouterModule],
+  imports: [FormsModule, RouterModule],
   templateUrl: './editar-usuario.component.html',
   styleUrls: ['./editar-usuario.component.css']
 })
