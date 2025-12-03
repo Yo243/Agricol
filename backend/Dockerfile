@@ -35,5 +35,4 @@ EXPOSE 3000
 
 CMD ["node", "src/server.js"]
 
-RUN npx prisma migrate deploy
-RUN npx prisma db seed
+
