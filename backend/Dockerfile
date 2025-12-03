@@ -1,6 +1,6 @@
 FROM node:18-alpine
 
-# Instalar dependencias del sistema necesarias para Prisma
+# Instalar dependencias del sistema
 RUN apk add --no-cache \
     openssl \
     libc6-compat
@@ -8,20 +8,20 @@ RUN apk add --no-cache \
 # Directorio de trabajo
 WORKDIR /app
 
-# Copiar archivos de dependencias
-COPY package*.json ./
+# Copiar archivos de package desde backend/
+COPY backend/package*.json ./
 
 # Instalar dependencias
 RUN npm ci --production=false
 
-# Copiar schema de Prisma
-COPY prisma ./prisma/
+# Copiar schema de Prisma desde backend/
+COPY backend/prisma ./prisma/
 
 # Generar Prisma Client
 RUN npx prisma generate
 
-# Copiar el resto del código
-COPY . .
+# Copiar el resto del código del backend
+COPY backend/ ./
 
 # Crear usuario no-root para seguridad
 RUN addgroup -g 1001 -S nodejs && \
@@ -38,4 +38,3 @@ EXPOSE 3000
 
 # Comando de inicio
 CMD ["node", "src/server.js"]
-#hola
