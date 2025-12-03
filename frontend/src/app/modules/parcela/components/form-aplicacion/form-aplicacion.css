@@ -1,6 +1,6 @@
 /* ============================================================
    FORMULARIO DE APLICACIÓN - Estilo Minimalista AgriCol
-   Versión con fondos sólidos (sin transparencias)
+   Versión con letras negras en título y botones
    ============================================================ */
 
 /* ---------- VARIABLES DE COLOR ---------- */
@@ -83,7 +83,7 @@
 .modal-title {
   font-size: 1.25rem;
   font-weight: 700;
-  color: var(--text-primary);
+  color: #000000; /* ✅ NEGRO */
   margin: 0;
 }
 
@@ -165,7 +165,7 @@
 .section-title {
   font-size: 1rem;
   font-weight: 700;
-  color: var(--text-primary);
+  color: #000000; /* ✅ NEGRO */
   margin: 0;
   flex-shrink: 0;
 }
@@ -328,10 +328,11 @@
 
 .btn-add-insumo {
   background: var(--primary);
-  color: white;
+  color: #000000; /* ✅ TEXTO NEGRO */
   padding: 0.75rem 1rem;
   flex-shrink: 0;
   box-shadow: 0 1px 2px rgba(0, 0, 0, 0.05);
+  font-weight: 700; /* ✅ MÁS BOLD */
 }
 
 .btn-add-insumo:hover:not(:disabled) {
@@ -405,7 +406,7 @@
 .insumos-table tbody tr {
   border-bottom: 1px solid var(--gray-100);
   transition: background 0.2s ease;
-  background: #ffffff;
+  background: #060404;
 }
 
 .insumos-table tbody tr:hover {
