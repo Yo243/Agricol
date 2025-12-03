@@ -18,7 +18,7 @@ app.use(helmet({
 const allowedOrigins = [
   process.env.FRONTEND_URL,
   'http://localhost:4200',
-  'http://localhost:3000',
+  'https://agricol-production.up.railway.app',
   'http://localhost:5173'
 ].filter(Boolean);
 
