@@ -3,21 +3,20 @@
 # ---------------------------------------------
 FROM node:20-alpine AS build
 
-# Establece el directorio de trabajo (asumimos que este es el directorio frontend)
+# Establece el directorio de trabajo
 WORKDIR /app
 
 # Copia package.json (y package-lock.json si existe)
 COPY package*.json ./
 
-# **SOLUCIÓN AL ERROR EUSAGE:** Usamos 'npm install' en lugar de 'npm ci'
-# 'npm ci' requiere el archivo package-lock.json. 
+# **SOLUCIÓN AL ERROR EUSAGE:** Usamos 'npm install' para evitar el error EUSAGE si package-lock.json no está disponible.
 RUN npm install 
 
-# Copia el código fuente completo
+# Copia el código fuente completo (incluyendo el nginx.conf que está en la carpeta frontend/)
 COPY . .
 
 # Compila la aplicación Angular para producción
-# La compilación se genera en /app/dist/{nombre-proyecto}/browser
+# La compilación se genera en /app/dist/lebuas/browser
 RUN npm run build -- --configuration=production
 
 # ---------------------------------------------
@@ -25,12 +24,12 @@ RUN npm run build -- --configuration=production
 # ---------------------------------------------
 FROM nginx:alpine
 
-# Copia el archivo de configuración de Nginx.
-COPY nginx.conf /etc/nginx/conf.d/default.conf
+# **CORRECCIÓN DEL ERROR:** Copiamos el archivo nginx.conf desde su ubicación real
+# en el contexto de compilación (frontend/nginx.conf) a la configuración de Nginx.
+COPY frontend/nginx.conf /etc/nginx/conf.d/default.conf
 
 # Copia SOLO los archivos de producción compilados a la raíz de Nginx
-# NOTA: Ajusté la ruta de /app/dist/lebuas/browser a /app/dist/frontend/browser
-COPY --from=build /app/dist/frontend/browser /usr/share/nginx/html
+COPY --from=build /app/dist/lebuas/browser /usr/share/nginx/html
 
 # Expone el puerto predeterminado de Nginx
 EXPOSE 80
