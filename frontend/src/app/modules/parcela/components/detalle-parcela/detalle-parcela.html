@@ -1,16 +1,22 @@
 <!-- Detalle de Parcela - Mejorado y Responsive -->
 
 @if (error) {
-  <div class="alert-overlay">
-    <div class="alert alert-error">
-      <svg class="alert-icon" fill="currentColor" viewBox="0 0 20 20">
-        <path fill-rule="evenodd"
-          d="M10 18a8 8 0 100-16 8 8 0 000 16zM8.707 7.293a1 1 0 00-1.414 1.414L8.586 10l-1.293 1.293a1 1 0 101.414 1.414L10 11.414l1.293 1.293a1 1 0 001.414-1.414L11.414 10l1.293-1.293a1 1 0 00-1.414-1.414L10 8.586 8.707 7.293z"
-          clip-rule="evenodd"/>
-      </svg>
-      <div class="alert-content">
-        <h3 class="alert-title">Error</h3>
-        <p class="alert-message">{{ error }}</p>
+  <div class="custom-modal-overlay">
+    <div class="custom-modal error">
+      <div class="custom-modal-header">
+        <div class="custom-modal-icon danger">
+          <svg width="32" height="32" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <circle cx="12" cy="12" r="12" fill="#FEE2E2"/>
+            <path stroke="#DC2626" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" d="M12 8v4m0 4h.01"/>
+          </svg>
+        </div>
+        <h2 class="custom-modal-title">Error</h2>
+      </div>
+      <div class="custom-modal-body">
+        <p class="custom-modal-message">{{ error }}</p>
+      </div>
+      <div class="custom-modal-actions">
+        <button type="button" class="btn-primary" (click)="error = ''">Cerrar</button>
       </div>
     </div>
   </div>

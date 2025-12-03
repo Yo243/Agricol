@@ -34,15 +34,23 @@
 
     <!-- Modal de Éxito -->
     @if (showSuccessModal) {
-      <div class="success-modal-overlay">
-        <div class="success-modal">
-          <div class="success-icon-wrapper">
-            <svg class="success-icon" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"/>
-            </svg>
+      <div class="custom-modal-overlay">
+        <div class="custom-modal success">
+          <div class="custom-modal-header">
+            <div class="custom-modal-icon danger">
+              <svg width="32" height="32" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <circle cx="12" cy="12" r="12" fill="#FEE2E2"/>
+                <path stroke="#DC2626" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" d="M12 8v4m0 4h.01"/>
+              </svg>
+            </div>
+            <h2 class="custom-modal-title">{{ modoEdicion ? 'Parcela actualizada' : 'Parcela creada' }}</h2>
           </div>
-          <h3 class="success-title">{{ modoEdicion ? '¡Actualizado!' : '¡Creado!' }}</h3>
-          <p class="success-message">{{ successMessage }}</p>
+          <div class="custom-modal-body">
+            <p class="custom-modal-message">{{ successMessage }}</p>
+          </div>
+          <div class="custom-modal-actions">
+            <button type="button" class="btn-primary" (click)="cerrar()">Cerrar</button>
+          </div>
         </div>
       </div>
     }
