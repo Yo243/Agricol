@@ -30,7 +30,7 @@ COPY frontend/nginx.conf /etc/nginx/conf.d/default.conf
 
 # 6. Copia SOLO los archivos de producción compilados a la raíz de Nginx
 # La ruta de origen es: /app/frontend/dist/lebuas/browser (dentro del contenedor build)
-COPY --from=build /app/frontend/dist/lebuas/browser /usr/share/nginx/html
+COPY --from=build /app/frontend/dist/frontend/browser /usr/share/nginx/html
 
 # Expone el puerto predeterminado de Nginx
 EXPOSE 80
