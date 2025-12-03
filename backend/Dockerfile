@@ -10,10 +10,12 @@ WORKDIR /app
 
 # Copiar archivos de dependencias
 COPY package*.json ./
-COPY prisma ./prisma/
 
 # Instalar dependencias
 RUN npm ci --production=false
+
+# Copiar schema de Prisma
+COPY prisma ./prisma/
 
 # Generar Prisma Client
 RUN npx prisma generate
@@ -31,7 +33,7 @@ RUN chown -R nodejs:nodejs /app
 # Usar usuario no-root
 USER nodejs
 
-# Exponer puerto (Railway usa variable PORT)
+# Exponer puerto
 EXPOSE 3000
 
 # Comando de inicio
