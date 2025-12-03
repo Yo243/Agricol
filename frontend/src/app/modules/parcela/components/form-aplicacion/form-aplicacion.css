@@ -83,7 +83,7 @@
 .modal-title {
   font-size: 1.25rem;
   font-weight: 700;
-  color: #100606; /* ✅ NEGRO */
+  color: #cdcdcd; /* ✅ NEGRO */
   margin: 0;
 }
 
@@ -165,7 +165,7 @@
 .section-title {
   font-size: 1rem;
   font-weight: 700;
-  color: #120505; /* ✅ NEGRO */
+  color: #8a8a8a; /* ✅ NEGRO */
   margin: 0;
   flex-shrink: 0;
 }
@@ -180,34 +180,22 @@
 }
 
 /* ---------- FORM GRID ---------- */
-.form-grid-2 {
-  display: grid;
-  grid-template-columns: 1fr;
-  gap: 1.25rem;
-}
 
-@media (min-width: 640px) {
-  .form-grid-2 {
-    grid-template-columns: repeat(2, 1fr);
-  }
-}
+.btn-primary,
+.btn-add-insumo {
+  background-color: var(--primary-color, #4CAF50);
+  color: var(--primary-text, #fff);
+  border: none;
+  padding: 10px 20px;
+  border-radius: 5px;
+  cursor: pointer;
+  font-size: 16px;
+  transition: background 0.3s;
 
-.full-width {
-  grid-column: 1 / -1;
 }
-
-/* ---------- FORM GROUPS ---------- */
-.form-group {
-  display: flex;
-  flex-direction: column;
-  gap: 0.5rem;
-}
-
-.form-label {
-  font-size: 0.875rem;
-  font-weight: 600;
-  color: var(--gray-700);
-  display: block;
+.btn-primary:hover,
+.btn-add-insumo:hover {
+  background-color: var(--primary-color-hover, #388E3C);
 }
 
 .form-label.required::after {
@@ -328,10 +316,10 @@
 
 .btn-add-insumo {
   background: var(--primary);
-  color: #1b0059; /* ✅ TEXTO NEGRO */
+  color: #d9d9d9; /* ✅ TEXTO NEGRO */
   padding: 0.75rem 1rem;
   flex-shrink: 0;
-  box-shadow: 0 1px 2px rgba(0, 0, 0, 0.014);
+  box-shadow: 0 1px 2px rgba(192, 192, 192, 0.11);
   font-weight: 700; /* ✅ MÁS BOLD */
 }
 
