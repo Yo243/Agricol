@@ -17,8 +17,9 @@ app.use(helmet({
 // CORS mejorado para Railway
 const allowedOrigins = [
   process.env.FRONTEND_URL,
+  'https://glistening-ambition-production.up.railway.app',
   'http://localhost:4200',
-  'https://agricol-production.up.railway.app',
+  'http://localhost:3000',
   'http://localhost:5173'
 ].filter(Boolean);
 
@@ -27,9 +28,11 @@ app.use(cors({
     // Permitir requests sin origin (como mobile apps o curl)
     if (!origin) return callback(null, true);
     
-    if (allowedOrigins.includes(origin) || allowedOrigins.includes('*')) {
+    // ✅ CAMBIO AQUÍ: Quité la parte de allowedOrigins.includes('*')
+    if (allowedOrigins.includes(origin)) {
       callback(null, true);
     } else {
+      console.log('❌ Origen bloqueado por CORS:', origin);
       callback(new Error('No permitido por CORS'));
     }
   },
