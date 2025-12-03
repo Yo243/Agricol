@@ -33,7 +33,7 @@ COPY frontend/nginx.conf /etc/nginx/conf.d/default.conf
 COPY --from=build /app/frontend/dist/frontend/browser /usr/share/nginx/html
 
 # Expone el puerto predeterminado de Nginx
-EXPOSE 80
+EXPOSE 8080
 
 # Comando de inicio: ejecuta Nginx en primer plano
 CMD ["nginx", "-g", "daemon off;"]
