@@ -50,6 +50,10 @@ export class DetalleParcelaComponent implements OnInit {
   totalAplicaciones = 0;
   costoTotal = 0;
 
+  // ========== MENSAJES CENTRADOS Y BONITOS ==========
+  error = '';
+  success = '';
+
   ngOnInit() {
     const id = Number(this.route.snapshot.paramMap.get('id'));
     if (id) this.cargarParcela(id);
@@ -67,8 +71,11 @@ export class DetalleParcelaComponent implements OnInit {
       },
       error: (error) => {
         console.error('Error al cargar parcela:', error);
-        alert('Error al cargar la parcela');
-        this.router.navigate(['/parcelas']);
+        this.error = 'Error al cargar la parcela. Por favor intenta de nuevo.';
+        this.loading = false;
+        setTimeout(() => {
+          this.router.navigate(['/parcelas']);
+        }, 2000);
       }
     });
   }

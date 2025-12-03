@@ -14,6 +14,45 @@ FORMULARIO DE APLICACIÓN DE INSUMOS CON IA - AgriCol
           </svg>
         </button>
       </div>
+
+      <!-- Alertas de Error y Éxito -->
+      @if (error) {
+        <div class="alert alert-error">
+          <svg class="alert-icon" fill="currentColor" viewBox="0 0 20 20">
+            <path fill-rule="evenodd"
+              d="M10 18a8 8 0 100-16 8 8 0 000 16zM8.707 7.293a1 1 0 00-1.414 1.414L8.586 10l-1.293 1.293a1 1 0 101.414 1.414L10 11.414l1.293 1.293a1 1 0 001.414-1.414L11.414 10l1.293-1.293a1 1 0 00-1.414-1.414L10 8.586 8.707 7.293z"
+              clip-rule="evenodd"/>
+          </svg>
+          <span>{{ error }}</span>
+        </div>
+      }
+
+      @if (success) {
+        <div class="alert alert-success">
+          <svg class="alert-icon" fill="currentColor" viewBox="0 0 20 20">
+            <path fill-rule="evenodd"
+              d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z"
+              clip-rule="evenodd"/>
+          </svg>
+          <span>{{ success }}</span>
+        </div>
+      }
+
+      <!-- Modal de Éxito -->
+      @if (showSuccessModal) {
+        <div class="success-modal-overlay">
+          <div class="success-modal">
+            <div class="success-icon-wrapper">
+              <svg class="success-icon" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"/>
+              </svg>
+            </div>
+            <h3 class="success-title">¡Registrado!</h3>
+            <p class="success-message">{{ successMessage }}</p>
+          </div>
+        </div>
+      }
+
       <!-- Body del Modal -->
       <div class="modal-body">
         <!-- Indicador de Carga -->

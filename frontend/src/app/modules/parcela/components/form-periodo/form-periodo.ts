@@ -3,13 +3,14 @@
 import { Component, EventEmitter, Input, OnInit, Output, inject } from '@angular/core';
 
 import { FormsModule } from '@angular/forms';
+import { CommonModule } from '@angular/common';
 import { ParcelasService } from '../../services/parcela.service';
 import { Parcela, Cultivo, CreatePeriodoSiembraDto } from '../../../../models/parcela.model';
 
 @Component({
   selector: 'app-form-periodo',
   standalone: true,
-  imports: [FormsModule],
+  imports: [FormsModule, CommonModule],
   templateUrl: './form-periodo.html',
   styleUrls: ['./form-periodo.css']
 })
@@ -25,6 +26,12 @@ export class FormPeriodoComponent implements OnInit {
   cultivos: Cultivo[] = [];
   loading = false;
   loadingData = false;
+
+  // ========== MENSAJES CENTRADOS Y BONITOS ==========
+  error = '';
+  success = '';
+  showSuccessModal = false;
+  successMessage = '';
 
   formData: CreatePeriodoSiembraDto = {
     parcelaId: 0,
@@ -97,16 +104,22 @@ export class FormPeriodoComponent implements OnInit {
     if (!this.validarFormulario()) return;
 
     this.loading = true;
+    this.error = '';
+    this.success = '';
 
     this.parcelasService.createPeriodoSiembra(this.formData).subscribe({
       next: () => {
-        alert('Período de siembra creado correctamente');
+        this.success = '✓ Período de siembra creado correctamente';
+        this.showSuccessModal = true;
+        this.successMessage = 'El período de siembra ha sido creado exitosamente.';
         this.onSave.emit();
-        this.cerrar();
+        setTimeout(() => {
+          this.cerrar();
+        }, 1500);
       },
       error: (error) => {
         console.error('Error al crear período:', error);
-        alert('Error al crear el período de siembra');
+        this.error = 'Error al crear el período de siembra. Intenta de nuevo.';
         this.loading = false;
       }
     });
@@ -114,30 +127,34 @@ export class FormPeriodoComponent implements OnInit {
 
   validarFormulario(): boolean {
     if (!this.formData.parcelaId) {
-      alert('Selecciona una parcela');
+      this.error = 'Selecciona una parcela';
       return false;
     }
 
     if (!this.formData.cultivoId) {
-      alert('Selecciona un cultivo');
+      this.error = 'Selecciona un cultivo';
       return false;
     }
 
     if (this.formData.hectareasSembradas <= 0) {
-      alert('Las hectáreas sembradas deben ser mayor a 0');
+      this.error = 'Las hectáreas sembradas deben ser mayor a 0';
       return false;
     }
 
     const parcela = this.parcelas.find(p => p.id === this.formData.parcelaId);
     if (parcela && this.formData.hectareasSembradas > parcela.superficieHa) {
-      alert(`Las hectáreas sembradas no pueden ser mayor a ${parcela.superficieHa} ha`);
+      this.error = `Las hectáreas sembradas no pueden ser mayor a ${parcela.superficieHa} ha`;
       return false;
     }
 
+    this.error = '';
     return true;
   }
 
   cerrar() {
+    this.error = '';
+    this.success = '';
+    this.showSuccessModal = false;
     this.onClose.emit();
   }
 }

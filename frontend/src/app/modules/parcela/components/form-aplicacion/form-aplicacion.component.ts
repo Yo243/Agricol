@@ -1,5 +1,6 @@
 import { Component, EventEmitter, Input, OnInit, Output, inject } from '@angular/core';
 import { FormsModule } from '@angular/forms';
+import { CommonModule } from '@angular/common';
 import { HttpClient } from '@angular/common/http';
 import { ParcelasService } from '../../services/parcela.service';
 import { 
@@ -43,7 +44,7 @@ interface SugerenciaIA {
 @Component({
   selector: 'app-form-aplicacion',
   standalone: true,
-  imports: [FormsModule],
+  imports: [FormsModule, CommonModule],
   templateUrl: './form-aplicacion.html',
   styleUrls: ['./form-aplicacion.css']
 })
@@ -68,6 +69,12 @@ export class FormAplicacionComponent implements OnInit {
   loadingIA = false;
   sugerenciaIA: SugerenciaIA | null = null;
   mostrarSugerencia = false;
+
+  // ========== MENSAJES CENTRADOS Y BONITOS ==========
+  error = '';
+  success = '';
+  showSuccessModal = false;
+  successMessage = '';
 
   formData: CreateAplicacionDto = {
     periodoSiembraId: 0,
@@ -161,14 +168,16 @@ export class FormAplicacionComponent implements OnInit {
 
   agregarInsumo() {
     if (!this.insumoSeleccionado) {
-      alert('Selecciona un insumo');
+      this.error = 'Selecciona un insumo';
       return;
     }
 
     if (this.insumosSeleccionados.find(i => i.insumoId === this.insumoSeleccionado)) {
-      alert('Este insumo ya fue agregado');
+      this.error = 'Este insumo ya fue agregado';
       return;
     }
+
+    this.error = '';
 
     const insumo = this.insumos.find(i => i.id === this.insumoSeleccionado);
     if (insumo) {
@@ -203,7 +212,7 @@ export class FormAplicacionComponent implements OnInit {
   async obtenerSugerenciaIA() {
     // Validar que hay datos mínimos
     if (!this.formData.periodoSiembraId) {
-      alert('Selecciona un período de siembra primero');
+      this.error = 'Selecciona un período de siembra primero';
       return;
     }
 
@@ -215,7 +224,7 @@ export class FormAplicacionComponent implements OnInit {
     if (!periodo) {
       console.error('❌ Período no encontrado. ID buscado:', periodoId);
       console.error('IDs disponibles:', this.periodos.map(p => p.id));
-      alert('No se encontró información del período. ID: ' + periodoId);
+      this.error = 'No se encontró información del período. ID: ' + periodoId;
       return;
     }
 
@@ -257,7 +266,7 @@ export class FormAplicacionComponent implements OnInit {
     } catch (error: any) {
       console.error('❌ Error al obtener sugerencia de IA:', error);
       console.error('Detalles del error:', error.error);
-      alert('Error al obtener sugerencia: ' + (error.error?.message || error.message || 'Error desconocido'));
+      this.error = 'Error al obtener sugerencia: ' + (error.error?.message || error.message || 'Error desconocido');
     } finally {
       this.loadingIA = false;
     }
@@ -299,7 +308,7 @@ export class FormAplicacionComponent implements OnInit {
     // Cerrar modal de sugerencia
     this.cerrarSugerencia();
 
-    alert('Sugerencias aplicadas. Revisa y ajusta si es necesario.');
+    this.success = '✓ Sugerencias aplicadas correctamente';
   }
 
   /**
@@ -323,16 +332,22 @@ export class FormAplicacionComponent implements OnInit {
     }));
 
     this.loading = true;
+    this.error = '';
+    this.success = '';
 
     this.parcelasService.registrarAplicacion(this.formData).subscribe({
       next: () => {
-        alert('Aplicación registrada correctamente');
+        this.success = '✓ Aplicación registrada correctamente';
+        this.showSuccessModal = true;
+        this.successMessage = 'La aplicación ha sido registrada exitosamente.';
         this.onSave.emit();
-        this.cerrar();
+        setTimeout(() => {
+          this.cerrar();
+        }, 1500);
       },
       error: (error) => {
         console.error('Error al registrar aplicación:', error);
-        alert(error.error?.message || 'Error al registrar la aplicación');
+        this.error = error.error?.message || 'Error al registrar la aplicación';
         this.loading = false;
       }
     });
@@ -340,37 +355,41 @@ export class FormAplicacionComponent implements OnInit {
 
   validarFormulario(): boolean {
     if (!this.formData.periodoSiembraId) {
-      alert('Selecciona un período de siembra');
+      this.error = 'Selecciona un período de siembra';
       return false;
     }
 
     if (this.formData.hectareasAplicadas <= 0) {
-      alert('Las hectáreas aplicadas deben ser mayor a 0');
+      this.error = 'Las hectáreas aplicadas deben ser mayor a 0';
       return false;
     }
 
     if (this.insumosSeleccionados.length === 0) {
-      alert('Agrega al menos un insumo');
+      this.error = 'Agrega al menos un insumo';
       return false;
     }
 
     // Validar stock
     for (const insumo of this.insumosSeleccionados) {
       if (insumo.cantidad <= 0) {
-        alert(`La cantidad de ${insumo.nombre} debe ser mayor a 0`);
+        this.error = `La cantidad de ${insumo.nombre} debe ser mayor a 0`;
         return false;
       }
 
       if (insumo.cantidad > (insumo.stockDisponible || 0)) {
-        alert(`No hay suficiente stock de ${insumo.nombre} (disponible: ${insumo.stockDisponible})`);
+        this.error = `No hay suficiente stock de ${insumo.nombre} (disponible: ${insumo.stockDisponible})`;
         return false;
       }
     }
 
+    this.error = '';
     return true;
   }
 
   cerrar() {
+    this.error = '';
+    this.success = '';
+    this.showSuccessModal = false;
     this.onClose.emit();
   }
 }
