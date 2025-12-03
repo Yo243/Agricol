@@ -1,15 +1,53 @@
 .layout-root {
   min-height: 100vh;
+  display: flex;
 }
 
-/* contenido cuando el sidebar está normal (260px) */
+/* ==================== CONTENIDO PRINCIPAL ==================== */
 .main-content {
+  flex: 1;
   margin-left: 260px;
-  padding: 1.5rem 2rem;
+  padding: 2rem;
+  background: #f8fafc;
+  min-height: 100vh;
+  width: 100%;
+  max-width: 100%;
   transition: margin-left 0.3s ease;
+  overflow-x: hidden;
 }
 
-/* contenido cuando el sidebar está colapsado (70px) */
+/* Contenido cuando el sidebar está colapsado (solo desktop) */
 .main-content.collapsed {
   margin-left: 70px;
+}
+
+/* ==================== RESPONSIVE - MÓVIL ==================== */
+@media (max-width: 1024px) {
+  .layout-root {
+    display: block; /* Cambiar de flex a block en móvil */
+  }
+
+  /* 📱 MÓVIL: Sin margen (sidebar está oculto/overlay) */
+  .main-content {
+    margin-left: 0 !important;
+    padding: 5rem 1rem 1rem; /* Espacio arriba para el botón hamburguesa */
+    width: 100%;
+  }
+
+  /* En móvil, ignorar el estado collapsed */
+  .main-content.collapsed {
+    margin-left: 0 !important;
+  }
+}
+
+@media (max-width: 768px) {
+  .main-content {
+    padding: 5rem 0.75rem 1rem;
+  }
+}
+
+@media (max-width: 480px) {
+  .main-content {
+    padding: 4.5rem 0.5rem 0.75rem;
+  }
 }
