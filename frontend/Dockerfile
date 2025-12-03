@@ -3,20 +3,21 @@
 # ---------------------------------------------
 FROM node:20-alpine AS build
 
-# Establece el directorio de trabajo DENTRO de la carpeta frontend
-WORKDIR /app/frontend
+# Establece el directorio de trabajo (asumimos que este es el directorio frontend)
+WORKDIR /app
 
-# Copia los archivos de dependencias para caching eficiente
+# Copia package.json (y package-lock.json si existe)
 COPY package*.json ./
 
-# Instala dependencias (ci es mejor que install para builds automatizados)
-RUN npm ci
+# **SOLUCIÓN AL ERROR EUSAGE:** Usamos 'npm install' en lugar de 'npm ci'
+# 'npm ci' requiere el archivo package-lock.json. 
+RUN npm install 
 
-# Copia el resto del código fuente (incluyendo angular.json, src, etc.)
+# Copia el código fuente completo
 COPY . .
 
 # Compila la aplicación Angular para producción
-# La salida se genera en: /app/frontend/dist/frontend/browser
+# La compilación se genera en /app/dist/{nombre-proyecto}/browser
 RUN npm run build -- --configuration=production
 
 # ---------------------------------------------
@@ -24,14 +25,12 @@ RUN npm run build -- --configuration=production
 # ---------------------------------------------
 FROM nginx:alpine
 
-# Copia el archivo de configuración de Nginx (debe estar en el mismo contexto que el Dockerfile)
-# En la etapa 1 se asumió que estaba en /app/frontend/nginx.conf, ajustamos la ruta de origen
-COPY --from=build /app/frontend/nginx.conf /etc/nginx/conf.d/default.conf
+# Copia el archivo de configuración de Nginx.
+COPY nginx.conf /etc/nginx/conf.d/default.conf
 
-# Copia SOLO los archivos de producción compilados (HTML/CSS/JS)
-# La ruta de origen es la de compilación de Angular: /app/frontend/dist/frontend/browser
-# La ruta de destino es la raíz de Nginx: /usr/share/nginx/html
-COPY --from=build /app/frontend/dist/frontend/browser /usr/share/nginx/html
+# Copia SOLO los archivos de producción compilados a la raíz de Nginx
+# NOTA: Ajusté la ruta de /app/dist/lebuas/browser a /app/dist/frontend/browser
+COPY --from=build /app/dist/frontend/browser /usr/share/nginx/html
 
 # Expone el puerto predeterminado de Nginx
 EXPOSE 80
