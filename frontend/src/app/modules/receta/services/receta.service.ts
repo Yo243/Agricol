@@ -4,7 +4,7 @@ import { Injectable, inject } from '@angular/core';
 import { HttpClient, HttpParams, HttpErrorResponse } from '@angular/common/http';
 import { Observable, throwError } from 'rxjs';
 import { map, catchError } from 'rxjs/operators';
-import { environment } from '../../../environments/environment';
+import { environment } from '../../../../environments/environment';
 
 // ✅ Aliases funcionando
 import { Receta, CreateRecetaDto, UpdateRecetaDto, RecetaFilters, Cultivo } 

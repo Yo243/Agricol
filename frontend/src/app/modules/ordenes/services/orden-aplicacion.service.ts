@@ -13,7 +13,7 @@ import {
   Receta,
   ValidacionStock
 } from '../../../models/orden-aplicacion.model';
-import { environment } from '../../../environments/environment';
+import { environment } from '../../../../environments/environment';
 
 interface ApiResponse<T> {
   message: string;
