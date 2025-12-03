@@ -1,187 +1,257 @@
-import { Component } from '@angular/core';
-import { CommonModule } from '@angular/common'; // 👈 esto trae NgIf, NgFor, NgClass, etc.
+import { Component, OnInit } from '@angular/core';
+import { CommonModule } from '@angular/common';
+import { HttpClient } from '@angular/common/http';
+import { environment } from '../../../../../environments/environment';
+import { forkJoin } from 'rxjs';
 
-interface DashboardMetric {
-  key: 'parcelas' | 'inventario' | 'ordenes';
-  title: string;
-  value: number | string;
-  subtitle: string;
-  accent: 'primary' | 'warning' | 'info';
+// Interfaces
+interface DashboardData {
+  totalParcelas: number;
+  parcelasActivas: number;
+  totalHectareas: number;
+  totalProductos: number;
+  valorInventario: number;
+  ordenesPendientes: number;
+  totalOrdenes: number;
+  periodosActivos: number;
+  hectareasSembradas: number;
 }
 
-type TaskType = 'parcela' | 'inventario' | 'orden';
-type TaskStatus = 'pendiente' | 'en_progreso' | 'completada';
-
-interface TodayTask {
-  title: string;
-  type: TaskType;
-  time: string;
-  status: TaskStatus;
+interface Actividad {
+  id: number;
+  nombre: string;
+  tipo: string;
+  fechaProgramada: string;
+  estado: string;
+  responsable?: string;
 }
 
-type AlertSeverity = 'alto' | 'medio' | 'bajo';
-type AlertModule = 'parcelas' | 'inventario' | 'ordenes';
-
-interface AlertItem {
-  title: string;
-  description: string;
-  severity: AlertSeverity;
-  module: AlertModule;
+interface AlertaInventario {
+  id: number;
+  itemNombre: string;
+  tipo: string;
+  mensaje: string;
+  prioridad: string;
+  fecha: string;
+  leida: boolean;
 }
 
-interface ActivityItem {
-  title: string;
-  time: string;
+interface PeriodoSiembra {
+  id: number;
+  codigo: string;
+  fechaInicio: string;
+  fechaCosechaEsperada: string;
+  hectareasSembradas: number;
+  rendimientoEsperado?: number;
+  estado: string;
+  parcela: {
+    nombre: string;
+    codigo: string;
+  };
+  cultivo: {
+    nombre: string;
+    variedad?: string;
+  };
+}
+
+interface InventarioItem {
+  id: number;
+  codigo: string;
+  nombre: string;
+  categoria: string;
+  stockActual: number;
+  stockMinimo: number;
+  stockMaximo: number;
+  unidadMedida: string;
+  valorTotal: number;
 }
 
 @Component({
   selector: 'app-dashboard',
   standalone: true,
-  imports: [CommonModule],   // 👈 con esto ya se quitan los warnings de *ngIf / *ngFor / [ngClass]
+  imports: [CommonModule],
   templateUrl: './dashboard.component.html',
   styleUrls: ['./dashboard.component.css'],
 })
-export class DashboardComponent {
-  metrics: DashboardMetric[] = [
-    {
-      key: 'parcelas',
-      title: 'Parcelas',
-      value: 12,
-      subtitle: 'Parcelas activas',
-      accent: 'primary',
-    },
-    {
-      key: 'inventario',
-      title: 'Inventario',
-      value: 150,
-      subtitle: 'Productos en stock',
-      accent: 'info',
-    },
-    {
-      key: 'ordenes',
-      title: 'Órdenes',
-      value: 8,
-      subtitle: 'Órdenes pendientes',
-      accent: 'warning',
-    },
-  ];
+export class DashboardComponent implements OnInit {
+  loading = true;
+  error: string | null = null;
 
-  todayTasks: TodayTask[] = [
-    {
-      title: 'Riego programado - Parcela Norte',
-      type: 'parcela',
-      time: 'Hoy • 17:00',
-      status: 'pendiente',
-    },
-    {
-      title: 'Aplicación de fertilizante - Parcela Este',
-      type: 'parcela',
-      time: 'Hoy • 18:30',
-      status: 'en_progreso',
-    },
-    {
-      title: 'Revisión de stock de fertilizantes',
-      type: 'inventario',
-      time: 'Hoy • 20:00',
-      status: 'pendiente',
-    },
-    {
-      title: 'Cierre de órdenes del día',
-      type: 'orden',
-      time: 'Hoy • 21:30',
-      status: 'pendiente',
-    },
-  ];
+  // Datos del dashboard
+  dashboardData: DashboardData = {
+    totalParcelas: 0,
+    parcelasActivas: 0,
+    totalHectareas: 0,
+    totalProductos: 0,
+    valorInventario: 0,
+    ordenesPendientes: 0,
+    totalOrdenes: 0,
+    periodosActivos: 0,
+    hectareasSembradas: 0,
+  };
 
-  alerts: AlertItem[] = [
-    {
-      title: 'Stock bajo de fertilizante NPK',
-      description: 'Quedan menos de 5 unidades disponibles en inventario.',
-      severity: 'alto',
-      module: 'inventario',
-    },
-    {
-      title: 'Riego atrasado en Parcela Oeste',
-      description: 'La última aplicación de riego fue hace más de 5 días.',
-      severity: 'medio',
-      module: 'parcelas',
-    },
-    {
-      title: 'Órdenes abiertas sin responsable',
-      description: 'Hay 2 órdenes sin usuario asignado.',
-      severity: 'bajo',
-      module: 'ordenes',
-    },
-  ];
+  actividadesPendientes: Actividad[] = [];
+  alertasInventario: AlertaInventario[] = [];
+  periodosActivos: PeriodoSiembra[] = [];
+  productosBajoStock: InventarioItem[] = [];
 
-  recentActivity: ActivityItem[] = [
-    {
-      title: 'Se registró una nueva parcela: Parcela Sur',
-      time: 'Hace 15 minutos',
-    },
-    {
-      title: 'Se actualizó el stock de herbicida selectivo',
-      time: 'Hace 40 minutos',
-    },
-    {
-      title: 'Se completó la orden OR-00125',
-      time: 'Hace 1 hora',
-    },
-    {
-      title: 'Se creó la orden OR-00126',
-      time: 'Hace 2 horas',
-    },
-  ];
+  private apiUrl = environment.apiUrl;
 
-  mapTaskType(type: TaskType): string {
-    switch (type) {
-      case 'parcela':
-        return 'Parcela';
-      case 'inventario':
-        return 'Inventario';
-      case 'orden':
-        return 'Orden';
-      default:
-        return '';
-    }
+  constructor(private http: HttpClient) {}
+
+  ngOnInit(): void {
+    this.loadDashboardData();
   }
 
-  mapTaskStatus(status: TaskStatus): string {
-    switch (status) {
-      case 'pendiente':
-        return 'Pendiente';
-      case 'en_progreso':
-        return 'En progreso';
-      case 'completada':
-        return 'Completada';
-      default:
-        return '';
-    }
+  loadDashboardData(): void {
+    this.loading = true;
+    this.error = null;
+
+    // Hacer todas las peticiones en paralelo
+    forkJoin({
+      parcelas: this.http.get<any>(`${this.apiUrl}/parcelas`),
+      inventario: this.http.get<any>(`${this.apiUrl}/inventario`),
+      ordenes: this.http.get<any>(`${this.apiUrl}/ordenes-aplicacion`),
+      periodos: this.http.get<any>(`${this.apiUrl}/periodos-siembra`),
+      actividades: this.http.get<any>(`${this.apiUrl}/periodos-siembra/actividades`),
+      alertas: this.http.get<any>(`${this.apiUrl}/inventario/alertas`),
+    }).subscribe({
+      next: (responses) => {
+        this.processDashboardData(responses);
+        this.loading = false;
+      },
+      error: (err) => {
+        console.error('Error cargando dashboard:', err);
+        this.error = 'Error al cargar los datos del dashboard. Intenta de nuevo.';
+        this.loading = false;
+      },
+    });
   }
 
-  mapSeverity(severity: AlertSeverity): string {
-    switch (severity) {
-      case 'alto':
-        return 'Alta prioridad';
-      case 'medio':
-        return 'Prioridad media';
-      case 'bajo':
-        return 'Prioridad baja';
-      default:
-        return '';
-    }
+  private processDashboardData(responses: any): void {
+    // Procesar Parcelas
+    const parcelas = this.extractData(responses.parcelas);
+    this.dashboardData.totalParcelas = parcelas.length;
+    this.dashboardData.parcelasActivas = parcelas.filter((p: any) => p.activo && p.estado === 'Activa').length;
+    this.dashboardData.totalHectareas = parcelas.reduce((sum: number, p: any) => sum + (p.superficieHa || 0), 0);
+
+    // Procesar Inventario
+    const inventario = this.extractData(responses.inventario);
+    this.dashboardData.totalProductos = inventario.filter((i: any) => i.activo).length;
+    this.dashboardData.valorInventario = inventario.reduce((sum: number, i: any) => sum + (i.valorTotal || 0), 0);
+
+    // Productos bajo stock (stock actual <= stock mínimo)
+    this.productosBajoStock = inventario
+      .filter((i: any) => i.activo && i.stockActual <= i.stockMinimo)
+      .slice(0, 5);
+
+    // Procesar Órdenes
+    const ordenes = this.extractData(responses.ordenes);
+    this.dashboardData.totalOrdenes = ordenes.length;
+    this.dashboardData.ordenesPendientes = ordenes.filter((o: any) => o.estado === 'PENDIENTE').length;
+
+    // Procesar Períodos de Siembra
+    const periodos = this.extractData(responses.periodos);
+    this.periodosActivos = periodos
+      .filter((p: any) => p.estado === 'En Curso')
+      .slice(0, 5);
+    this.dashboardData.periodosActivos = this.periodosActivos.length;
+    this.dashboardData.hectareasSembradas = periodos
+      .filter((p: any) => p.estado === 'En Curso')
+      .reduce((sum: number, p: any) => sum + (p.hectareasSembradas || 0), 0);
+
+    // Procesar Actividades
+    const actividades = this.extractData(responses.actividades);
+    this.actividadesPendientes = actividades
+      .filter((a: any) => a.estado === 'Pendiente')
+      .sort((a: any, b: any) => new Date(a.fechaProgramada).getTime() - new Date(b.fechaProgramada).getTime())
+      .slice(0, 6);
+
+    // Procesar Alertas
+    const alertas = this.extractData(responses.alertas);
+    this.alertasInventario = alertas
+      .filter((a: any) => !a.leida)
+      .sort((a: any, b: any) => {
+        const prioridadOrder: any = { alta: 1, media: 2, baja: 3 };
+        return prioridadOrder[a.prioridad] - prioridadOrder[b.prioridad];
+      })
+      .slice(0, 5);
   }
 
-  mapModule(module: AlertModule): string {
-    switch (module) {
-      case 'parcelas':
-        return 'Módulo de Parcelas';
-      case 'inventario':
-        return 'Módulo de Inventario';
-      case 'ordenes':
-        return 'Módulo de Órdenes';
-      default:
-        return '';
+  // Helper para extraer data de respuestas que pueden venir en diferentes formatos
+  private extractData(response: any): any[] {
+    if (Array.isArray(response)) {
+      return response;
     }
+    if (response?.data && Array.isArray(response.data)) {
+      return response.data;
+    }
+    if (response?.items && Array.isArray(response.items)) {
+      return response.items;
+    }
+    return [];
+  }
+
+  // Formatear fechas
+  formatFecha(fecha: string | Date): string {
+    if (!fecha) return '-';
+    
+    const date = new Date(fecha);
+    const now = new Date();
+    const diffTime = date.getTime() - now.getTime();
+    const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24));
+
+    // Si es hoy
+    if (diffDays === 0) {
+      return `Hoy • ${date.toLocaleTimeString('es-MX', { hour: '2-digit', minute: '2-digit' })}`;
+    }
+
+    // Si es mañana
+    if (diffDays === 1) {
+      return `Mañana • ${date.toLocaleTimeString('es-MX', { hour: '2-digit', minute: '2-digit' })}`;
+    }
+
+    // Si es en los próximos 7 días
+    if (diffDays > 0 && diffDays <= 7) {
+      return `En ${diffDays} días`;
+    }
+
+    // Si ya pasó
+    if (diffDays < 0) {
+      return `Hace ${Math.abs(diffDays)} días`;
+    }
+
+    // Formato normal
+    return date.toLocaleDateString('es-MX', {
+      day: '2-digit',
+      month: 'short',
+      year: 'numeric',
+    });
+  }
+
+  // Obtener clase CSS para tipo de actividad
+  getTipoClass(tipo: string): string {
+    const tipoLower = tipo.toLowerCase();
+    if (tipoLower.includes('riego')) return 'riego';
+    if (tipoLower.includes('fertiliz')) return 'fertilizacion';
+    if (tipoLower.includes('control') || tipoLower.includes('plagas')) return 'control';
+    if (tipoLower.includes('cosecha')) return 'cosecha';
+    if (tipoLower.includes('siembra')) return 'siembra';
+    return 'otro';
+  }
+
+  // Calcular porcentaje de stock
+  getStockPercentage(item: InventarioItem): number {
+    if (!item.stockMaximo) return 0;
+    return (item.stockActual / item.stockMaximo) * 100;
+  }
+
+  // Obtener clase CSS según nivel de stock
+  getStockClass(item: InventarioItem): string {
+    const percentage = this.getStockPercentage(item);
+    if (percentage <= 25) return 'stock-critical';
+    if (percentage <= 50) return 'stock-low';
+    if (percentage <= 75) return 'stock-medium';
+    return 'stock-good';
   }
 }

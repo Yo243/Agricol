@@ -1,5 +1,4 @@
 import { Component, EventEmitter, Input, OnInit, Output, inject } from '@angular/core';
-
 import { FormsModule } from '@angular/forms';
 import { HttpClient } from '@angular/common/http';
 import { ParcelasService } from '../../services/parcela.service';
@@ -9,6 +8,7 @@ import {
   TIPOS_APLICACION, 
   TipoAplicacion 
 } from '../../../../models/parcela.model';
+import { environment } from '../../../../../environments/environment';
 
 interface Insumo {
   id: number;
@@ -99,7 +99,7 @@ export class FormAplicacionComponent implements OnInit {
     this.parcelasService.getPeriodosSiembra(undefined, 'En Curso').subscribe({
       next: (periodos) => {
         this.periodos = periodos;
-        console.log('Períodos cargados:', periodos); // Debug
+        console.log('Períodos cargados:', periodos);
         if (this.periodoId) {
           this.onPeriodoChange();
         }
@@ -107,8 +107,8 @@ export class FormAplicacionComponent implements OnInit {
       error: (error) => console.error('Error al cargar períodos:', error)
     });
 
-    // Cargar insumos disponibles
-    this.http.get<Insumo[]>('http://localhost:3000/api/inventario').subscribe({
+    // ✅ CORREGIDO: Usar environment.apiUrl en lugar de localhost
+    this.http.get<Insumo[]>(`${environment.apiUrl}/inventario`).subscribe({
       next: (insumos) => {
         this.insumos = insumos.filter(i => i.stockActual > 0);
         this.loadingData = false;
@@ -207,7 +207,6 @@ export class FormAplicacionComponent implements OnInit {
       return;
     }
 
-    // Convertir a número para comparación
     const periodoId = Number(this.formData.periodoSiembraId);
     console.log('🔍 Buscando período ID:', periodoId);
     console.log('📋 Períodos disponibles:', this.periodos);
@@ -240,11 +239,12 @@ export class FormAplicacionComponent implements OnInit {
 
       console.log('📤 Payload enviado:', payload);
 
+      // ✅ CORREGIDO: Usar backticks y agregar /sugerencia-ia
       const response = await this.http.post<{
         success: boolean;
         sugerencia: SugerenciaIA;
         generadoEn: string;
-      }>('http://localhost:3000/api/aplicaciones/sugerencia-ia', payload).toPromise();
+      }>(`${environment.apiUrl}/aplicaciones/sugerencia-ia`, payload).toPromise();
 
       console.log('📥 Respuesta recibida:', response);
 

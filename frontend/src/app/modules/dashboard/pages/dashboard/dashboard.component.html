@@ -4,136 +4,243 @@
     <div>
       <h1 class="dashboard-title">AgriCol Dashboard</h1>
       <p class="dashboard-subtitle">
-        Resumen general de tus operaciones agrícolas.
+        Resumen general de tus operaciones agrícolas
       </p>
     </div>
+    <button class="refresh-btn" (click)="loadDashboardData()" [disabled]="loading">
+      <span class="refresh-icon">🔄</span>
+      <span>Actualizar</span>
+    </button>
   </header>
 
-  <!-- Métricas principales -->
-  <section class="metrics-grid">
-    @for (metric of metrics; track metric) {
-      <article
-        class="metric-card"
-        [ngClass]="'metric-' + metric.accent"
-        >
+  <!-- Loading State -->
+  @if (loading) {
+    <div class="loading-state">
+      <div class="spinner"></div>
+      <p>Cargando datos...</p>
+    </div>
+  }
+
+  <!-- Error State -->
+  @if (error && !loading) {
+    <div class="error-state">
+      <span class="error-icon">⚠️</span>
+      <p>{{ error }}</p>
+      <button class="retry-btn" (click)="loadDashboardData()">Reintentar</button>
+    </div>
+  }
+
+  <!-- Dashboard Content -->
+  @if (!loading && !error) {
+    <!-- Métricas principales -->
+    <section class="metrics-grid">
+      <!-- Parcelas -->
+      <article class="metric-card metric-primary">
         <div class="metric-header">
-          <h2 class="metric-title">{{ metric.title }}</h2>
+          <h2 class="metric-title">Parcelas</h2>
         </div>
         <div class="metric-body">
-          <div class="metric-value">{{ metric.value }}</div>
-          <div class="metric-subtitle">{{ metric.subtitle }}</div>
+          <div class="metric-value">{{ dashboardData.totalParcelas }}</div>
+          <div class="metric-subtitle">
+            {{ dashboardData.parcelasActivas }} activas • {{ dashboardData.totalHectareas | number:'1.1-1' }} ha
+          </div>
         </div>
       </article>
-    }
-  </section>
 
-  <!-- Grid principal: tareas y alertas -->
-  <section class="main-grid">
-    <!-- Tareas de hoy -->
-    <article class="panel panel-tasks">
-      <div class="panel-header">
-        <h2 class="panel-title">Tareas de hoy</h2>
-        <p class="panel-helper">
-          Próximas actividades relacionadas con parcelas e inventario.
-        </p>
-      </div>
-
-      <ul class="task-list">
-        @for (task of todayTasks; track task) {
-          <li class="task-item">
-            <div class="task-main">
-              <span
-                class="task-chip"
-                [ngClass]="'task-type-' + task.type"
-                >
-                {{ mapTaskType(task.type) }}
-              </span>
-              <span class="task-title">{{ task.title }}</span>
-            </div>
-            <div class="task-meta">
-              <span class="task-time">{{ task.time }}</span>
-              <span
-                class="task-status"
-                [ngClass]="'status-' + task.status"
-                >
-                {{ mapTaskStatus(task.status) }}
-              </span>
-            </div>
-          </li>
-        }
-      </ul>
-
-      @if (todayTasks.length === 0) {
-        <div class="panel-empty">
-          No hay tareas registradas para hoy.
+      <!-- Inventario -->
+      <article class="metric-card metric-info">
+        <div class="metric-header">
+          <h2 class="metric-title">Inventario</h2>
         </div>
-      }
-    </article>
-
-    <!-- Alertas importantes -->
-    <article class="panel panel-alerts">
-      <div class="panel-header">
-        <h2 class="panel-title">Alertas importantes</h2>
-        <p class="panel-helper">
-          Elementos que requieren revisión y seguimiento.
-        </p>
-      </div>
-
-      <ul class="alert-list">
-        @for (alert of alerts; track alert) {
-          <li class="alert-item">
-            <div class="alert-main">
-              <span
-                class="alert-pill"
-                [ngClass]="'severity-' + alert.severity"
-                >
-                {{ mapSeverity(alert.severity) }}
-              </span>
-              <span class="alert-title">{{ alert.title }}</span>
-            </div>
-            <p class="alert-description">{{ alert.description }}</p>
-            <span class="alert-module">
-              {{ mapModule(alert.module) }}
-            </span>
-          </li>
-        }
-      </ul>
-
-      @if (alerts.length === 0) {
-        <div class="panel-empty">
-          No hay alertas activas en este momento.
+        <div class="metric-body">
+          <div class="metric-value">{{ dashboardData.totalProductos }}</div>
+          <div class="metric-subtitle">
+            Productos en stock • ${{ dashboardData.valorInventario | number:'1.0-0' }}
+          </div>
         </div>
-      }
-    </article>
-  </section>
+      </article>
 
-  <!-- Actividad reciente -->
-  <section class="secondary-grid">
-    <article class="panel panel-activity">
-      <div class="panel-header">
-        <h2 class="panel-title">Actividad reciente</h2>
-        <p class="panel-helper">
-          Últimas acciones registradas en el sistema.
-        </p>
-      </div>
-
-      <ul class="activity-list">
-        @for (item of recentActivity; track item) {
-          <li class="activity-item">
-            <span class="activity-dot"></span>
-            <div class="activity-content">
-              <span class="activity-title">{{ item.title }}</span>
-              <span class="activity-time">{{ item.time }}</span>
-            </div>
-          </li>
-        }
-      </ul>
-
-      @if (recentActivity.length === 0) {
-        <div class="panel-empty">
-          Aún no hay actividad registrada.
+      <!-- Órdenes -->
+      <article class="metric-card metric-warning">
+        <div class="metric-header">
+          <h2 class="metric-title">Órdenes</h2>
         </div>
-      }
-    </article>
-  </section>
+        <div class="metric-body">
+          <div class="metric-value">{{ dashboardData.ordenesPendientes }}</div>
+          <div class="metric-subtitle">
+            Pendientes • {{ dashboardData.totalOrdenes }} total
+          </div>
+        </div>
+      </article>
+
+      <!-- Períodos Activos -->
+      <article class="metric-card metric-success">
+        <div class="metric-header">
+          <h2 class="metric-title">Períodos Activos</h2>
+        </div>
+        <div class="metric-body">
+          <div class="metric-value">{{ dashboardData.periodosActivos }}</div>
+          <div class="metric-subtitle">
+            Ciclos en curso • {{ dashboardData.hectareasSembradas | number:'1.1-1' }} ha sembradas
+          </div>
+        </div>
+      </article>
+    </section>
+
+    <!-- Grid principal: tareas y alertas -->
+    <section class="main-grid">
+      <!-- Actividades Pendientes -->
+      <article class="panel panel-tasks">
+        <div class="panel-header">
+          <h2 class="panel-title">Actividades Programadas</h2>
+          <p class="panel-helper">
+            Próximas tareas y aplicaciones pendientes
+          </p>
+        </div>
+
+        <ul class="task-list">
+          @for (actividad of actividadesPendientes; track actividad.id) {
+            <li class="task-item">
+              <div class="task-main">
+                <span class="task-chip" [ngClass]="'task-type-' + getTipoClass(actividad.tipo)">
+                  {{ actividad.tipo }}
+                </span>
+                <span class="task-title">{{ actividad.nombre }}</span>
+              </div>
+              <div class="task-meta">
+                <span class="task-time">{{ formatFecha(actividad.fechaProgramada) }}</span>
+                <span class="task-status" [ngClass]="'status-' + actividad.estado.toLowerCase()">
+                  {{ actividad.estado }}
+                </span>
+              </div>
+              @if (actividad.responsable) {
+                <span class="task-responsible">👤 {{ actividad.responsable }}</span>
+              }
+            </li>
+          }
+        </ul>
+
+        @if (actividadesPendientes.length === 0) {
+          <div class="panel-empty">
+            ✅ No hay actividades pendientes
+          </div>
+        }
+      </article>
+
+      <!-- Alertas de Inventario -->
+      <article class="panel panel-alerts">
+        <div class="panel-header">
+          <h2 class="panel-title">Alertas de Inventario</h2>
+          <p class="panel-helper">
+            Productos que requieren atención
+          </p>
+        </div>
+
+        <ul class="alert-list">
+          @for (alerta of alertasInventario; track alerta.id) {
+            <li class="alert-item">
+              <div class="alert-main">
+                <span class="alert-pill" [ngClass]="'severity-' + alerta.prioridad">
+                  {{ alerta.prioridad | uppercase }}
+                </span>
+                <span class="alert-title">{{ alerta.itemNombre }}</span>
+              </div>
+              <p class="alert-description">{{ alerta.mensaje }}</p>
+              <div class="alert-footer">
+                <span class="alert-module">{{ alerta.tipo }}</span>
+                <span class="alert-date">{{ formatFecha(alerta.fecha) }}</span>
+              </div>
+            </li>
+          }
+        </ul>
+
+        @if (alertasInventario.length === 0) {
+          <div class="panel-empty">
+            ✅ No hay alertas activas
+          </div>
+        }
+      </article>
+    </section>
+
+    <!-- Grid secundario -->
+    <section class="secondary-grid">
+      <!-- Períodos de Siembra Activos -->
+      <article class="panel panel-periodos">
+        <div class="panel-header">
+          <h2 class="panel-title">Períodos de Siembra Activos</h2>
+          <p class="panel-helper">
+            Cultivos en curso por parcela
+          </p>
+        </div>
+
+        <ul class="periodo-list">
+          @for (periodo of periodosActivos; track periodo.id) {
+            <li class="periodo-item">
+              <div class="periodo-header">
+                <span class="periodo-codigo">{{ periodo.codigo }}</span>
+                <span class="periodo-badge">{{ periodo.cultivo.nombre }}</span>
+              </div>
+              <div class="periodo-body">
+                <p class="periodo-parcela">📍 {{ periodo.parcela.nombre }} - {{ periodo.hectareasSembradas }} ha</p>
+                <div class="periodo-dates">
+                  <span>Inicio: {{ formatFecha(periodo.fechaInicio) }}</span>
+                  <span>Cosecha: {{ formatFecha(periodo.fechaCosechaEsperada) }}</span>
+                </div>
+                @if (periodo.rendimientoEsperado) {
+                  <p class="periodo-rendimiento">
+                    🎯 Rendimiento esperado: {{ periodo.rendimientoEsperado | number:'1.1-1' }} ton/ha
+                  </p>
+                }
+              </div>
+            </li>
+          }
+        </ul>
+
+        @if (periodosActivos.length === 0) {
+          <div class="panel-empty">
+            No hay períodos de siembra activos
+          </div>
+        }
+      </article>
+
+      <!-- Productos Bajo Stock -->
+      <article class="panel panel-stock">
+        <div class="panel-header">
+          <h2 class="panel-title">Stock Bajo</h2>
+          <p class="panel-helper">
+            Productos cerca del mínimo
+          </p>
+        </div>
+
+        <ul class="stock-list">
+          @for (item of productosBajoStock; track item.id) {
+            <li class="stock-item">
+              <div class="stock-main">
+                <span class="stock-name">{{ item.nombre }}</span>
+                <span class="stock-category">{{ item.categoria }}</span>
+              </div>
+              <div class="stock-levels">
+                <div class="stock-bar">
+                  <div 
+                    class="stock-fill" 
+                    [style.width.%]="getStockPercentage(item)"
+                    [ngClass]="getStockClass(item)">
+                  </div>
+                </div>
+                <span class="stock-text">
+                  {{ item.stockActual | number:'1.0-0' }} / {{ item.stockMinimo | number:'1.0-0' }} {{ item.unidadMedida }}
+                </span>
+              </div>
+            </li>
+          }
+        </ul>
+
+        @if (productosBajoStock.length === 0) {
+          <div class="panel-empty">
+            ✅ Todo el inventario está en niveles óptimos
+          </div>
+        }
+      </article>
+    </section>
+  }
 </div>
