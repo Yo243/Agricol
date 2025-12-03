@@ -8,33 +8,29 @@ RUN apk add --no-cache \
 # Directorio de trabajo
 WORKDIR /app
 
-# Copiar archivos de package (ahora relativos a backend/)
+# Copiar archivos de package
 COPY package*.json ./
 
 # Instalar dependencias
 RUN npm ci --production=false
 
-# Copiar schema de Prisma (ahora relativo a backend/)
+# Copiar schema de Prisma
 COPY prisma ./prisma/
 
 # Generar Prisma Client
 RUN npx prisma generate
 
-# Copiar el resto del código (ahora relativo a backend/)
+# Copiar el resto del código
 COPY . .
 
-# Crear usuario no-root para seguridad
+# Crear usuario no-root
 RUN addgroup -g 1001 -S nodejs && \
     adduser -S nodejs -u 1001
 
-# Cambiar permisos
 RUN chown -R nodejs:nodejs /app
 
-# Usar usuario no-root
 USER nodejs
 
-# Exponer puerto
 EXPOSE 3000
 
-# Comando de inicio
 CMD ["node", "src/server.js"]
