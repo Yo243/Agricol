@@ -3,42 +3,38 @@
 # ---------------------------------------------
 FROM node:20-alpine AS build
 
-# Establece el directorio de trabajo
-WORKDIR /app
+# Establece el directorio de trabajo DENTRO de la carpeta frontend
+WORKDIR /app/frontend
 
 # Copia los archivos de dependencias para caching eficiente
 COPY package*.json ./
+
+# Instala dependencias (ci es mejor que install para builds automatizados)
 RUN npm ci
 
-# Copia el código fuente completo, incluyendo server.js
-COPY . . 
+# Copia el resto del código fuente (incluyendo angular.json, src, etc.)
+COPY . .
 
 # Compila la aplicación Angular para producción
-RUN npm run build 
+# La salida se genera en: /app/frontend/dist/frontend/browser
+RUN npm run build -- --configuration=production
 
 # ---------------------------------------------
-# ETAPA 2: SERVIR (Base ligera de producción con Express)
+# ETAPA 2: SERVIR (Base ligera de producción con Nginx)
 # ---------------------------------------------
-FROM node:20-alpine
+FROM nginx:alpine
 
-# Establece el directorio de trabajo para servir
-WORKDIR /usr/app
-
-# Copia el archivo clave de inicio (server.js) desde la Etapa 1
-# La corrección clave es que el archivo ahora está garantizado en /app/server.js
-COPY --from=build /app/server.js . 
+# Copia el archivo de configuración de Nginx (debe estar en el mismo contexto que el Dockerfile)
+# En la etapa 1 se asumió que estaba en /app/frontend/nginx.conf, ajustamos la ruta de origen
+COPY --from=build /app/frontend/nginx.conf /etc/nginx/conf.d/default.conf
 
 # Copia SOLO los archivos de producción compilados (HTML/CSS/JS)
-COPY --from=build /app/dist/frontend/browser ./dist/frontend/browser
+# La ruta de origen es la de compilación de Angular: /app/frontend/dist/frontend/browser
+# La ruta de destino es la raíz de Nginx: /usr/share/nginx/html
+COPY --from=build /app/frontend/dist/frontend/browser /usr/share/nginx/html
 
-# Copia los archivos de dependencias
-COPY package*.json ./
+# Expone el puerto predeterminado de Nginx
+EXPOSE 80
 
-# Instala SOLO las dependencias de producción (Express, tslib, etc.)
-RUN npm ci --omit=dev
-
-# Expone el puerto que usa server.js
-EXPOSE 8080
-
-# Comando de inicio: ejecuta el script "start:prod"
-CMD ["npm", "run", "start:prod"]
+# Comando de inicio: ejecuta Nginx en primer plano
+CMD ["nginx", "-g", "daemon off;"]
