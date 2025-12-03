@@ -1,6 +1,7 @@
 import { Component, EventEmitter, Input, OnInit, Output, inject } from '@angular/core';
 
 import { FormsModule } from '@angular/forms';
+import { CommonModule } from '@angular/common';
 import { ParcelasService } from '../../services/parcela.service';
 import {
   Parcela,
@@ -15,7 +16,7 @@ import {
 @Component({
   selector: 'app-form-parcela',
   standalone: true,
-  imports: [FormsModule],
+  imports: [FormsModule, CommonModule],
   templateUrl: './form-parcela.html',
   styleUrls: ['./form-parcela.css']
 })
@@ -29,6 +30,12 @@ export class FormParcelaComponent implements OnInit {
 
   loading = false;
   modoEdicion = false;
+  
+  // ========== MENSAJES CENTRADOS Y BONITOS ==========
+  error = '';
+  success = '';
+  showSuccessModal = false;
+  successMessage = '';
 
   ESTADOS_PARCELA = ESTADOS_PARCELA;
   TIPOS_SUELO = TIPOS_SUELO;
@@ -82,6 +89,8 @@ export class FormParcelaComponent implements OnInit {
     if (!this.validarFormulario()) return;
 
     this.loading = true;
+    this.error = '';
+    this.success = '';
 
     const dataParaEnviar: CreateParcelaDto = {
       nombre: this.formData.nombre,
@@ -99,26 +108,34 @@ export class FormParcelaComponent implements OnInit {
       const updateData: UpdateParcelaDto = { ...dataParaEnviar };
       this.parcelasService.updateParcela(this.parcela.id, updateData).subscribe({
         next: () => {
-          alert('Parcela actualizada correctamente');
+          this.success = '✓ Parcela actualizada correctamente';
+          this.showSuccessModal = true;
+          this.successMessage = 'La parcela ha sido actualizada exitosamente.';
           this.onSave.emit();
-          this.cerrar();
+          setTimeout(() => {
+            this.cerrar();
+          }, 1500);
         },
         error: (error) => {
           console.error('Error al actualizar:', error);
-          alert('Error al actualizar la parcela');
+          this.error = 'Error al actualizar la parcela. Intenta de nuevo.';
           this.loading = false;
         }
       });
     } else {
       this.parcelasService.createParcela(dataParaEnviar).subscribe({
         next: () => {
-          alert('Parcela creada correctamente');
+          this.success = '✓ Parcela creada correctamente';
+          this.showSuccessModal = true;
+          this.successMessage = 'La nueva parcela ha sido creada exitosamente.';
           this.onSave.emit();
-          this.cerrar();
+          setTimeout(() => {
+            this.cerrar();
+          }, 1500);
         },
         error: (error) => {
           console.error('Error al crear:', error);
-          alert('Error al crear la parcela');
+          this.error = 'Error al crear la parcela. Intenta de nuevo.';
           this.loading = false;
         }
       });
@@ -127,19 +144,23 @@ export class FormParcelaComponent implements OnInit {
 
   validarFormulario(): boolean {
     if (!this.formData.nombre.trim()) {
-      alert('El nombre es requerido');
+      this.error = 'El nombre de la parcela es requerido';
       return false;
     }
 
     if (this.formData.superficieHa <= 0) {
-      alert('La superficie debe ser mayor a 0');
+      this.error = 'La superficie debe ser mayor a 0 hectáreas';
       return false;
     }
 
+    this.error = '';
     return true;
   }
 
   cerrar() {
+    this.error = '';
+    this.success = '';
+    this.showSuccessModal = false;
     this.onClose.emit();
   }
 }
