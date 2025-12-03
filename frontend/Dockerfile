@@ -10,13 +10,14 @@ WORKDIR /app/frontend
 COPY frontend/package*.json ./
 
 # 2. Instala dependencias
-RUN npm install 
+# CORRECCIÓN ERESOLVE: Usamos --legacy-peer-deps para ignorar los conflictos entre las versiones 20 y 21
+RUN npm install --legacy-peer-deps
 
 # 3. Copia el resto del código fuente de 'frontend'
 COPY frontend/. .
 
 # 4. Compila la aplicación Angular para producción
-# La compilación se genera en /app/frontend/dist/lebuas/browser (dentro del contenedor)
+# La compilación se genera en /app/frontend/dist/lebuas/browser
 RUN npm run build -- --configuration=production
 
 # ---------------------------------------------
